@@ -1,0 +1,237 @@
+.hold-body {
+    height: 100%;
+}
+
+.hold-groups-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    width: 100%;
+    height: 300px;
+    border: 1px solid #0d6efd;
+    background-color: #fff;
+}
+
+.hold-group {
+    background-color: #f8f9fa;
+    padding: 0.5rem;
+    border: 1px solid #0d6efd;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.hold-header {
+    text-align: center;
+    margin-bottom: 0.25rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid #0d6efd;
+    font-size: 0.875rem;
+}
+
+.hold-positions {
+    display: flex;
+    border: 1px solid #0d6efd;
+    padding: 0.25rem;
+    flex: 1;
+    justify-content: space-around;
+}
+
+.position-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+}
+
+.row-number {
+    height: 1.25rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #6c757d;
+}
+
+.position-slots {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: space-around;
+    flex: 1;
+    height: 100%;
+}
+
+.hold-position {
+    width: 80px;
+    height: 80px;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0.15rem 0;
+    transition: all 0.2s ease-in-out;
+}
+
+.position-L { border-bottom: 1px solid #0d6efd; }
+.position-R { border-top: 1px solid #0d6efd; }
+.position-center { 
+    border-top: 1px solid #0d6efd;
+    border-bottom: 1px solid #0d6efd;
+}
+
+.empty-position {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #6c757d;
+    font-size: 0.75rem;
+}
+
+.empty-position i { font-size: 0.75rem; margin-bottom: 0.15rem; }
+.empty-position small { font-size: 0.75rem; opacity: 0.75; }
+
+.position-card {
+    width: 100%;
+    height: 100%;
+    padding: 0.25rem;
+}
+
+.position-card .card {
+    height: 100%;
+}
+
+.position-card .card-body {
+    padding: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+}
+
+.position-card h6 { 
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.hold-section {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.hold-title {
+    color: #495057;
+    font-weight: 600;
+    padding-left: 0.5rem;
+    border-left: 3px solid #0d6efd;
+}
+
+.hold-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.hold-section.overweight {
+    border: 2px solid #dc3545;
+}
+
+.hold-section.overweight .hold-title {
+    color: #dc3545;
+    border-left-color: #dc3545;
+}
+
+.hold-group[data-hold="FH"],
+.hold-group[data-hold="AH"] {
+    border-color: #0d6efd;
+}
+
+.hold-group[data-hold="FH"] .hold-header,
+.hold-group[data-hold="AH"] .hold-header {
+    border-bottom-color: #0d6efd;
+}
+
+.hold-group[data-hold="FH"] .hold-positions,
+.hold-group[data-hold="AH"] .hold-positions {
+    border-color: #0d6efd;
+}
+
+/* Adjusting bulk hold to be bigger */
+.hold-group[data-hold="BH"] {
+    flex: 0.6;
+}
+
+.hold-group[data-hold="BH"] .hold-positions {
+    justify-content: center;
+}
+
+.hold-position:not([data-hold="BH"]).occupied {
+    cursor: not-allowed;
+}
+
+.hold-position:not([data-hold="BH"]).occupied.dragover {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    border-color: #dc3545 !important;
+}
+
+.hold-group[data-hold="BH"] .hold-position {
+    width: 100%;
+    height: 100%;
+    padding: 0.25rem;
+    overflow-y: auto;
+}
+
+.bulk-containers-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+.bulk-container-item {
+    display: flex;
+    padding: 0.25rem 0.5rem;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    cursor: move;
+    min-height: 28px;
+    font-size: 0.75rem;
+}
+
+.bulk-container-item:hover { background-color: #f8f9fa; }
+
+.bulk-container-details {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.container-number { font-weight: 500; font-size: 0.75rem; }
+.container-weight { color: #6c757d; font-size: 0.75rem; }
+
+.empty-bulk-position {
+    text-align: center;
+    color: #6c757d;
+    padding: 0.5rem;
+    border: 1px solid #dee2e6;
+    font-size: 0.75rem;
+}
+
+/* Drag and drop states */
+.hold-position.dragover { 
+    background-color: rgba(13, 110, 253, 0.1);
+    border-color: #0d6efd;
+}
+
+/* Remove all border radius */
+.hold-group, .hold-position, .card,
+.position-card .card, .bulk-container-item {
+    border-radius: 0;
+}
