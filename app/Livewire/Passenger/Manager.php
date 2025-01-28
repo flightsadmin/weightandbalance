@@ -22,7 +22,7 @@ class Manager extends Component
         'name' => '',
         'seat_number' => '',
         'ticket_number' => '',
-        'status' => 'checked_in',
+        'type' => '',
         'notes' => ''
     ];
 
@@ -30,7 +30,7 @@ class Manager extends Component
         'form.name' => 'required|string|max:255',
         'form.seat_number' => 'required|string|max:4',
         'form.ticket_number' => 'nullable|string|max:255',
-        'form.status' => 'required|in:checked_in,standby,offloaded',
+        'form.type' => 'required|in:male,female,child,infant',
         'form.notes' => 'nullable|string'
     ];
 
@@ -46,7 +46,7 @@ class Manager extends Component
             'name',
             'seat_number',
             'ticket_number',
-            'status',
+            'type',
             'notes'
         ]);
         $this->showForm = true;

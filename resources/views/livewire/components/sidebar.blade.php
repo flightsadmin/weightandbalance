@@ -1,7 +1,7 @@
 <div class="d-flex flex-column h-100">
     <div class="position-sticky top-0 border-bottom bg-dark-subtle">
         <div class="d-flex justify-content-between align-items-center m-2">
-            <input type="date" wire:model.live="selectedDate" class="form-control form-control-sm me-4" id="date-picker">
+            <input type="date" wire:model.live="selectedDate" class="form-control form-control-sm me-3" id="date-picker">
             <a wire:navigate href="{{ route('flights.create') }}" class="btn-link text-secondary bi-plus-circle-fill float-end h4 m-0"></a>
         </div>
     </div>
@@ -26,11 +26,13 @@
 
     <div class="dropdown mt-auto mb-3">
         {{ $flights->links() }}
+        {{-- <div class="d-flex flex-column align-items-center"> --}}
         <hr class="mt-2">
         <a href="#" class="d-flex align-items-center text-center text-reset text-decoration-none dropdown-toggle"
             data-bs-toggle="dropdown" aria-expanded="false">
             <strong>Dropdown</strong>
         </a>
+        {{-- </div> --}}
         <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
             <li>
                 <form action="{{ route('migrate') }}" method="GET" style="margin: 0;">

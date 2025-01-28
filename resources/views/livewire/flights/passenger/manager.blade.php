@@ -5,14 +5,12 @@
                 placeholder="Search by name, ticket or seat number...">
         </div>
         <div class="d-flex gap-2">
-
             <span class="badge bg-primary">{{ $passengers->count() }} Passengers</span>
             <span class="badge bg-success">{{ $passengers->where('acceptance_status', 'accepted')->count() }} Accepted</span>
             <span class="badge bg-warning">{{ $passengers->where('acceptance_status', 'standby')->count() }} Standby</span>
             <span class="badge bg-danger">{{ $passengers->where('acceptance_status', 'offloaded')->count() }} Offloaded</span>
         </div>
         <div class="d-flex gap-2">
-
             <span class="badge bg-primary">{{ $passengers->count() }} Passengers</span>
             <span class="badge bg-success">{{ $passengers->where('boarding_status', 'boarded')->count() }} Boarded</span>
             <span class="badge bg-danger">{{ $passengers->where('boarding_status', 'unboarded')->count() }} Unboarded</span>
@@ -143,7 +141,7 @@
 
     <!-- Modal -->
     <div class="modal fade" id="passengerFormModal" tabindex="-1" wire:ignore.self>
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <form wire:submit="save">
                     <div class="modal-header">
@@ -152,14 +150,21 @@
                     </div>
                     <div class="modal-body">
                         <div class="row g-3">
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <label class="form-label">Name</label>
                                 <input type="text" class="form-control form-control-sm" wire:model="form.name">
                                 @error('form.name')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Seat Number</label>
+                                <input type="text" class="form-control form-control-sm" wire:model="form.seat_number">
+                                @error('form.seat_number')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label">Passenger Type</label>
                                 <select class="form-select form-select-sm" wire:model="form.type">
                                     <option value="">Select Type</option>
@@ -173,27 +178,9 @@
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Seat Number</label>
-                                <input type="text" class="form-control form-control-sm" wire:model="form.seat_number">
-                                @error('form.seat_number')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6">
                                 <label class="form-label">Ticket Number</label>
                                 <input type="text" class="form-control form-control-sm" wire:model="form.ticket_number">
                                 @error('form.ticket_number')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-12">
-                                <label class="form-label">Status</label>
-                                <select class="form-select form-select-sm" wire:model="form.status">
-                                    <option value="checked_in">Checked In</option>
-                                    <option value="standby">Standby</option>
-                                    <option value="offloaded">Offloaded</option>
-                                </select>
-                                @error('form.status')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>
