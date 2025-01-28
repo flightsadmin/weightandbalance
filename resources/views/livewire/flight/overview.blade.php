@@ -67,7 +67,25 @@
                             </tr>
                             <tr>
                                 <th>Aircraft</th>
-                                <td>{{ $flight->aircraft->registration_number }} ({{ $flight->aircraft->type->name }})</td>
+                                <td>{{ $flight->aircraft->registration_number }} ({{ $flight->aircraft->type->name }})
+
+                                    <span class="dropdown d-inline float-end">
+                                        <button
+                                            class="btn btn-sm btn-secondary dropdown-toggle"
+                                            type="button" data-bs-toggle="dropdown">
+                                            {{ $flight->aircraft->registration_number }}
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            @foreach ($flight->airline->aircraft as $reg)
+                                                <li>
+                                                    <button class="dropdown-item" wire:click="updateRegistration('{{ $reg->id }}')">
+                                                        {{ ucfirst($reg->registration_number) }}
+                                                    </button>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </span>
+                                </td>
                             </tr>
                             <tr>
                                 <th>Route</th>

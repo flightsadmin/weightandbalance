@@ -15,8 +15,7 @@ class HoldFactory extends Factory
         $holdTypes = [
             'FH' => 'Forward Hold',
             'AH' => 'Aft Hold',
-            'BH' => 'Bulk Hold',
-            'CH' => 'Center Hold'
+            'BH' => 'Bulk Hold'
         ];
 
         $code = $this->faker->randomElement(array_keys($holdTypes));
@@ -27,7 +26,7 @@ class HoldFactory extends Factory
             'code' => $code,
             'position' => $this->faker->numberBetween(1, 4),
             'max_weight' => $this->faker->numberBetween(2000, 5000),
-            'is_active' => true,
+            'is_active' => fake()->boolean(90),
         ];
     }
 

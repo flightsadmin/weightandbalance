@@ -22,8 +22,12 @@ class Overview extends Component
 
     public function updateStatus($status)
     {
-        $this->flight->status = $status;
-        $this->flight->save();
+        $this->flight->update(['status' => $status]);
+    }
+
+    public function updateRegistration($reg)
+    {
+        $this->flight->update(['aircraft_id' => $reg]);
     }
 
     public function calculateWeightBalance(Flight $flight)
