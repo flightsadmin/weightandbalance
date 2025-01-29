@@ -12,14 +12,16 @@ return new class extends Migration {
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('airline_id')->constrained()->cascadeOnDelete();
             $table->string('key');
-            $table->string('value')->nullable();
-            $table->string('description')->nullable();
+            $table->text('value')->nullable();
             $table->string('type')->default('string');
+            $table->text('description')->nullable();
+            $table->foreignId('airline_id')->constrained()->cascadeOnDelete();
+            $table->nullableMorphs('settingable');
             $table->timestamps();
 
-            $table->unique(['airline_id', 'key']);
+            // Composite unique constraint
+            $table->unique(['key', 'airline_id', 'settingable_type', 'settingable_id'], 'settings_composite_unique');
         });
     }
 

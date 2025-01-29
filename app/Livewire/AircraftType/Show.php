@@ -28,11 +28,11 @@ class Show extends Component
     ];
 
     public $settings = [
-        'default_passenger_weight' => 75,
-        'default_crew_weight' => 75,
-        'default_baggage_weight' => 20,
-        'default_cargo_density' => 167,
-        'default_fuel_density' => 0.8,
+        'standard_passenger_weight' => 75,
+        'standard_crew_weight' => 75,
+        'standard_baggage_weight' => 20,
+        'standard_cargo_density' => 167,
+        'standard_fuel_density' => 0.8,
     ];
 
     protected $rules = [

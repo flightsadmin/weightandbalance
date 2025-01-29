@@ -87,6 +87,7 @@ class Manager extends Component
             session()->forget('selected_airline_id');
         }
         $this->resetPage();
+        return redirect()->route('aircraft_types.index');
     }
 
     public function edit(AircraftType $aircraftType)

@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 window.Swal = Swal;
 
 // Sweet Alert Pop-up
-window.addEventListener("closeModal", function (event) {
+window.addEventListener("alert", function (event) { 
     Swal.fire({
         text: event.detail.message,
         icon: event.detail.icon,

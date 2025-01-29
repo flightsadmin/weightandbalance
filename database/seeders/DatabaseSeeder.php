@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
 
         Airline::factory(2)->create()->each(function ($airline) {
             AircraftType::factory(1)->create()->each(function ($aircraftType) use ($airline) {
+                $airline->aircraftTypes()->sync($aircraftType->id);
                 Aircraft::factory(3)->create([
                     'airline_id' => $airline->id,
                     'aircraft_type_id' => $aircraftType->id

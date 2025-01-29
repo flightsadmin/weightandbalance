@@ -22,6 +22,7 @@ Route::get('/database', function () {
 })->name('migrate');
 
 // Public routes
+Route::get('airlines/{airline}/settings', App\Livewire\Setting\Manager::class)->name('airlines.settings');
 Route::get('airlines', App\Livewire\Airline\Index::class)->name('airlines.index');
 Route::get('aircraft_types', App\Livewire\AircraftType\Manager::class)->name('aircraft_types.index');
 
@@ -32,7 +33,6 @@ Route::get('airlines/{airline}', App\Livewire\Airline\Show::class)->name('airlin
 Route::get('airlines/{airline}/aircraft', App\Livewire\Airline\Aircraft::class)->name('airlines.aircraft');
 Route::get('airlines/{airline}/aircraft_types', App\Livewire\Airline\AircraftTypes::class)->name('airlines.aircraft_types');
 Route::get('airlines/{airline}/flights', App\Livewire\Airline\Flights::class)->name('airlines.flights');
-Route::get('airlines/{airline}/settings', App\Livewire\Setting\Index::class)->name('airlines.settings');
 
 // Routes requiring selected airline
 Route::middleware('selected.airline')->group(function () {

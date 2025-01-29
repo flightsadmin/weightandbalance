@@ -21,9 +21,10 @@ class CrewFactory extends Factory
      */
     public function definition(): array
     {
+        $crew = Crew::max('id') ?? 0;
 
         return [
-            'employee_id' => str_pad($this->static++, 6, '0', STR_PAD_LEFT),
+            'employee_id' => str_pad($crew + 1, 6, '0', STR_PAD_LEFT),
             'name' => $this->faker->name(),
             'position' => $this->faker->randomElement(['captain', 'first_officer', 'cabin_crew']),
             'notes' => $this->faker->optional(0.7)->sentence,
