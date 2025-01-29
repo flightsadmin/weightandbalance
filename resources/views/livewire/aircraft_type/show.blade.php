@@ -372,7 +372,7 @@
 
     @script
         <script>
-            $wire.on(['hold-saved', 'hold-updated'], () => {
+            $wire.on('hold-saved', () => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('holdFormModal'));
                 modal.hide();
 
