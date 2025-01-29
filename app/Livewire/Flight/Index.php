@@ -34,10 +34,11 @@ class Index extends Component
     {
         if (in_array($status, ['scheduled', 'boarding', 'departed', 'arrived', 'cancelled'])) {
             $flight->update(['status' => $status]);
-            $this->dispatch('alert', [
-                'type' => 'success',
-                'message' => 'Flight status updated successfully.'
-            ]);
+            $this->dispatch(
+                'alert',
+                icon: 'success',
+                message: 'Flight status updated successfully.'
+            );
         }
     }
 }

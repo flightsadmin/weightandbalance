@@ -149,6 +149,7 @@
 
                     <div class="col-md-9">
                         @if ($selectedType)
+                            <livewire:aircraft_type.show :aircraft_type="$selectedType" />
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h5 class="card-title m-0">
@@ -192,7 +193,7 @@
                                 <div class="card-header">
                                     <h5 class="card-title m-0">Aircraft Settings</h5>
                                 </div>
-                                <div class="card-body text-center text-muted my-5">
+                                <div class="card-body text-center text-muted my-2">
                                     <i class="bi bi-airplane display-4"></i>
                                     <p class="mt-3">Select an aircraft type to view its settings</p>
                                 </div>

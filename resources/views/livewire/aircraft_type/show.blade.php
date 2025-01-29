@@ -2,14 +2,11 @@
     <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
             <h3>{{ $aircraftType->name }}</h3>
-            <a href="{{ route('aircraft_types.index') }}" class="btn btn-secondary btn-sm my-0">
-                <i class="bi bi-arrow-left"></i> Back to Aircraft Types
-            </a>
         </div>
     </div>
 
     <div class="card-body">
-        <div class="row">
+        <div class="row gx-2">
             <div class="col-md-3">
                 <div class="list-group">
                     <button class="list-group-item list-group-item-action {{ $activeTab === 'overview' ? 'active' : '' }}"
@@ -24,10 +21,6 @@
                         wire:click="$set('activeTab', 'aircraft')">
                         <i class="bi bi-airplane"></i> Aircraft
                     </button>
-                    <button class="list-group-item list-group-item-action {{ $activeTab === 'settings' ? 'active' : '' }}"
-                        wire:click="$set('activeTab', 'settings')">
-                        <i class="bi bi-gear"></i> Settings
-                    </button>
                 </div>
             </div>
 
@@ -38,7 +31,7 @@
                             <h5 class="card-title mb-0">Aircraft Type Details</h5>
                         </div>
                         <div class="card-body">
-                            <div class="row">
+                            <div class="row g-0">
                                 <div class="col-md-6">
                                     <table class="table table-sm">
                                         <tr>
@@ -331,7 +324,6 @@
                                     <tr>
                                         <th>Registration</th>
                                         <th>Airline</th>
-                                        <th>Serial Number</th>
                                         <th>Manufacture Date</th>
                                         <th>Status</th>
                                         <th>Action</th>
@@ -341,8 +333,7 @@
                                     @forelse($aircraft as $plane)
                                         <tr wire:key="{{ $plane->id }}">
                                             <td>{{ $plane->registration_number }}</td>
-                                            <td>{{ $plane->airline->name }}</td>
-                                            <td>{{ $plane->serial_number }}</td>
+                                            <td>{{ $plane->airline->iata_code }}</td>
                                             <td>{{ $plane->manufacture_date?->format('M d, Y') }}</td>
                                             <td>
                                                 <span
@@ -375,78 +366,19 @@
                         </div>
                     </div>
                 @endif
-
-                @if ($activeTab === 'settings')
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">Aircraft Type Settings</h5>
-                            <button class="btn btn-primary btn-sm" wire:click="saveSettings">
-                                <i class="bi bi-save"></i> Save Settings
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Standard Passenger Weight (kg)</label>
-                                    <input type="number" class="form-control form-control-sm"
-                                        wire:model="settings.standard_passenger_weight">
-                                    @error('settings.standard_passenger_weight')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Standard Crew Weight (kg)</label>
-                                    <input type="number" class="form-control form-control-sm"
-                                        wire:model="settings.standard_crew_weight">
-                                    @error('settings.standard_crew_weight')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Standard Baggage Weight (kg)</label>
-                                    <input type="number" class="form-control form-control-sm"
-                                        wire:model="settings.standard_baggage_weight">
-                                    @error('settings.standard_baggage_weight')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label">Standard Fuel Density (kg/L)</label>
-                                    <input type="number" class="form-control form-control-sm" step="0.01"
-                                        wire:model="settings.standard_fuel_density">
-                                    @error('settings.standard_fuel_density')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
             </div>
         </div>
     </div>
 
     @script
         <script>
-            $wire.on('hold-saved', () => {
+            $wire.on(['hold-saved', 'hold-updated'], () => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('holdFormModal'));
                 modal.hide();
 
                 Swal.fire({
                     icon: 'success',
                     title: 'Hold saved successfully',
-                    showConfirmButton: false,
-                    timer: 1500,
-                    toast: true,
-                    position: 'top-end',
-                });
-            });
-
-            $wire.on('settings-saved', () => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Settings saved successfully',
                     showConfirmButton: false,
                     timer: 1500,
                     toast: true,

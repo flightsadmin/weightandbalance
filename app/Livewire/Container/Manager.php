@@ -69,10 +69,11 @@ class Manager extends Component
 
         $this->reset('form', 'editingContainer', 'showForm');
         $this->dispatch('containerSaved');
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Container saved successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Container saved successfully.'
+        );
     }
 
     public function render()

@@ -42,9 +42,10 @@ class Index extends Component
 
         $setting->update(['value' => $value]);
 
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Setting updated successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Setting updated successfully.'
+        );
     }
 }

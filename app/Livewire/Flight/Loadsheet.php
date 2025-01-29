@@ -83,10 +83,11 @@ class Loadsheet extends Component
 
         if ($overweightHolds->isNotEmpty()) {
             foreach ($overweightHolds as $hold) {
-                $this->dispatch('alert', [
-                    'type' => 'error',
-                    'message' => "{$hold->name} is over its maximum weight limit."
-                ]);
+                $this->dispatch(
+                    'alert',
+                    icon: 'error',
+                    message: "{$hold->name} is over its maximum weight limit."
+                );
             }
             return;
         }
@@ -98,10 +99,11 @@ class Loadsheet extends Component
             'version' => $this->loadsheet->increment('version')
         ]);
 
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Loadsheet released successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Loadsheet released successfully.'
+        );
     }
 
     #[On('containerSaved')]

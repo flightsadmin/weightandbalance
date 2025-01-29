@@ -40,9 +40,10 @@ class Index extends Component
     public function toggleStatus(Aircraft $aircraft)
     {
         $aircraft->update(['active' => !$aircraft->active]);
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Aircraft status updated successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Aircraft status updated successfully.'
+        );
     }
 }

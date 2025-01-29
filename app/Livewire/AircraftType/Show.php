@@ -27,14 +27,6 @@ class Show extends Component
         'positions' => []
     ];
 
-    public $settings = [
-        'standard_passenger_weight' => 75,
-        'standard_crew_weight' => 75,
-        'standard_baggage_weight' => 20,
-        'standard_cargo_density' => 167,
-        'standard_fuel_density' => 0.8,
-    ];
-
     protected $rules = [
         'holdForm.name' => 'required|string|max:255',
         'holdForm.code' => 'required|string|max:10',
@@ -50,62 +42,6 @@ class Show extends Component
     public function mount(AircraftType $aircraft_type)
     {
         $this->aircraftType = $aircraft_type;
-        $this->loadSettings();
-    }
-
-    public function loadSettings()
-    {
-        $airlineId = session('selected_airline_id');
-        $settings = Setting::where('airline_id', $airlineId)
-            ->whereIn('key', [
-                'standard_passenger_weight',
-                'standard_crew_weight',
-                'standard_baggage_weight',
-                'standard_cargo_density',
-                'standard_fuel_density'
-            ])
-            ->get()
-            ->pluck('value', 'key');
-
-        $this->settings = [
-            'standard_passenger_weight' => $settings['standard_passenger_weight'] ?? 75,
-            'standard_crew_weight' => $settings['standard_crew_weight'] ?? 75,
-            'standard_baggage_weight' => $settings['standard_baggage_weight'] ?? 20,
-            'standard_cargo_density' => $settings['standard_cargo_density'] ?? 167,
-            'standard_fuel_density' => $settings['standard_fuel_density'] ?? 0.8,
-        ];
-    }
-
-    public function saveSettings()
-    {
-        $this->validate(
-            [
-                'settings.standard_passenger_weight' => 'required|numeric|min:0',
-                'settings.standard_crew_weight' => 'required|numeric|min:0',
-                'settings.standard_baggage_weight' => 'required|numeric|min:0',
-                'settings.standard_cargo_density' => 'required|numeric|min:0',
-                'settings.standard_fuel_density' => 'required|numeric|min:0',
-            ]
-        );
-
-        $airlineId = session('selected_airline_id');
-        $airline = Airline::findOrFail($airlineId);
-
-        foreach ($this->settings as $key => $value) {
-            Setting::updateOrCreate(
-                [
-                    'airline_id' => $airlineId,
-                    'key' => $key,
-                ],
-                [
-                    'value' => $value,
-                    'type' => 'float',
-                    'description' => 'Default value for ' . str_replace('_', ' ', $key)
-                ]
-            );
-        }
-
-        $this->dispatch('settings-saved');
     }
 
     public function render()

@@ -24,10 +24,11 @@ class Show extends Component
         $this->aircraft->active = !$this->aircraft->active;
         $this->aircraft->save();
 
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Aircraft status updated successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Aircraft status updated successfully.'
+        );
     }
 
     public function render()

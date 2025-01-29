@@ -101,10 +101,11 @@ class Manager extends Component
             }
         }
 
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => ucfirst($category) . ' settings updated successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: ucfirst($category) . ' settings updated successfully.'
+        );
     }
 
     private function containsAny(string $key, array $words): bool

@@ -67,20 +67,22 @@ class Manager extends Component
         }
 
         $this->reset('form', 'editingPassenger', 'showForm');
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Passenger saved successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Passenger saved successfully.'
+        );
         $this->dispatch('passenger-saved');
     }
 
     public function delete(Passenger $passenger)
     {
         $passenger->delete();
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Passenger removed successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Passenger removed successfully.'
+        );
     }
 
     public function updateAcceptanceStatus($passengerId, $status)
@@ -90,10 +92,11 @@ class Manager extends Component
             'acceptance_status' => $status
         ]);
 
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => ucfirst($status) . ' passenger successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: ucfirst($status) . ' passenger successfully.'
+        );
     }
 
     public function updateBoardingStatus($passengerId, $status)
@@ -103,10 +106,11 @@ class Manager extends Component
             'boarding_status' => $status
         ]);
 
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => ucfirst($status) . ' passenger successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: ucfirst($status) . ' passenger successfully.'
+        );
     }
 
     #[On('passenger-saved')]

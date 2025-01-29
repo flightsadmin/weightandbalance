@@ -59,10 +59,11 @@ class Form extends Component
             $message = 'Flight created successfully.';
         }
 
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => $message
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: $message
+        );
 
         return $this->redirect(route('flights.index'), true);
     }

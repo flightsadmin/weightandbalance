@@ -71,20 +71,22 @@ class Manager extends Component
         }
 
         $this->reset('form', 'editingBaggage', 'showForm');
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Baggage saved successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Baggage saved successfully.'
+        );
         $this->dispatch('baggage-saved');
     }
 
     public function delete(Baggage $baggage)
     {
         $baggage->delete();
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Baggage removed successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Baggage removed successfully.'
+        );
     }
 
     public function updateContainer($baggageId, $containerId)
@@ -95,10 +97,11 @@ class Manager extends Component
             'status' => $containerId ? 'loaded' : 'offloaded'
         ]);
 
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => $containerId ? 'Baggage loaded to container.' : 'Baggage removed from container.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: $containerId ? 'Baggage loaded to container.' : 'Baggage removed from container.'
+        );
     }
 
     #[On('baggage-saved')]

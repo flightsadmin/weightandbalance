@@ -89,36 +89,39 @@ class AircraftTypes extends Component
         $this->airline->aircraftTypes()->attach($type->id);
 
         $this->reset('form', 'showCreateForm');
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Aircraft type created and added successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Aircraft type created and added successfully.'
+        );
     }
 
     public function addType($typeId)
     {
         $this->airline->aircraftTypes()->attach($typeId);
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Aircraft type added successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Aircraft type added successfully.'
+        );
     }
 
     public function removeType($typeId)
     {
-        // Don't allow removal if aircraft of this type exist
         if ($this->airline->aircraft()->where('aircraft_type_id', $typeId)->exists()) {
-            $this->dispatch('alert', [
-                'type' => 'error',
-                'message' => 'Cannot remove type - aircraft of this type exist.'
-            ]);
+            $this->dispatch(
+                'alert',
+                icon: 'error',
+                message: 'Cannot remove type - aircraft of this type exist.'
+            );
             return;
         }
 
         $this->airline->aircraftTypes()->detach($typeId);
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Aircraft type removed successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Aircraft type removed successfully.'
+        );
     }
 }

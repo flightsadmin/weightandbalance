@@ -68,10 +68,11 @@ class Overview extends Component
                 'notes' => $withinLimits ? 'All weights within limits' : 'Weight limits exceeded'
             ]
         );
-        $this->dispatch('alert', [
-            'type' => 'success',
-            'message' => 'Weight calculations updated successfully.'
-        ]);
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Weight calculations updated successfully.'
+        );
         return $this->redirect(route('flights.show', $flight), true);
     }
 }
