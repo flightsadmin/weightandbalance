@@ -1,4 +1,4 @@
-<div x-data="dragDropManager()">
+<div x-data="containerManager()">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="card-title">Loadsheet</h3>
@@ -47,6 +47,10 @@
                                                     <div wire:key="hold-{{ $code }}-{{ $row }}" class="position-row">
                                                         <div class="row-number">{{ $row }}</div>
                                                         <div class="position-slots">
+                                                            @php
+                                                                $rowPositions = collect($rowPositions); // Convert to collection
+                                                            @endphp
+
                                                             @if ($leftPosition = $rowPositions->firstWhere('side', 'L'))
                                                                 <x-hold-position
                                                                     :position="$leftPosition"
@@ -82,42 +86,27 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="card-title text-center">Unplanned</h5>
+                            <h5 class="card-title">Unplanned Containers</h5>
                         </div>
-                        <div class="card-body container-list-body">
-                            <div class="container-list"
-                                x-on:dragenter="dragEnter($event)"
-                                x-on:dragover.prevent
-                                x-on:dragleave="dragLeave($event)"
-                                x-on:drop="dropContainer(null)">
+                        <div class="card-body"
+                            x-on:click="removeSelectedContainer()"
+                            :class="{ 'unplanned-area': true, 'highlight': selectedContainer || selectedPosition }">
+                            <div class="container-list" x-on:click.stop>
                                 @forelse ($availableContainers as $container)
-                                    <div wire:key="container-{{ $container->id }}" class="draggable-container position-card"
-                                        draggable="true"
-                                        x-on:dragstart="startDrag($event, {{ $container->id }}, null)"
-                                        x-on:dragend="endDrag"
-                                        data-container-id="{{ $container->id }}">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="card" style="cursor: move;">
-                                                    <div class="card-body">
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <div>
-                                                                <h6 class="mb-0">{{ $container->container_number }}</h6>
-                                                                <small class="text-muted">{{ $container->type }}</small>
-                                                            </div>
-                                                            <div class="text-end">
-                                                                <div class="fw-bold">{{ number_format($container->weight) }} kg</div>
-                                                                <small class="text-muted">{{ $container->items_count ?? 0 }} pcs</small>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                    <div class="container-item"
+                                        x-on:click.stop="selectContainer({{ $container->id }})"
+                                        :class="{ 'selected': selectedContainer === {{ $container->id }} }">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h6 class="mb-1">{{ $container->container_number }}</h6>
+                                                <div class="fw-bold">{{ number_format($container->weight) }} kg</div>
                                             </div>
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="text-center">
-                                        <p>No Unplanned Containers</p>
+                                    <div class="text-center text-muted w-100">
+                                        <i class="bi bi-inbox display-4"></i>
+                                        <p>No unplanned containers</p>
                                     </div>
                                 @endforelse
                             </div>
@@ -145,79 +134,59 @@
     </div>
 
     <script>
-        function dragDropManager() {
+        function containerManager() {
             return {
-                draggedContainer: null,
-                draggedFromPosition: null,
-                isDraggingContainer: false,
+                selectedContainer: null,
+                selectedPosition: null,
 
-                startDrag(event, containerId, position) {
-                    this.draggedContainer = containerId;
-                    this.draggedFromPosition = position;
-                    this.isDraggingContainer = true;
-
-                    event.target.classList.add('dragging');
-                    event.dataTransfer.setData('text/plain', '');
-                    event.dataTransfer.effectAllowed = 'move';
+                selectContainer(containerId) {
+                    if (this.selectedContainer === containerId) {
+                        this.selectedContainer = null;
+                    } else {
+                        this.selectedContainer = containerId;
+                        this.selectedPosition = null;
+                    }
                 },
 
-                endDrag(event) {
-                    this.isDraggingContainer = false;
-                    event.target.classList.remove('dragging');
-                },
+                selectPosition(positionId) {
+                    if (this.selectedContainer) {
+                        @this.updateContainerPosition(this.selectedContainer, null, positionId);
+                        this.selectedContainer = null;
+                        this.selectedPosition = null;
+                    } else if (this.selectedPosition === positionId) {
+                        this.selectedPosition = null;
+                    } else {
+                        let containerInPosition = Object.entries(@json($containerPositions))
+                            .find(([contId, posId]) => posId === positionId);
 
-                dragEnter(event) {
-                    const holdPosition = event.target.closest('.hold-position');
-                    const containerList = event.target.closest('.container-list');
-
-                    if (this.isDraggingContainer) {
-                        if (
-                            (holdPosition && !holdPosition.querySelector('.position-card')) ||
-                            (holdPosition && holdPosition.closest('[data-hold="BH"]')) ||
-                            containerList
-                        ) {
-                            if (holdPosition) {
-                                holdPosition.classList.add('dragover');
-                            } else if (containerList) {
-                                containerList.classList.add('dragover');
-                            }
+                        if (containerInPosition) {
+                            @this.updateContainerPosition(containerInPosition[0], positionId, null);
                         }
+
+                        this.selectedPosition = positionId;
+                        this.selectedContainer = null;
                     }
                 },
 
-                dragLeave(event) {
-                    const holdPosition = event.target.closest('.hold-position');
-                    const containerList = event.target.closest('.container-list');
+                removeSelectedContainer() {
+                    // Handle container in position
+                    if (this.selectedPosition) {
+                        let containerInPosition = Object.entries(@json($containerPositions))
+                            .find(([contId, posId]) => posId === this.selectedPosition);
 
-                    if (holdPosition) {
-                        holdPosition.classList.remove('dragover');
-                    }
-                    if (containerList) {
-                        containerList.classList.remove('dragover');
-                    }
-                },
-
-                dropContainer(newPosition) {
-                    if (this.draggedContainer) {
-                        @this.updateContainerPosition(
-                            this.draggedContainer,
-                            this.draggedFromPosition,
-                            newPosition
-                        );
-
-                        const holdPosition = event.target.closest('.hold-position');
-                        const containerList = event.target.closest('.container-list');
-
-                        if (holdPosition) {
-                            holdPosition.classList.remove('dragover');
+                        if (containerInPosition) {
+                            @this.updateContainerPosition(containerInPosition[0], this.selectedPosition, null);
                         }
-                        if (containerList) {
-                            containerList.classList.remove('dragover');
-                        }
+                        this.selectedPosition = null;
                     }
-                    this.draggedContainer = null;
-                    this.draggedFromPosition = null;
-                    this.isDraggingContainer = false;
+                    // Handle selected container
+                    else if (this.selectedContainer) {
+                        let currentPosition = @json($containerPositions)[this.selectedContainer];
+                        if (currentPosition) {
+                            @this.updateContainerPosition(this.selectedContainer, currentPosition, null);
+                        }
+                        this.selectedContainer = null;
+                    }
                 }
             };
         }

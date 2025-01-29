@@ -43,8 +43,13 @@ class Loadsheet extends Component
             $compartment = $holdType . '-' . $toPosition;
         }
 
+        // Find current position if fromPosition is null
+        if (!$fromPosition && isset($this->containerPositions[$containerId])) {
+            $fromPosition = $this->containerPositions[$containerId];
+        }
+
         // Remove from old position
-        if ($fromPosition) {
+        if (isset($this->containerPositions[$containerId])) {
             unset($this->containerPositions[$containerId]);
         }
 

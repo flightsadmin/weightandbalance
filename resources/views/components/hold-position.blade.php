@@ -1,12 +1,9 @@
 <div class="hold-position border {{ $position->side ? 'position-' . $position->side : 'position-center' }}"
-    x-on:dragenter="dragEnter($event)"
-    x-on:dragover.prevent
-    x-on:dragleave="dragLeave($event)"
-    x-on:drop="dropContainer('{{ $position->id }}')"
+    x-on:click="selectPosition('{{ $position->id }}')"
+    :class="{ 'selected': selectedPosition === '{{ $position->id }}', 'occupied': {{ isset($containerPositions[$position->id]) ? 'true' : 'false' }} }"
     data-position="{{ $position->id }}">
 
     @if ($position->hold->code === 'BH')
-        {{-- Bulk Hold Display --}}
         <div class="bulk-containers-list">
             @php
                 $positionId = $position->id;
@@ -17,10 +14,9 @@
 
             @if ($bulkContainers->isNotEmpty())
                 @foreach ($bulkContainers as $container)
-                    <div class="bulk-container-item draggable-container"
-                        draggable="true"
-                        x-on:dragstart="startDrag($event, {{ $container->id }}, '{{ $position->id }}')"
-                        x-on:dragend="endDrag"
+                    <div class="bulk-container-item"
+                        x-on:click.stop="selectContainer({{ $container->id }})"
+                        :class="{ 'selected': selectedContainer === {{ $container->id }} }"
                         data-container-id="{{ $container->id }}">
                         <div class="bulk-container-details">
                             <span class="container-number">{{ $container->container_number }}</span>
@@ -38,13 +34,15 @@
         </div>
     @else
         {{-- Regular Hold Position Display --}}
-        @if ($container = $containers->firstWhere('id', array_search($position->id, $containerPositions)))
-            <div class="position-card draggable-container"
-                style="cursor: move;"
-                draggable="true"
-                x-on:dragstart="startDrag($event, {{ $container->id }}, '{{ $position->id }}')"
-                x-on:dragend="endDrag"
-                data-container-id="{{ $container->id }}">
+        @php
+            $containerId = array_search($position->id, $containerPositions);
+            $container = $containerId ? $containers->firstWhere('id', $containerId) : null;
+        @endphp
+
+        @if ($container)
+            <div class="position-card"
+                x-on:click.stop="selectContainer({{ $container->id }})"
+                :class="{ 'selected': selectedContainer === {{ $container->id }} }">
                 <div class="card h-100">
                     <div class="card-body text-center">
                         <h6 class="mb-1">{{ $container->container_number }}</h6>
