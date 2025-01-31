@@ -46,6 +46,7 @@
                             <th>AWB Number</th>
                             <th>Flight</th>
                             <th>Type</th>
+                            <th>Pieces</th>
                             <th>Weight</th>
                             <th>Container</th>
                             <th>Status</th>
@@ -67,9 +68,37 @@
                                     </span>
                                 </td>
                                 <td>{{ ucwords(str_replace('_', ' ', $item->type)) }}</td>
+                                <td>{{ $item->pieces }}</td>
                                 <td>{{ number_format($item->weight) }} kg</td>
                                 <td>
-                                    @if ($item->container)
+                                    <div class="dropdown d-inline">
+                                        <button
+                                            class="btn btn-sm btn-{{ $item->container_id ? 'success' : 'danger' }} dropdown-toggle"
+                                            type="button" data-bs-toggle="dropdown">
+                                            {{ $item->container_id ? $item->container->container_number : 'Not loaded' }}
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            @foreach ($containers as $container)
+                                                <li>
+                                                    <button class="dropdown-item"
+                                                        wire:click="updateContainer({{ $item->id }}, {{ $container->id }})">
+                                                        <i class="bi bi-check-circle text-success"></i> {{ $container->container_number }}
+                                                    </button>
+                                                </li>
+                                            @endforeach
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item"
+                                                    wire:click="updateContainer({{ $item->id }}, null)">
+                                                    <i class="bi bi-x-circle text-danger"></i> Offloaded
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    {{-- @if ($item->container)
                                         <a href="{{ route('containers.show', $item->container) }}" class="text-decoration-none">
                                             {{ $item->container->container_number }}
                                         </a>
@@ -79,7 +108,7 @@
                                         </span>
                                     @else
                                         <span class="text-muted">Not assigned</span>
-                                    @endif
+                                    @endif --}}
                                 </td>
                                 <td>
                                     <span

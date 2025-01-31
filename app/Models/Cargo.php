@@ -14,18 +14,19 @@ class Cargo extends Model
 
     protected $fillable = [
         'flight_id',
+        'container_id',
         'awb_number',
+        'pieces',
+        'weight',
         'type',
         'description',
-        'weight',
-        'container_id',
         'status',
         'special_instructions'
     ];
 
     protected $casts = [
         'weight' => 'integer',
-        'volume' => 'integer'
+        'pieces' => 'integer'
     ];
 
     public function flight(): BelongsTo

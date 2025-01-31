@@ -2,11 +2,12 @@
 
 namespace App\Livewire\Passenger;
 
+use App\Models\Baggage;
 use App\Models\Flight;
 use App\Models\Passenger;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\On;
 
 class Manager extends Component
 {
@@ -16,8 +17,10 @@ class Manager extends Component
     public $flight = null;
     public $showForm = false;
     public $editingPassenger = null;
+    public $editingBaggage = null;
     public $search = '';
-
+    public $pieces = '';
+    public $weight = '';
     public $form = [
         'name' => '',
         'seat_number' => '',
@@ -111,6 +114,26 @@ class Manager extends Component
             icon: 'success',
             message: ucfirst($status) . ' passenger successfully.'
         );
+    }
+    public function saveBaggage()
+    {
+        $this->editingPassenger->baggage()->delete();
+        for ($i = 0; $i < $this->pieces; $i++) {
+            $this->editingPassenger->baggage()->create([
+                'flight_id' => $this->editingPassenger->flight->id,
+                'tag_number' => $this->editingPassenger->flight->airline->iata_code . str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
+                'weight' => $this->weight / $this->pieces
+            ]);
+        }
+        $this->dispatch('alert', icon: 'success', message: 'Baggage saved successfully.');
+        $this->dispatch('baggage-saved');
+    }
+
+    public function editBaggage(Passenger $passenger)
+    {
+        $this->editingPassenger = $passenger;
+        $this->pieces = $passenger->baggage->count();
+        $this->weight = $passenger->baggage->sum('weight');
     }
 
     #[On('passenger-saved')]

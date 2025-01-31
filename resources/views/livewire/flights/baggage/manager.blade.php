@@ -25,6 +25,7 @@
                     <th>Weight</th>
                     <th>Container</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -77,7 +78,7 @@
                                 {{ ucfirst($bag->status) }}
                             </span>
                         </td>
-                        <td class="text-end">
+                        <td>
                             <button class="btn btn-sm btn-link" wire:click="edit({{ $bag->id }})" data-bs-toggle="modal"
                                 data-bs-target="#baggageFormModal">
                                 <i class="bi bi-pencil"></i>
@@ -103,7 +104,7 @@
 
     <!-- Modal -->
     <div class="modal fade" id="baggageFormModal" tabindex="-1" wire:ignore.self>
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <form wire:submit="save">
                     <div class="modal-header">
@@ -158,7 +159,7 @@
                             <div class="col-md-6">
                                 <label class="form-label">Status</label>
                                 <select class="form-select form-select-sm" wire:model="form.status">
-                                    <option value="pending">Pending</option>
+                                    <option value="checked">Checked</option>
                                     <option value="loaded">Loaded</option>
                                     <option value="offloaded">Offloaded</option>
                                 </select>

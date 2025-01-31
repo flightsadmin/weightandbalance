@@ -23,46 +23,18 @@ class CargoFactory extends Factory
 
         $type = fake()->randomElement(array_keys($cargoTypes));
         $weight = fake()->numberBetween($cargoTypes[$type]['min'], $cargoTypes[$type]['max']);
-        $volume = $weight * fake()->randomFloat(2, 0.2, 0.5); // Approximate volume based on weight
 
         return [
             'flight_id' => null,
             'container_id' => null,
             'awb_number' => fake()->unique()->numerify('###-########'),
             'weight' => $weight,
-            'volume' => $volume,
+            'pieces' => fake()->numberBetween(1, 10),
             'type' => $type,
-            'status' => fake()->randomElement(['accepted', 'loaded', 'offloaded']),
+            'status' => 'accepted',
             'description' => fake()->optional(10)->sentence(),
             'special_instructions' => fake()->optional(10)->sentence()
         ];
-    }
-
-    public function accepted()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => 'accepted',
-            ];
-        });
-    }
-
-    public function loaded()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => 'loaded',
-            ];
-        });
-    }
-
-    public function offloaded()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => 'offloaded',
-            ];
-        });
     }
 
     public function forFlight(Flight $flight)
@@ -70,24 +42,6 @@ class CargoFactory extends Factory
         return $this->state(function (array $attributes) use ($flight) {
             return [
                 'flight_id' => $flight->id,
-            ];
-        });
-    }
-
-    public function ofType(string $type)
-    {
-        return $this->state(function (array $attributes) use ($type) {
-            return [
-                'type' => $type,
-            ];
-        });
-    }
-
-    public function inCompartment(string $compartment)
-    {
-        return $this->state(function (array $attributes) use ($compartment) {
-            return [
-                'compartment' => $compartment,
             ];
         });
     }

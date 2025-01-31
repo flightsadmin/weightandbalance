@@ -56,7 +56,13 @@
                         @endunless
                         <td>{{ $passenger->ticket_number }}</td>
                         <td>{{ $passenger->seat_number }}</td>
-                        <td>{{ $passenger->baggage_count }} <i class="bi bi-luggage-fill"></i> pcs</td>
+                        <td>
+                            <button class="btn btn-sm btn-link text-decoration-none text-reset"
+                                wire:click="editBaggage({{ $passenger->id }})" data-bs-toggle="modal"
+                                data-bs-target="#baggageModal">
+                                {{ $passenger->baggage_count }} <i class="bi bi-luggage-fill"></i> pcs
+                            </button>
+                        </td>
                         <td>
                             <div class="dropdown d-inline">
                                 <button
@@ -202,10 +208,42 @@
         </div>
     </div>
 
+    <div class="modal fade" id="baggageModal" tabindex="-1" wire:ignore.self>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Baggage</h5>
+                </div>
+                <form wire:submit="saveBaggage">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Pieces</label>
+                                <input type="number" class="form-control form-control-sm" wire:model="pieces">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Weight</label>
+                                <input type="number" class="form-control form-control-sm" wire:model="weight">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Save Baggage</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     @script
         <script>
             $wire.on('passenger-saved', () => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('passengerFormModal'));
+                modal.hide();
+            });
+            $wire.on('baggage-saved', () => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('baggageModal'));
                 modal.hide();
             });
         </script>

@@ -15,8 +15,8 @@ return new class extends Migration {
             $table->foreignId('flight_id')->constrained()->cascadeOnDelete();
             $table->foreignId('container_id')->nullable()->constrained()->nullOnDelete();
             $table->string('awb_number')->unique(); // Air Waybill number
-            $table->integer('weight');
-            $table->integer('volume')->nullable();
+            $table->integer('pieces')->nullable();
+            $table->integer('weight')->nullable();
             $table->string('type')->nullable(); // general, dangerous_goods, perishable, etc.
             $table->string('status')->default('accepted'); // accepted, loaded, offloaded
             $table->text('description')->nullable();
