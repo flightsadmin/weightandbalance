@@ -1,9 +1,9 @@
 <div x-data="containerManager()">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="card-title">Loadsheet</h3>
-            @if ($loadsheet->status === 'released')
-                <span class="badge bg-success">v{{ $loadsheet->version }}</span>
+            <h3 class="card-title">Loadplan</h3>
+            @if ($loadplan->status === 'released')
+                <span class="badge bg-success">v{{ $loadplan->version }}</span>
             @else
                 <span class="badge bg-warning">Draft</span>
             @endif
@@ -11,9 +11,9 @@
                 <div class="me-2">
                     <livewire:container.manager :flight="$flight" />
                 </div>
-                <button wire:click="releaseLoadsheet" class="btn btn-sm btn-primary"
-                    {{ $loadsheet->status === 'released' ? 'disabled' : '' }}>
-                    <i class="bi bi-check2-circle"></i> Release Loadsheet
+                <button wire:click="releaseLoadplan" class="btn btn-sm btn-primary"
+                    {{ $loadplan->status === 'released' ? 'disabled' : '' }}>
+                    <i class="bi bi-check2-circle"></i> Release Loadplan
                 </button>
             </div>
         </div>

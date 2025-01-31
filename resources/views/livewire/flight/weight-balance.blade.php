@@ -7,7 +7,8 @@
                     <i class="bi bi-list-check"></i> Load Summary
                 </button>
                 <button class="btn btn-sm btn-success"
-                    {{ !$weights['is_takeoff_weight_ok'] || !$weights['is_landing_weight_ok'] || !$weights['is_zero_fuel_weight_ok'] ? 'disabled' : '' }}>
+                    {{ !$weights['is_takeoff_weight_ok'] || !$weights['is_landing_weight_ok'] || !$weights['is_zero_fuel_weight_ok'] ? 'disabled' : '' }}
+                    wire:click="generateLoadsheet">
                     <i class="bi bi-check-circle"></i> Approve Loadsheet
                 </button>
             </div>

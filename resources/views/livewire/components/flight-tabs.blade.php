@@ -68,9 +68,9 @@
             </a>
         </li>
         <li class="nav-item">
-            <a wire:click.prevent="setTab('loadsheet')" href=""
-                class="nav-link {{ $activeTab === 'loadsheet' ? 'active' : '' }}">
-                <i class="bi bi-file-earmark-pdf-fill"></i> Loadsheet
+            <a wire:click.prevent="setTab('loadplan')" href=""
+                class="nav-link {{ $activeTab === 'loadplan' ? 'active' : '' }}">
+                <i class="bi bi-database-fill-add"></i> Loadplan
             </a>
         </li>
     </ul>
@@ -93,8 +93,8 @@
             <livewire:crew.manager :flight="$flight" />
         @elseif ($activeTab === 'weight-balance')
             <livewire:flight.weight-balance :flight="$flight" />
-        @elseif ($activeTab === 'loadsheet')
-            <livewire:flight.loadsheet :flight="$flight" />
+        @elseif ($activeTab === 'loadplan')
+            <livewire:flight.loadplan :flight="$flight" />
         @endif
     </div>
 </div>

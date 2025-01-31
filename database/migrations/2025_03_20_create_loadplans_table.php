@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('loadsheets', function (Blueprint $table) {
+        Schema::create('loadplans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('flight_id')->constrained()->cascadeOnDelete();
             $table->string('status')->default('draft');
@@ -22,6 +22,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('loadsheets');
+        Schema::dropIfExists('loadplans');
     }
 };

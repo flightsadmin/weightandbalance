@@ -123,13 +123,13 @@ class Flight extends Model
         ]);
     }
 
-    public function loadsheets()
+    public function loadplans()
     {
-        return $this->hasMany(Loadsheet::class);
+        return $this->hasMany(Loadplan::class);
     }
 
-    public function latestLoadsheet()
+    public function latestLoadplan()
     {
-        return $this->hasOne(Loadsheet::class)->latestOfMany();
+        return $this->hasOne(Loadplan::class)->latestOfMany();
     }
 }

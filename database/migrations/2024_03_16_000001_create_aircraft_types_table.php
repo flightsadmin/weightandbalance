@@ -19,10 +19,10 @@ return new class extends Migration {
             $table->integer('max_passengers')->default(0);
             $table->integer('cargo_capacity')->default(0); // in kg
             $table->integer('max_fuel_capacity')->default(0); // in liters
-            $table->decimal('empty_weight', 10, 2)->default(0); // in kg
-            $table->decimal('max_zero_fuel_weight', 10, 2)->default(0); // in kg
-            $table->decimal('max_takeoff_weight', 10, 2)->default(0); // in kg
-            $table->decimal('max_landing_weight', 10, 2)->default(0); // in kg
+            $table->integer('empty_weight')->default(0); // in kg
+            $table->integer('max_zero_fuel_weight')->default(0); // in kg
+            $table->integer('max_takeoff_weight')->default(0); // in kg
+            $table->integer('max_landing_weight')->default(0); // in kg
 
             // Basic dimensions
             $table->integer('max_range')->default(0); // in nautical miles

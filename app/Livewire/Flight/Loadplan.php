@@ -6,24 +6,24 @@ use App\Models\Flight;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-class Loadsheet extends Component
+class Loadplan extends Component
 {
     public $flight;
-    public $loadsheet;
+    public $loadplan;
     public $containerPositions = [];
     public $isDragging = false;
 
     public function mount(Flight $flight)
     {
         $this->flight = $flight->load('aircraft.type.holds.positions');
-        $this->loadsheet = $flight->loadsheets()->latest()->first()
-            ?? $flight->loadsheets()->create([
+        $this->loadplan = $flight->loadplans()->latest()->first()
+            ?? $flight->loadplans()->create([
                 'status' => 'draft',
                 'version' => 0,
                 'last_modified_by' => auth()->id()
             ]);
 
-        $this->containerPositions = $this->loadsheet->container_positions ?? [];
+        $this->containerPositions = $this->loadplan->container_positions ?? [];
     }
 
     public function updateContainerPosition($containerId, $fromPosition, $toPosition)
@@ -68,8 +68,8 @@ class Loadsheet extends Component
             ]);
         }
 
-        // Save changes to loadsheet
-        $this->loadsheet->update([
+        // Save changes to loadplan
+        $this->loadplan->update([
             'container_positions' => $this->containerPositions,
             'last_modified_by' => auth()->id()
         ]);
@@ -78,7 +78,7 @@ class Loadsheet extends Component
         $this->dispatch('containerMoved');
     }
 
-    public function releaseLoadsheet()
+    public function releaseLoadplan()
     {
         // Validate total weight per hold
         $overweightHolds = $this->flight->aircraft->type->holds
@@ -97,17 +97,17 @@ class Loadsheet extends Component
             return;
         }
 
-        $this->loadsheet->update([
+        $this->loadplan->update([
             'status' => 'released',
             'released_by' => auth()->id(),
             'released_at' => now(),
-            'version' => $this->loadsheet->increment('version')
+            'version' => $this->loadplan->increment('version')
         ]);
 
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: 'Loadsheet released successfully.'
+            message: 'Loadplan released successfully.'
         );
     }
 
@@ -122,7 +122,7 @@ class Loadsheet extends Component
             ->orderBy('position')
             ->get();
 
-        return view('livewire.flight.loadsheet', [
+        return view('livewire.flight.loadplan', [
             'containers' => $containers,
             'availableContainers' => $availableContainers,
             'holds' => $holds,

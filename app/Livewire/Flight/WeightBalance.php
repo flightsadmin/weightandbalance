@@ -38,7 +38,6 @@ class WeightBalance extends Component
             'max_landing_weight' => $type->max_landing_weight,
             'max_zero_fuel_weight' => $type->max_zero_fuel_weight,
         ];
-
         // Crew weights
         $crew = $this->flight->fuel?->crew ?? '2/4';
         list($cockpitCrew, $cabinCrew) = explode('/', $crew);
@@ -57,8 +56,7 @@ class WeightBalance extends Component
         $weights['operating_empty_weight'] = $weights['basic_empty_weight'] + $crewWeight + $pantryWeight;
 
         // Passenger weights
-        $standardPaxWeight = $airline->getStandardPassengerWeight();
-        $weights['passenger_weight'] = $this->flight->passengers->count() * $standardPaxWeight;
+        $weights['passenger_weight'] = $this->flight->passengers->count() * $airline->getStandardPassengerWeight();
 
         // Baggage weights
         $weights['baggage_weight'] = $this->flight->baggage->sum('weight');
@@ -100,8 +98,6 @@ class WeightBalance extends Component
         $weights['is_takeoff_weight_ok'] = $weights['take_off_weight'] <= $weights['max_takeoff_weight'];
         $weights['is_landing_weight_ok'] = $weights['landing_weight'] <= $weights['max_landing_weight'];
         $weights['is_zero_fuel_weight_ok'] = $weights['zero_fuel_weight'] <= $weights['max_zero_fuel_weight'];
-
-        WeightBalanceModel::updateOrCreate(['flight_id' => $this->flight->id], ['weights' => $weights]);
 
         return $weights;
     }
@@ -158,6 +154,12 @@ class WeightBalance extends Component
 
         $this->showSummaryModal = true;
         $this->dispatch('show-summary');
+    }
+
+    public function generateLoadsheet()
+    {
+        WeightBalanceModel::updateOrCreate(['flight_id' => $this->flight->id], ['weights' => $this->calculateWeights()]);
+        $this->dispatch('alert', icon: 'success', message: 'Loadsheet generated successfully');
     }
 
     public function render()
