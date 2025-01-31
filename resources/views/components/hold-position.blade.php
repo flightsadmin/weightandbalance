@@ -46,7 +46,7 @@
                 <div class="card h-100">
                     <div class="card-body text-center">
                         <h6 class="mb-1">{{ $container->container_number }}</h6>
-                        <div class="fw-bold">{{ number_format($container->weight) }} kg</div>
+                        <small class="fw-bold">{{ number_format($container->weight) }} kg</small>
                     </div>
                 </div>
             </div>

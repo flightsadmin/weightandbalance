@@ -102,7 +102,12 @@
 .empty-position {
     text-align: center;
     color: #6c757d;
-    width: 100%;
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 1px;
 }
 
 .empty-position i { font-size: 0.75rem; margin-bottom: 0.15rem; }
@@ -179,9 +184,39 @@
 
 .hold-group[data-hold="BH"] .hold-positions {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;  /* Prevent wrapping */
     justify-content: flex-start;
     gap: 0.25rem;
+    overflow-x: auto;  /* Enable horizontal scroll */
+    overflow-y: hidden; /* Disable vertical scroll */
+    flex-direction: row; /* Ensure horizontal layout */
+    padding: 0.25rem;
+    /* Add smooth scrolling */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar but keep functionality */
+.hold-group[data-hold="BH"] .hold-positions::-webkit-scrollbar {
+    height: 6px;
+}
+
+.hold-group[data-hold="BH"] .hold-positions::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.hold-group[data-hold="BH"] .hold-positions::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.hold-group[data-hold="BH"] .hold-position {
+    flex: 0 0 auto;  /* Prevent position shrinking */
+    width: 80px;     /* Match other hold sizes */
+    height: 80px;
+    min-height: unset;
+    padding: 0.25rem;
+    margin: 1px;
 }
 
 .hold-position:not([data-hold="BH"]).occupied {
@@ -193,15 +228,6 @@
     border-color: #dc3545 !important;
 }
 
-.hold-group[data-hold="BH"] .hold-position {
-    width: 120px;  /* Same width as other holds */
-    height: 80px;  /* Same height as other holds */
-    min-height: unset;  /* Remove min-height */
-    padding: 0.5rem;
-    margin: 1px;
-    overflow-y: visible;
-}
-
 .bulk-containers-list {
     display: flex;
     flex-wrap: wrap;
@@ -209,12 +235,14 @@
     padding: 0.25rem;
 }
 
-.bulk-container-item {
-    width: 120px;
+.bulk-container-item,
+.empty-bulk-position {
+    flex: 0 0 auto;
+    width: 80px;
     height: 80px;
-    padding: 0.5rem;
-    border: 1px solid #dee2e6;
-    background-color: #fff;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.75rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -237,21 +265,6 @@
 .container-weight { 
     color: #6c757d; 
     font-size: 0.75rem; 
-}
-
-.empty-bulk-position {
-    width: 120px;
-    height: 80px;
-    text-align: center;
-    color: #6c757d;
-    padding: 0.5rem;
-    border: 1px solid #dee2e6;
-    font-size: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 1px;
 }
 
 /* Remove drag-related styles */
