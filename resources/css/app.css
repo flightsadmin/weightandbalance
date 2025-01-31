@@ -169,7 +169,10 @@
 }
 
 .hold-group[data-hold="BH"] .hold-positions {
-    justify-content: center;
+    display: flex;
+    flex-wrap: wrap;  /* Allow items to wrap */
+    justify-content: flex-start;  /* Align items to start */
+    gap: 0.5rem;
 }
 
 .hold-position:not([data-hold="BH"]).occupied {
@@ -182,31 +185,36 @@
 }
 
 .hold-group[data-hold="BH"] .hold-position {
-    width: 100%;
-    height: 100%;
-    padding: 0.25rem;
-    overflow-y: auto;
+    width: 120px;  /* Same width as other holds */
+    height: 80px;  /* Same height as other holds */
+    min-height: unset;  /* Remove min-height */
+    padding: 0.5rem;
+    margin: 2px;
+    overflow-y: visible;
 }
 
 .bulk-containers-list {
-    width: 100%;
-    height: 100%;
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.25rem;
 }
 
 .bulk-container-item {
+    width: 120px;
+    height: 80px;
     padding: 0.5rem;
     border: 1px solid #dee2e6;
     background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .bulk-container-details {
     width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    text-align: center;
 }
 
 .container-number { 
@@ -222,12 +230,18 @@
 }
 
 .empty-bulk-position {
-    min-height: 100px;
+    width: 120px;
+    height: 80px;
     text-align: center;
     color: #6c757d;
     padding: 0.5rem;
     border: 1px solid #dee2e6;
     font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 2px;
 }
 
 /* Remove drag-related styles */
