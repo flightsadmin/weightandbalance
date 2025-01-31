@@ -122,7 +122,6 @@
                             class="btn btn-sm btn-{{ $flight->weightBalance ? 'warning' : 'primary' }}">
                             {{ $flight->weightBalance ? 'Recalculate' : 'Calculate' }} <i class="bi bi-calculator"></i>
                         </button>
-                        <livewire:flight.summary :flight="$flight" :key="'summary-' . $flight->id" />
                     </div>
                     <div class="card-body">
                         <div class="row">

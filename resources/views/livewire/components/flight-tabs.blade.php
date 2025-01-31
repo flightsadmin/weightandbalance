@@ -56,12 +56,6 @@
             </a>
         </li>
         <li class="nav-item">
-            <a wire:click.prevent="setTab('weight-balance')" href=""
-                class="nav-link {{ $activeTab === 'weight-balance' ? 'active' : '' }}">
-                <i class="bi bi-speedometer2"></i> Weight & Balance
-            </a>
-        </li>
-        <li class="nav-item">
             <a wire:click.prevent="setTab('fuel')" href=""
                 class="nav-link {{ $activeTab === 'fuel' ? 'active' : '' }}">
                 <i class="bi bi-fuel-pump"></i> Fuel
@@ -71,6 +65,12 @@
             <a wire:click.prevent="setTab('loadplan')" href=""
                 class="nav-link {{ $activeTab === 'loadplan' ? 'active' : '' }}">
                 <i class="bi bi-database-fill-add"></i> Loadplan
+            </a>
+        </li>
+        <li class="nav-item">
+            <a wire:click.prevent="setTab('loadsheet')" href=""
+                class="nav-link {{ $activeTab === 'loadsheet' ? 'active' : '' }}">
+                <i class="bi bi-speedometer2"></i> Loadsheet
             </a>
         </li>
     </ul>
@@ -91,10 +91,10 @@
             <livewire:passenger.manager :flight="$flight" />
         @elseif ($activeTab === 'crew')
             <livewire:crew.manager :flight="$flight" />
-        @elseif ($activeTab === 'weight-balance')
-            <livewire:flight.weight-balance :flight="$flight" />
         @elseif ($activeTab === 'loadplan')
             <livewire:flight.loadplan :flight="$flight" />
+        @elseif ($activeTab === 'loadsheet')
+            <livewire:flight.weight-balance :flight="$flight" />
         @endif
     </div>
 </div>
