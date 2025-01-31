@@ -19,34 +19,32 @@ class AirlineFactory extends Factory
      */
     public function definition(): array
     {
-        return [
-            'name' => fake()->company(),
-            'iata_code' => strtoupper(fake()->unique()->lexify('??')),
-            'icao_code' => strtoupper(fake()->unique()->lexify('???')),
-            'country' => fake()->country(),
-            'address' => fake()->address(),
-            'phone' => fake()->phoneNumber(),
-            'email' => fake()->safeEmail(),
-            'description' => fake()->catchPhrase(),
-            'active' => fake()->boolean(80),
-        ];
-    }
-
-    public function active()
-    {
-        return $this->state(function (array $attributes) {
-            return [
+        $airlines = [
+            [
+                'name' => 'Kenya Airways',
+                'iata_code' => 'KQ',
+                'icao_code' => 'KQA',
+                'country' => 'Kenya',
+                'address' => 'Nairobi, Kenya',
+                'phone' => '021-12345678',
+                'email' => 'info@kenyairways.com',
+                'description' => 'Kenya Airways is a Kenyan airline headquartered in Nairobi.',
                 'active' => true,
-            ];
-        });
-    }
-
-    public function inactive()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'active' => false,
-            ];
-        });
+            ],
+            [
+                'name' => 'Qatar Airways',
+                'iata_code' => 'QR',
+                'icao_code' => 'QTR',
+                'country' => 'Qatar',
+                'address' => 'Doha, Qatar',
+                'phone' => '021-12345678',
+                'email' => 'info@qatarairways.com',
+                'description' => 'Qatar Airways is a Qatari airline headquartered in Doha.',
+                'active' => true,
+            ]
+        ];
+        $airline = fake()->unique()->randomElement($airlines);
+        return $airline;
     }
 }
+

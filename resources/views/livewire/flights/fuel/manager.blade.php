@@ -32,7 +32,7 @@
                     <h4>Total Fuel</h4>
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="display-6 text-primary mb-2">
-                            {{ number_format($fuel->total_fuel) }} kg
+                            {{ number_format($fuel->block_fuel) }} kg
                         </div>
                         <span class="badge bg-warning text-muted text-sm">
                             Max Capacity: {{ number_format($fuel->flight->aircraft->type->max_fuel_capacity) }} kg
@@ -40,8 +40,8 @@
                     </div>
                     <div class="progress" style="height: 25px;">
                         <div class="progress-bar bg-primary" role="progressbar"
-                            style="width: {{ ($fuel->total_fuel / $fuel->flight->aircraft->type->max_fuel_capacity ?? 0) * 100 }}%">
-                            {{ number_format(($fuel->total_fuel / $fuel->flight->aircraft->type->max_fuel_capacity ?? 0) * 100, 1) }}%
+                            style="width: {{ ($fuel->block_fuel / $fuel->flight->aircraft->type->max_fuel_capacity ?? 0) * 100 }}%">
+                            {{ number_format(($fuel->block_fuel / $fuel->flight->aircraft->type->max_fuel_capacity ?? 0) * 100, 1) }}%
                         </div>
                     </div>
                 </div>
@@ -56,6 +56,14 @@
                     </div>
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Block Fuel:</span>
+                                <strong>{{ number_format($fuel->block_fuel) }} kg</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Take Off Fuel:</span>
+                                <strong>{{ number_format($fuel->take_off_fuel) }} kg</strong>
+                            </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Taxi Fuel:</span>
                                 <strong>{{ number_format($fuel->taxi_fuel) }} kg</strong>
@@ -72,25 +80,17 @@
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5 class="card-title m-0">Reserve Fuel</h5>
+                        <h5 class="card-title m-0">Crew & Pantry</h5>
                     </div>
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between">
-                                <span>Contingency:</span>
-                                <strong>{{ number_format($fuel->contingency_fuel) }} kg</strong>
+                                <span>Crew:</span>
+                                <strong>{{ $fuel->crew }}</strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
-                                <span>Alternate:</span>
-                                <strong>{{ number_format($fuel->alternate_fuel) }} kg</strong>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span>Final Reserve:</span>
-                                <strong>{{ number_format($fuel->final_reserve_fuel) }} kg</strong>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span>Additional:</span>
-                                <strong>{{ number_format($fuel->additional_fuel) }} kg</strong>
+                                <span>Pantry:</span>
+                                <strong>{{ $fuel->pantry }}</strong>
                             </li>
                         </ul>
                     </div>
