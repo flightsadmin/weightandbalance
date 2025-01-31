@@ -19,7 +19,7 @@ class HoldPosition extends Model
     ];
 
     protected $casts = [
-        'max_weight' => 'float',
+        'max_weight' => 'integer',
         'is_active' => 'boolean'
     ];
 

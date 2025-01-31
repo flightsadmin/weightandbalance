@@ -23,10 +23,8 @@ class Fuel extends Model
     ];
 
     protected $casts = [
-        'taxi_fuel' => 'float',
-        'trip_fuel' => 'float',
-        'crew' => 'string',
-        'pantry' => 'string',
+        'taxi_fuel' => 'integer',
+        'trip_fuel' => 'integer',
     ];
 
     public function flight(): BelongsTo

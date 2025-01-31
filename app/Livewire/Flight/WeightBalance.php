@@ -3,11 +3,14 @@
 namespace App\Livewire\Flight;
 
 use App\Models\Flight;
+use App\Models\WeightBalance as WeightBalanceModel;
 use Livewire\Component;
 
 class WeightBalance extends Component
 {
     public Flight $flight;
+    public $showSummaryModal = false;
+    public $summary = [];
 
     public function mount(Flight $flight)
     {
@@ -17,7 +20,8 @@ class WeightBalance extends Component
             'baggage',
             'cargo',
             'fuel',
-            'containers'
+            'containers',
+            'weightBalance'
         ]);
     }
 
@@ -38,7 +42,8 @@ class WeightBalance extends Component
         // Crew weights
         $crew = $this->flight->fuel?->crew ?? '2/4';
         list($cockpitCrew, $cabinCrew) = explode('/', $crew);
-        $crewWeight = ($cockpitCrew * $airline->getStandardCockpitCrewWeight()) + ($cabinCrew * $airline->getStandardCabinCrewWeight());
+        $crewWeight = ($cockpitCrew * $airline->getStandardCockpitCrewWeight()) +
+            ($cabinCrew * $airline->getStandardCabinCrewWeight());
 
         // Pantry weight based on configuration
         $pantryWeight = match ($this->flight->fuel?->pantry ?? 'A') {
@@ -96,7 +101,63 @@ class WeightBalance extends Component
         $weights['is_landing_weight_ok'] = $weights['landing_weight'] <= $weights['max_landing_weight'];
         $weights['is_zero_fuel_weight_ok'] = $weights['zero_fuel_weight'] <= $weights['max_zero_fuel_weight'];
 
+        WeightBalanceModel::updateOrCreate(['flight_id' => $this->flight->id], ['weights' => $weights]);
+
         return $weights;
+    }
+
+    public function generateSummary()
+    {
+        // 1. Passenger Summary
+        $passengers = $this->flight->passengers->where('acceptance_status', 'accepted');
+        $passengersByGender = $passengers->groupBy('type')->map->count();
+
+        // Group passengers by zone based on seat numbers
+        $passengersByZone = $passengers->groupBy(function ($passenger) {
+            preg_match('/\d+/', $passenger->seat_number, $matches);
+            $seatNumber = $matches[0] ?? 0;
+            return 'Zone ' . str_pad(ceil($seatNumber / 10), 3, '0', STR_PAD_LEFT);
+        })->map->count();
+
+        // 2. Baggage Summary by Hold
+        $baggageByHold = $this->flight->containers()
+            ->where('type', 'baggage')
+            ->where('status', 'loaded')
+            ->get()
+            ->groupBy('compartment')
+            ->map(function ($containers) {
+                return [
+                    'count' => $containers->count(),
+                    'weight' => $containers->sum('weight')
+                ];
+            });
+
+        // 3. Cargo Summary by Hold
+        $cargoByHold = $this->flight->containers()
+            ->where('type', 'cargo')
+            ->where('status', 'loaded')
+            ->get()
+            ->groupBy('compartment')
+            ->map(function ($containers) {
+                return [
+                    'count' => $containers->count(),
+                    'weight' => $containers->sum('weight')
+                ];
+            });
+
+        $this->summary = [
+            'passengers' => [
+                'by_gender' => $passengersByGender,
+                'by_zone' => $passengersByZone,
+                'count' => $passengers->count(),
+                'total_weight' => $passengers->count() * ($settings['standard_passenger_weight'] ?? 75)
+            ],
+            'baggage' => $baggageByHold,
+            'cargo' => $cargoByHold,
+        ];
+
+        $this->showSummaryModal = true;
+        $this->dispatch('show-summary');
     }
 
     public function render()

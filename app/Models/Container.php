@@ -13,7 +13,7 @@ class Container extends Model
     protected $fillable = [
         'container_number',
         'flight_id',
-        'type', // 'baggage' or 'cargo'
+        'type',
         'compartment',
         'status',
         'tare_weight',

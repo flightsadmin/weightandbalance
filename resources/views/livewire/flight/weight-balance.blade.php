@@ -2,7 +2,10 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h2 class="card-title m-0">Weight & Balance</h2>
-            <div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-primary" wire:click="generateSummary">
+                    <i class="bi bi-list-check"></i> Load Summary
+                </button>
                 <button class="btn btn-sm btn-success"
                     {{ !$weights['is_takeoff_weight_ok'] || !$weights['is_landing_weight_ok'] || !$weights['is_zero_fuel_weight_ok'] ? 'disabled' : '' }}>
                     <i class="bi bi-check-circle"></i> Approve Loadsheet
@@ -244,4 +247,136 @@
             </div>
         </div>
     </div>
+
+    <!-- Summary Modal -->
+    <div class="modal fade" id="summaryModal" tabindex="-1" wire:ignore.self>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h5 class="modal-title">Load Summary</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if ($showSummaryModal)
+                        <!-- Passengers -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-3">
+                                    <div class="card-header py-2">
+                                        <h6 class="mb-0">Passengers</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4 border-end">
+                                                <h6>By Gender</h6>
+                                                <ul class="list-unstyled">
+                                                    @foreach ($summary['passengers']['by_gender'] as $gender => $count)
+                                                        <li>{{ ucfirst($gender) }}: {{ $count }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-4 border-end">
+                                                <h6>By Zone</h6>
+                                                <ul class="list-unstyled">
+                                                    @foreach ($summary['passengers']['by_zone'] as $zone => $count)
+                                                        <li>{{ $zone }}: {{ $count }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-4 border-end">
+                                                <h6>Total</h6>
+                                                <ul class="list-unstyled">
+                                                    <li>Count: {{ $summary['passengers']['count'] }}</li>
+                                                    <li>Weight: {{ number_format($summary['passengers']['total_weight']) }} kg</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Load Distribution -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header py-2">
+                                        <h6 class="mb-0">Baggage by Hold</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Hold</th>
+                                                        <th>Count</th>
+                                                        <th>Weight</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($summary['baggage'] as $hold => $data)
+                                                        <tr>
+                                                            <td>{{ $hold }}</td>
+                                                            <td>{{ $data['count'] }}</td>
+                                                            <td>{{ number_format($data['weight']) }} kg</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header py-2">
+                                        <h6 class="mb-0">Cargo by Hold</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Hold</th>
+                                                        <th>Count</th>
+                                                        <th>Weight</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($summary['cargo'] as $hold => $data)
+                                                        <tr>
+                                                            <td>{{ $hold }}</td>
+                                                            <td>{{ $data['count'] }}</td>
+                                                            <td>{{ number_format($data['weight']) }} kg</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer py-1">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="window.print()">
+                        <i class="bi bi-printer"></i> Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @script
+        <script>
+            $wire.on('show-summary', () => {
+                const modal = new bootstrap.Modal(document.getElementById('summaryModal'));
+                modal.show();
+            });
+        </script>
+    @endscript
 </div>

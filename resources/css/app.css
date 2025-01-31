@@ -209,11 +209,20 @@
     align-items: center;
 }
 
-.container-number { font-weight: 500; font-size: 0.75rem; word-wrap: break-word; white-space: normal; }
+.container-number { 
+    font-weight: 500;
+    font-size: 0.75rem;
+    word-wrap: break-word;
+    white-space: normal; 
+}
 
-.container-weight { color: #6c757d; font-size: 0.75rem; }
+.container-weight { 
+    color: #6c757d; 
+    font-size: 0.75rem; 
+}
 
 .empty-bulk-position {
+    min-height: 100px;
     text-align: center;
     color: #6c757d;
     padding: 0.5rem;
