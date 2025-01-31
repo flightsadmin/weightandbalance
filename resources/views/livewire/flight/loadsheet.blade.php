@@ -91,21 +91,30 @@
                         <div class="card-body"
                             x-on:click="removeSelectedContainer()"
                             :class="{ 'unplanned-area': true, 'highlight': selectedContainer || selectedPosition }">
-                            <div class="container-list" x-on:click.stop>
+                            <div class="container-list row g-2" x-on:click.stop>
                                 @forelse ($availableContainers as $container)
-                                    <div class="container-item"
+                                    <div class="container-item col-md-4"
                                         x-on:click.stop="selectContainer({{ $container->id }})"
                                         :class="{ 'selected': selectedContainer === {{ $container->id }} }">
                                         <div class="card">
                                             <div class="card-body">
-                                                <h6 class="mb-1">{{ $container->container_number }}</h6>
-                                                <div class="fw-bold">{{ number_format($container->weight) }} kg</div>
+                                                <div class="text-center fw-bold">{{ $container->container_number }}
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span
+                                                        class="badge bg-{{ $container->type == 'baggage' ? 'primary' : ($container->type == 'cargo' ? 'warning' : 'success') }}">
+                                                        {{ $container->type }}
+                                                        <i
+                                                            class="bi bi-{{ $container->type == 'baggage' ? 'luggage' : ($container->type == 'cargo' ? 'box' : 'truck') }}"></i>
+                                                    </span>
+                                                    <div class="fw-bold">{{ number_format($container->weight) }} kg</div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="text-center text-muted w-100">
-                                        <i class="bi bi-inbox display-4"></i>
+                                    <div class="text-center text-muted">
+                                        <i class="bi bi-inbox display-6"></i>
                                         <p>No unplanned containers</p>
                                     </div>
                                 @endforelse

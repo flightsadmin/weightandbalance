@@ -14,24 +14,19 @@ class Fuel extends Model
 
     protected $fillable = [
         'flight_id',
+        'block_fuel',
+        'take_off_fuel',
         'taxi_fuel',
         'trip_fuel',
-        'contingency_fuel',
-        'alternate_fuel',
-        'final_reserve_fuel',
-        'additional_fuel',
-        'total_fuel',
-        'notes'
+        'crew',
+        'pantry'
     ];
 
     protected $casts = [
         'taxi_fuel' => 'float',
         'trip_fuel' => 'float',
-        'contingency_fuel' => 'float',
-        'alternate_fuel' => 'float',
-        'final_reserve_fuel' => 'float',
-        'additional_fuel' => 'float',
-        'total_fuel' => 'float',
+        'crew' => 'string',
+        'pantry' => 'string',
     ];
 
     public function flight(): BelongsTo

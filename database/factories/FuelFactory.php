@@ -20,12 +20,11 @@ class FuelFactory extends Factory
      */
     public function definition(): array
     {
-        // Base fuel calculations (in kg)
         $crew = fake()->randomElement(['2/4', '3/5', '4/6', '5/7', '6/8']);
         $pantry = fake()->randomElement(['A', 'B', 'C', 'D', 'E']);
         $blockFuel = fake()->numberBetween(10000, 20000);
         $taxiFuel = fake()->numberBetween(200, 400);
-        $tripFuel = fake()->numberBetween(5000, 15000);
+        $tripFuel = $blockFuel - $taxiFuel / 0.4;
         $takeOffFuel = $blockFuel - $taxiFuel;
 
         return [

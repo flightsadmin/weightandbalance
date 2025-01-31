@@ -112,7 +112,7 @@
                                                             wire:model.live="holdForm.name">
                                                             <option value="">Select Name</option>
                                                             <option value="Aft Hold">Aft Hold</option>
-                                                            <option value="Fwd Hold">Fwd Hold</option>
+                                                            <option value="Forward Hold">Forward Hold</option>
                                                             <option value="Bulk Hold">Bulk Hold</option>
                                                         </select>
                                                         @error('holdForm.name')
@@ -124,7 +124,7 @@
                                                         <select class="form-select form-select-sm" wire:model.live="holdForm.code">
                                                             <option value="">Select Code</option>
                                                             <option value="AH">AH (Aft Hold)</option>
-                                                            <option value="FH">FH (Fwd Hold)</option>
+                                                            <option value="FH">FH (Forward Hold)</option>
                                                             <option value="BH">BH (Bulk Hold)</option>
                                                         </select>
                                                         @error('holdForm.code')

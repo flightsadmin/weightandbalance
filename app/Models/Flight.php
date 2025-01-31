@@ -104,7 +104,7 @@ class Flight extends Model
             $this->getTotalBaggageWeight() +
             $this->getTotalCargoWeight() +
             $this->getTotalCrewWeight() +
-            ($this->fuel ? $this->fuel->total_fuel : 0);
+            ($this->fuel ? $this->fuel->block_fuel : 0);
     }
 
     public function isWithinWeightLimits(): bool

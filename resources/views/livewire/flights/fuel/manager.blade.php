@@ -2,13 +2,16 @@
     <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
             <h2 class="card-title">Fuel Record Details</h2>
+            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#fuelModal">
+                <i class="bi bi-fuel-pump"></i> {{ $flight->fuel ? 'Update' : 'Add' }} Fuel
+            </button>
         </div>
     </div>
     <div class="card-body">
         <div class="row mb-4">
             <div class="col-md-6">
-                <h4>Flight Information</h4>
                 @if ($fuel)
+                    <h4>Flight Information</h4>
                     <p class="mb-1">
                         <strong>Flight Number:</strong>
                         <a wire:navigate href="{{ route('flights.show', $fuel->flight) }}" class="text-decoration-none">
@@ -24,7 +27,7 @@
                         {{ $fuel->flight->scheduled_departure_time->format('D, M d, Y H:i') }}
                     </p>
                 @else
-                    <p>No flight information available</p>
+                    <p class="alert alert-success">Fuel data not found for this flight.</p>
                 @endif
             </div>
             @if ($fuel)
@@ -58,19 +61,19 @@
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Block Fuel:</span>
-                                <strong>{{ number_format($fuel->block_fuel) }} kg</strong>
+                                <strong>{{ number_format($fuel->block_fuel ?? 0) }} kg</strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Take Off Fuel:</span>
-                                <strong>{{ number_format($fuel->take_off_fuel) }} kg</strong>
+                                <strong>{{ number_format($fuel->take_off_fuel ?? 0) }} kg</strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Taxi Fuel:</span>
-                                <strong>{{ number_format($fuel->taxi_fuel) }} kg</strong>
+                                <strong>{{ number_format($fuel->taxi_fuel ?? 0) }} kg</strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Trip Fuel:</span>
-                                <strong>{{ number_format($fuel->trip_fuel) }} kg</strong>
+                                <strong>{{ number_format($fuel->trip_fuel ?? 0) }} kg</strong>
                             </li>
                         </ul>
                     </div>
@@ -86,16 +89,111 @@
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Crew:</span>
-                                <strong>{{ $fuel->crew }}</strong>
+                                <strong>{{ $fuel->crew ?? '-' }}</strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Pantry:</span>
-                                <strong>{{ $fuel->pantry }}</strong>
+                                <strong>{{ $fuel->pantry ?? '-' }}</strong>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div>
+            <!-- Bootstrap Modal -->
+            <div class="modal fade" id="fuelModal" tabindex="-1" aria-labelledby="fuelModalLabel" aria-hidden="true"
+                wire:ignore.self>
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="fuelModalLabel">{{ $flight->fuel ? 'Update' : 'Add' }} Fuel Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form wire:submit="save">
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Block Fuel (kg)</label>
+                                            <input type="number" wire:model="block_fuel" class="form-control form-control-sm" required>
+                                            @error('block_fuel')
+                                                <span class="text-danger small">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Taxi Fuel (kg)</label>
+                                            <input type="number" wire:model="taxi_fuel" class="form-control form-control-sm" required>
+                                            @error('taxi_fuel')
+                                                <span class="text-danger small">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Trip Fuel (kg)</label>
+                                            <input type="number" wire:model="trip_fuel" class="form-control form-control-sm" required>
+                                            @error('trip_fuel')
+                                                <span class="text-danger small">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Crew</label>
+                                            <select wire:model="crew" class="form-select form-select-sm" required>
+                                                <option value="" disabled selected>Select Crew</option>
+                                                <option value="2/4">2/4</option>
+                                                <option value="3/5">3/5</option>
+                                                <option value="4/6">4/6</option>
+                                            </select>
+                                            @error('crew')
+                                                <span class="text-danger small">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Pantry</label>
+                                            <select wire:model="pantry" class="form-select form-select-sm" required>
+                                                <option value="" disabled selected>Select Pantry</option>
+                                                <option value="A">A</option>
+                                                <option value="B">B</option>
+                                            </select>
+                                            @error('pantry')
+                                                <span class="text-danger small">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-lg"></i> Cancel
+                                </button>
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-save"></i> Save Fuel Data
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    @script
+        <script>
+            $wire.on('close-modal', () => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('fuelModal'));
+                modal.hide();
+            });
+        </script>
+    @endscript
 </div>

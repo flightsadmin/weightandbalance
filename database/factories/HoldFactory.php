@@ -12,62 +12,40 @@ class HoldFactory extends Factory
 
     public function definition(): array
     {
-        $holdTypes = [
-            'FH' => 'Forward Hold',
-            'AH' => 'Aft Hold',
-            'BH' => 'Bulk Hold'
+        $holds = [
+            'FH' => [
+                'name' => 'Forward Hold',
+                'code' => 'FH',
+                'position' => 1,
+            ],
+            'AH' => [
+                'name' => 'Aft Hold',
+                'code' => 'AH',
+                'position' => 2,
+            ],
+            'BH' => [
+                'name' => 'Bulk Hold',
+                'code' => 'BH',
+                'position' => 3,
+            ]
         ];
 
-        $code = $this->faker->randomElement(array_keys($holdTypes));
+        $code = $this->faker->randomElement(array_keys($holds));
 
         return [
             'aircraft_type_id' => null,
-            'name' => $holdTypes[$code],
-            'code' => $code,
-            'position' => $this->faker->numberBetween(1, 4),
+            'name' => $holds[$code]['name'],
+            'code' => $holds[$code]['code'],
+            'position' => $holds[$code]['position'],
             'max_weight' => $this->faker->numberBetween(2000, 5000),
             'is_active' => fake()->boolean(90),
         ];
     }
-
-    public function forwardHold()
+    public function forAircraftType(AircraftType $aircraftType)
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes) use ($aircraftType) {
             return [
-                'name' => 'Forward Hold',
-                'code' => 'FH',
-                'position' => 1,
-            ];
-        });
-    }
-
-    public function aftHold()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'name' => 'Aft Hold',
-                'code' => 'AH',
-                'position' => 2,
-            ];
-        });
-    }
-
-    public function bulkHold()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'name' => 'Bulk Hold',
-                'code' => 'BH',
-                'position' => 3,
-            ];
-        });
-    }
-
-    public function inactive()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'is_active' => false,
+                'aircraft_type_id' => $aircraftType->id,
             ];
         });
     }

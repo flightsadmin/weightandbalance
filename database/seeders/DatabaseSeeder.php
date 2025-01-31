@@ -28,12 +28,8 @@ class DatabaseSeeder extends Seeder
                     'airline_id' => $airline->id,
                     'aircraft_type_id' => $aircraftType->id
                 ])->each(function ($aircraft) use ($airline, $aircraftType) {
-                    Hold::factory(2)->create([
-                        'aircraft_type_id' => $aircraftType->id
-                    ])->each(function ($hold) {
-                        HoldPosition::factory(4)->create([
-                            'hold_id' => $hold->id
-                        ]);
+                    Hold::factory()->forAircraftType($aircraftType)->create()->each(function ($hold) {
+                        $hold->positions()->saveMany(HoldPosition::factory(2)->make());
                     });
 
                     Flight::factory(rand(1, 3))->create([
@@ -51,9 +47,7 @@ class DatabaseSeeder extends Seeder
                                 $crew->flights()->attach($flight);
                             });
 
-                        Passenger::factory(rand(10, 30))->create([
-                            'flight_id' => $flight->id
-                        ])->each(function ($passenger) use ($flight) {
+                        Passenger::factory(rand(10, 30))->forFlight($flight)->create()->each(function ($passenger) use ($flight) {
                             $passenger->baggage()->saveMany(Baggage::factory(rand(1, 2))->make([
                                 'flight_id' => $flight->id
                             ]));
@@ -67,9 +61,7 @@ class DatabaseSeeder extends Seeder
                             'flight_id' => $flight->id
                         ]);
 
-                        Container::factory(rand(1, 3))->create([
-                            'flight_id' => $flight->id
-                        ]);
+                        Container::factory(rand(1, 3))->forFlight($flight)->create();
                     });
                 });
             });
