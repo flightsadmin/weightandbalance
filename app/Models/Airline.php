@@ -29,7 +29,10 @@ class Airline extends Model
     ];
 
     public const SETTING_STANDARD_PASSENGER_WEIGHT = 'standard_passenger_weight';
-    public const SETTING_STANDARD_CREW_WEIGHT = 'standard_crew_weight';
+    public const SETTING_STANDARD_COCKPIT_CREW_WEIGHT = 'standard_cockpit_crew_weight';
+    public const SETTING_STANDARD_CABIN_CREW_WEIGHT = 'standard_cabin_crew_weight';
+    public const SETTING_STANDARD_PANTY_WEIGHT = 'standard_pantry_weight';
+
     public function aircraft(): HasMany
     {
         return $this->hasMany(Aircraft::class);
@@ -63,11 +66,27 @@ class Airline extends Model
             ->value ?? 75);
     }
 
-    public function getStandardCrewWeight(): float
+    public function getStandardCockpitCrewWeight(): float
     {
         return (float) ($this->settings()
-            ->where('key', self::SETTING_STANDARD_CREW_WEIGHT)
+            ->where('key', self::SETTING_STANDARD_COCKPIT_CREW_WEIGHT)
+            ->first()
+            ->value ?? 85);
+    }
+
+    public function getStandardCabinCrewWeight(): float
+    {
+        return (float) ($this->settings()
+            ->where('key', self::SETTING_STANDARD_CABIN_CREW_WEIGHT)
             ->first()
             ->value ?? 75);
+    }
+
+    public function getStandardPantryWeight(): float
+    {
+        return (float) ($this->settings()
+            ->where('key', self::SETTING_STANDARD_PANTY_WEIGHT)
+            ->first()
+            ->value ?? 250);
     }
 }
