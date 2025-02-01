@@ -21,6 +21,7 @@ class HoldPositionFactory extends Factory
             'row' => $row,
             'side' => $side,
             'max_weight' => fake()->numberBetween(1000, 2000),
+            'index' => $this->faker->randomFloat(5, 0, 1),
             'is_active' => true,
         ];
     }

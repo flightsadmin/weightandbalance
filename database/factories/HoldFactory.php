@@ -17,16 +17,19 @@ class HoldFactory extends Factory
                 'name' => 'Forward Hold',
                 'code' => 'FH',
                 'position' => 1,
+                'index' => $this->faker->randomFloat(5, 0, 1),
             ],
             'AH' => [
                 'name' => 'Aft Hold',
                 'code' => 'AH',
                 'position' => 2,
+                'index' => $this->faker->randomFloat(5, 0, 1),
             ],
             'BH' => [
                 'name' => 'Bulk Hold',
                 'code' => 'BH',
                 'position' => 3,
+                'index' => $this->faker->randomFloat(5, 0, 1),
             ]
         ];
 
@@ -38,6 +41,7 @@ class HoldFactory extends Factory
             'code' => $holds[$code]['code'],
             'position' => $holds[$code]['position'],
             'max_weight' => $this->faker->numberBetween(2000, 5000),
+            'index' => $holds[$code]['index'],
             'is_active' => fake()->boolean(90),
         ];
     }

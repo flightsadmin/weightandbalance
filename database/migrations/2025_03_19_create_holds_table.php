@@ -10,10 +10,11 @@ return new class extends Migration {
         Schema::create('holds', function (Blueprint $table) {
             $table->id();
             $table->foreignId('aircraft_type_id')->constrained()->cascadeOnDelete();
-            $table->string('name');        // e.g., 'Aft Hold'
-            $table->string('code', 2);     // e.g., 'AH'
+            $table->string('name')->nullable();
+            $table->string('code', 2)->nullable();
             $table->integer('position')->nullable();
             $table->integer('max_weight')->nullable();
+            $table->decimal('index', 8, 5)->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
@@ -21,11 +22,22 @@ return new class extends Migration {
         Schema::create('hold_positions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('hold_id')->constrained()->cascadeOnDelete();
-            $table->string('code')->nullable();        // e.g., '31L'
-            $table->integer('row')->nullable();        // e.g., 3
-            $table->string('side', 1)->nullable(); // L, R, or null for center
+            $table->string('code')->nullable();
+            $table->integer('row')->nullable();
+            $table->string('side', 1)->nullable();
             $table->integer('max_weight')->nullable();
+            $table->decimal('index', 8, 5)->nullable();
             $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+
+        Schema::create('cabin_zones', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('aircraft_type_id')->constrained()->onDelete('cascade');
+            $table->string('name')->nullable();
+            $table->float('max_capacity')->nullable();
+            $table->decimal('index', 8, 5)->nullable();
+            $table->decimal('arm', 8, 5)->nullable();
             $table->timestamps();
         });
     }
@@ -33,5 +45,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('holds');
+        Schema::dropIfExists('hold_positions');
+        Schema::dropIfExists('cabin_zones');
     }
 };
