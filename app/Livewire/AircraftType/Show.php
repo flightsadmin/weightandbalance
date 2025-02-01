@@ -22,7 +22,7 @@ class Show extends Component
         'name' => '',
         'code' => '',
         'position' => 1,
-        'max_weight' => 0,
+        'max_weight' => 2000,
         'is_active' => true,
         'positions' => []
     ];
@@ -79,20 +79,20 @@ class Show extends Component
             $this->holdForm['positions'][] = [
                 'row' => $lastRow + 1,
                 'side' => null,
-                'max_weight' => 0,
+                'max_weight' => 2000,
                 'is_active' => true
             ];
         } else {
             $this->holdForm['positions'][] = [
                 'row' => $lastRow + 1,
                 'side' => 'L',
-                'max_weight' => 0,
+                'max_weight' => 2000,
                 'is_active' => true
             ];
             $this->holdForm['positions'][] = [
                 'row' => $lastRow + 1,
                 'side' => 'R',
-                'max_weight' => 0,
+                'max_weight' => 2000,
                 'is_active' => true
             ];
         }

@@ -60,7 +60,7 @@
                                     <table class="table table-sm">
                                         <tr>
                                             <th>Max Passengers:</th>
-                                            <td>{{ number_format($aircraftType->max_passengers) }}</td>
+                                            <td>{{ number_format($aircraftType->max_passengers) }} pax</td>
                                         </tr>
                                         <tr>
                                             <th>Cargo Capacity:</th>
@@ -168,9 +168,9 @@
                                                             </div>
                                                             <div class="card-body p-2">
                                                                 @if (empty($holdForm['positions']))
-                                                                    <p class="text-center text-muted small mb-0">No positions defined.
-                                                                        Click
-                                                                        "Add Position" to create one.</p>
+                                                                    <p class="text-center text-muted small mb-0">
+                                                                        No positions defined. Click "Add Position" to create one.
+                                                                    </p>
                                                                 @else
                                                                     <div class="table-responsive">
                                                                         <table class="table table-sm mb-0">
@@ -179,8 +179,9 @@
                                                                                     <th>Row</th>
                                                                                     <th>Side</th>
                                                                                     <th>Max Weight</th>
+                                                                                    <th>Index</th>
                                                                                     <th>Active</th>
-                                                                                    <th></th>
+                                                                                    <th>Action</th>
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
@@ -195,7 +196,7 @@
                                                                                                     {{ $message }}</div>
                                                                                             @enderror
                                                                                         </td>
-                                                                                        <td style="width: 100px">
+                                                                                        <td>
                                                                                             @if ($holdForm['code'] !== 'BH')
                                                                                                 <select
                                                                                                     class="form-select form-select-sm"
@@ -222,7 +223,16 @@
                                                                                                     {{ $message }}</div>
                                                                                             @enderror
                                                                                         </td>
-                                                                                        <td style="width: 80px">
+                                                                                        <td>
+                                                                                            <input type="number"
+                                                                                                class="form-control form-control-sm"
+                                                                                                wire:model="holdForm.positions.{{ $index }}.index">
+                                                                                            @error("holdForm.positions.{$index}.index")
+                                                                                                <div class="text-danger small">
+                                                                                                    {{ $message }}</div>
+                                                                                            @enderror
+                                                                                        </td>
+                                                                                        <td>
                                                                                             <div class="form-check form-switch">
                                                                                                 <input class="form-check-input"
                                                                                                     type="checkbox"
