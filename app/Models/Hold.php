@@ -17,11 +17,13 @@ class Hold extends Model
         'code',
         'position',
         'max_weight',
+        'index',
         'is_active'
     ];
 
     protected $casts = [
         'max_weight' => 'integer',
+        'index' => 'float',
         'is_active' => 'boolean'
     ];
 

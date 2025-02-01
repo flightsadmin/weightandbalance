@@ -21,9 +21,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
-        Airline::factory(2)->create()->each(function ($airline) {
-            AircraftType::factory(1)->create()->each(function ($aircraftType) use ($airline) {
-                $airline->aircraftTypes()->sync($aircraftType->id);
+        Airline::factory(1)->create()->each(function ($airline) {
+            AircraftType::factory(1)->forAirline($airline)->create()->each(function ($aircraftType) use ($airline) {
                 Aircraft::factory(3)->create([
                     'airline_id' => $airline->id,
                     'aircraft_type_id' => $aircraftType->id
@@ -32,8 +31,7 @@ class DatabaseSeeder extends Seeder
                         $hold->positions()->saveMany(HoldPosition::factory(2)->make());
                     });
 
-                    Flight::factory(rand(1, 3))->create([
-                        'airline_id' => $airline->id,
+                    Flight::factory(rand(1, 3))->forAirline($airline)->create([
                         'aircraft_id' => $aircraft->id,
                     ])->each(function ($flight) {
                         $captain = Crew::factory()->captain()->create();

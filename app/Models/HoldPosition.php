@@ -15,11 +15,13 @@ class HoldPosition extends Model
         'row',       // e.g., 3
         'side',      // 'L' or 'R' or null for center
         'max_weight',
+        'index',
         'is_active'
     ];
 
     protected $casts = [
         'max_weight' => 'integer',
+        'index' => 'float',
         'is_active' => 'boolean'
     ];
 

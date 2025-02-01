@@ -48,9 +48,9 @@ class Airline extends Model
         return $this->hasMany(Setting::class);
     }
 
-    public function aircraftTypes(): BelongsToMany
+    public function aircraftTypes(): HasMany
     {
-        return $this->belongsToMany(AircraftType::class, 'airline_aircraft_type');
+        return $this->hasMany(AircraftType::class);
     }
 
     public function scopeActive($query)

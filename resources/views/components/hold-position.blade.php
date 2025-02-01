@@ -26,7 +26,7 @@
                 @endforeach
             @else
                 <div class="empty-bulk-position">
-                    <div class="position-code">{{ $position->code }}</div>
+                    <div class="position-code">{{ $position->position }}</div>
                     <i class="bi bi-box-seam"></i>
                     <small class="text-muted">{{ $position->max_weight }} kg</small>
                 </div>

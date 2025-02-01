@@ -37,7 +37,6 @@
                     <th>Cargo (kg)</th>
                     <th>Fuel (L)</th>
                     <th>MTOW (kg)</th>
-                    <th>Range (nm)</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -55,7 +54,6 @@
                         <td>{{ number_format($type->cargo_capacity) }}</td>
                         <td>{{ number_format($type->max_fuel_capacity) }}</td>
                         <td>{{ number_format($type->max_takeoff_weight) }}</td>
-                        <td>{{ number_format($type->max_range) }}</td>
                         <td class="text-end">
                             <button class="btn btn-sm btn-link" wire:click="edit({{ $type->id }})"
                                 data-bs-toggle="modal" data-bs-target="#aircraftTypeFormModal">
@@ -128,13 +126,6 @@
                                 <label class="form-label">Max Passengers</label>
                                 <input type="number" class="form-control form-control-sm" wire:model="form.max_passengers">
                                 @error('form.max_passengers')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Max Range (nm)</label>
-                                <input type="number" class="form-control form-control-sm" wire:model="form.max_range">
-                                @error('form.max_range')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>

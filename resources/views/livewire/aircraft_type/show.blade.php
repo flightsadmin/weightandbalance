@@ -17,6 +17,10 @@
                         wire:click="$set('activeTab', 'holds')">
                         <i class="bi bi-box"></i> Cargo Holds
                     </button>
+                    <button class="list-group-item list-group-item-action {{ $activeTab === 'zones' ? 'active' : '' }}"
+                        wire:click="$set('activeTab', 'zones')">
+                        <i class="bi bi-box"></i> Cabin Zones
+                    </button>
                     <button class="list-group-item list-group-item-action {{ $activeTab === 'aircraft' ? 'active' : '' }}"
                         wire:click="$set('activeTab', 'aircraft')">
                         <i class="bi bi-airplane"></i> Aircraft
@@ -106,32 +110,35 @@
                                             </div>
                                             <div class="modal-body">
                                                 <div class="row g-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Name</label>
-                                                        <select name="name" class="form-select form-select-sm"
-                                                            wire:model.live="holdForm.name">
-                                                            <option value="">Select Name</option>
-                                                            <option value="Aft Hold">Aft Hold</option>
-                                                            <option value="Forward Hold">Forward Hold</option>
-                                                            <option value="Bulk Hold">Bulk Hold</option>
-                                                        </select>
-                                                        @error('holdForm.name')
-                                                            <div class="text-danger small">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                    <div class="col-md-6">
+                                                    <div class="col-md-5">
                                                         <label class="form-label">Code</label>
                                                         <select class="form-select form-select-sm" wire:model.live="holdForm.code">
                                                             <option value="">Select Code</option>
-                                                            <option value="AH">AH (Aft Hold)</option>
                                                             <option value="FH">FH (Forward Hold)</option>
+                                                            <option value="AH">AH (Aft Hold)</option>
                                                             <option value="BH">BH (Bulk Hold)</option>
                                                         </select>
                                                         @error('holdForm.code')
                                                             <div class="text-danger small">{{ $message }}</div>
                                                         @enderror
                                                     </div>
-                                                    <div class="col-md-6">
+                                                    <div class="col-md-5">
+                                                        <label class="form-label">Name</label>
+                                                        <input type="text" class="form-control form-control-sm"
+                                                            wire:model.live="holdForm.name" readonly>
+                                                        @error('holdForm.name')
+                                                            <div class="text-danger small">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label">Status</label>
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                wire:model="holdForm.is_active">
+                                                            <label class="form-check-label">Active</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
                                                         <label class="form-label">Position</label>
                                                         <input type="number" class="form-control form-control-sm"
                                                             wire:model="holdForm.position">
@@ -139,7 +146,7 @@
                                                             <div class="text-danger small">{{ $message }}</div>
                                                         @enderror
                                                     </div>
-                                                    <div class="col-md-6">
+                                                    <div class="col-md-4">
                                                         <label class="form-label">Max Weight (kg)</label>
                                                         <input type="number" class="form-control form-control-sm"
                                                             wire:model="holdForm.max_weight">
@@ -147,12 +154,13 @@
                                                             <div class="text-danger small">{{ $message }}</div>
                                                         @enderror
                                                     </div>
-                                                    <div class="col-12">
-                                                        <div class="form-check form-switch">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                wire:model="holdForm.is_active">
-                                                            <label class="form-check-label">Active</label>
-                                                        </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">Index</label>
+                                                        <input type="number" class="form-control form-control-sm"
+                                                            wire:model="holdForm.index" step="0.0001">
+                                                        @error('holdForm.index')
+                                                            <div class="text-danger small">{{ $message }}</div>
+                                                        @enderror
                                                     </div>
 
                                                     <!-- Hold Positions Section -->
@@ -226,7 +234,8 @@
                                                                                         <td>
                                                                                             <input type="number"
                                                                                                 class="form-control form-control-sm"
-                                                                                                wire:model="holdForm.positions.{{ $index }}.index">
+                                                                                                wire:model="holdForm.positions.{{ $index }}.index"
+                                                                                                step="0.0001">
                                                                                             @error("holdForm.positions.{$index}.index")
                                                                                                 <div class="text-danger small">
                                                                                                     {{ $message }}</div>
@@ -320,6 +329,58 @@
                     </div>
                 @endif
 
+                @if ($activeTab === 'zones')
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title">Cabin Zones</h3>
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#cabinZoneModal"
+                                wire:ignore>
+                                <i class="bi bi-plus-circle"></i> Add Zone
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Max Capacity</th>
+                                            <th>Index</th>
+                                            <th>Arm</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($aircraftType->cabinZones as $zone)
+                                            <tr>
+                                                <td>{{ $zone->name }}</td>
+                                                <td>{{ number_format($zone->max_capacity) }} kg</td>
+                                                <td>{{ number_format($zone->index, 4) }}</td>
+                                                <td>{{ number_format($zone->arm, 4) }}</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary" wire:click="editZone({{ $zone->id }})"
+                                                        data-bs-toggle="modal" data-bs-target="#cabinZoneModal">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger"
+                                                        wire:click="deleteZone({{ $zone->id }})"
+                                                        wire:confirm="Are you sure you want to delete this zone?">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="5" class="text-center">No cabin zones defined</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 @if ($activeTab === 'aircraft')
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
@@ -380,20 +441,82 @@
         </div>
     </div>
 
+    <!-- Cabin Zone Modal -->
+    <div class="modal fade" tabindex="-1" id="cabinZoneModal" wire:ignore.self>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ $editingZone ? 'Edit' : 'Add' }} Cabin Zone</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form wire:submit="saveZone">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Zone Name</label>
+                                    <input type="text" class="form-control form-control-sm" wire:model="zoneForm.name" required>
+                                    @error('zoneForm.name')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Max Capacity (kg)</label>
+                                    <input type="number" class="form-control form-control-sm" wire:model="zoneForm.max_capacity"
+                                        required>
+                                    @error('zoneForm.max_capacity')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Index</label>
+                                    <input type="number" step="0.0001" class="form-control form-control-sm"
+                                        wire:model="zoneForm.index"
+                                        required>
+                                    @error('zoneForm.index')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Arm</label>
+                                    <input type="number" step="0.0001" class="form-control form-control-sm" wire:model="zoneForm.arm"
+                                        required>
+                                    @error('zoneForm.arm')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-sm btn-primary">Save Zone</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @script
         <script>
             $wire.on('hold-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('holdFormModal'));
-                modal.hide();
+                const holdModal = bootstrap.Modal.getInstance(document.getElementById('holdFormModal'));
+                holdModal.hide();
+            });
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Hold saved successfully',
-                    showConfirmButton: false,
-                    timer: 1500,
-                    toast: true,
-                    position: 'top-end',
-                });
+            $wire.on('zone-saved', () => {
+                const cabinZoneModal = bootstrap.Modal.getInstance(document.getElementById('cabinZoneModal'));
+                cabinZoneModal.hide();
             });
         </script>
     @endscript

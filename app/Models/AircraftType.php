@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AircraftType extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'airline_id',
         'code',
         'name',
         'manufacturer',
@@ -22,7 +24,6 @@ class AircraftType extends Model
         'max_zero_fuel_weight',
         'max_takeoff_weight',
         'max_landing_weight',
-        'max_range',
         'category',
         'max_deck_crew',
         'max_cabin_crew',
@@ -66,5 +67,28 @@ class AircraftType extends Model
     public function getSetting($key, $default = null)
     {
         return $this->settings()->where('key', $key)->first()?->typed_value ?? $default;
+    }
+
+    public function airline(): BelongsTo
+    {
+        return $this->belongsTo(Airline::class);
+    }
+
+    public function airlines(): BelongsToMany
+    {
+        return $this->belongsToMany(Airline::class)->withTimestamps();
+    }
+
+    /**
+     * Get all active airlines using this aircraft type
+     */
+    public function activeAirlines(): BelongsToMany
+    {
+        return $this->airlines()->wherePivot('is_active', true);
+    }
+
+    public function cabinZones(): HasMany
+    {
+        return $this->hasMany(CabinZone::class)->orderBy('index');
     }
 }
