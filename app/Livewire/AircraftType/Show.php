@@ -7,6 +7,7 @@ use App\Models\Hold;
 use App\Models\Setting;
 use App\Models\Airline;
 use App\Models\CabinZone;
+use App\Models\Aircraft;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -35,6 +36,16 @@ class Show extends Component
         'index' => 0.9001,
         'is_active' => true,
         'positions' => []
+    ];
+
+    public $showAircraftModal = false;
+    public $editingAircraft = null;
+    public $aircraftForm = [
+        'registration_number' => '',
+        'serial_number' => '',
+        'manufacturing_date' => '',
+        'notes' => '',
+        'active' => true
     ];
 
     protected $rules = [
@@ -219,5 +230,51 @@ class Show extends Component
             'arm' => ''
         ];
         $this->showCabinZoneModal = false;
+    }
+
+    public function editAircraft(Aircraft $aircraft)
+    {
+        $this->editingAircraft = $aircraft;
+        $this->aircraftForm = [
+            'registration_number' => $aircraft->registration_number,
+            'basic_weight' => $aircraft->basic_weight,
+            'basic_index' => $aircraft->basic_index,
+            'remarks' => $aircraft->remarks,
+            'active' => $aircraft->active
+        ];
+        $this->showAircraftModal = true;
+    }
+
+    public function saveAircraft()
+    {
+        $this->validate([
+            'aircraftForm.registration_number' => 'required|string|max:10',
+            'aircraftForm.basic_weight' => 'required|integer|min:0',
+            'aircraftForm.basic_index' => 'required|numeric|min:0',
+            'aircraftForm.remarks' => 'nullable|string',
+            'aircraftForm.active' => 'boolean'
+        ]);
+
+        $data = array_merge($this->aircraftForm, [
+            'airline_id' => $this->aircraftType->airline_id,
+            'aircraft_type_id' => $this->aircraftType->id
+        ]);
+
+        $this->aircraftType->aircraft()->updateOrCreate(
+            [
+                'id' => $this->editingAircraft ? $this->editingAircraft->id : null,
+            ],
+            $data
+        );
+
+        $this->dispatch('alert', icon: 'success', message: 'Aircraft saved successfully.');
+        $this->dispatch('aircraft-saved');
+        $this->reset('aircraftForm', 'editingAircraft');
+    }
+
+    public function deleteAircraft(Aircraft $aircraft)
+    {
+        $aircraft->delete();
+        $this->dispatch('alert', icon: 'success', message: 'Aircraft deleted successfully.');
     }
 }

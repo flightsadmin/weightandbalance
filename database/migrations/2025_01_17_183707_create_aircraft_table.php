@@ -15,8 +15,8 @@ return new class extends Migration {
             $table->foreignId('airline_id')->constrained()->onDelete('cascade');
             $table->foreignId('aircraft_type_id')->constrained()->onDelete('cascade');
             $table->string('registration_number')->unique();
-            $table->string('serial_number')->nullable();
-            $table->date('manufacture_date')->nullable();
+            $table->integer('basic_weight')->nullable();
+            $table->decimal('basic_index', 8, 5)->nullable();
             $table->boolean('active')->default(true);
             $table->text('remarks')->nullable();
             $table->timestamps();

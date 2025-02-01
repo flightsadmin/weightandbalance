@@ -24,8 +24,8 @@ class AircraftFactory extends Factory
             'airline_id' => null,
             'aircraft_type_id' => null,
             'registration_number' => strtoupper(fake()->unique()->lexify('??-????')),
-            'manufacture_date' => fake()->dateTimeBetween('-10 years', '-1 year'),
-            'serial_number' => fake()->unique()->numerify('######'),
+            'basic_weight' => fake()->numberBetween(40000, 100000),
+            'basic_index' => fake()->randomFloat(5, 0.00001, 0.99999),
             'active' => fake()->boolean(90), // 90% chance of being active
             'remarks' => fake()->sentence(),
         ];

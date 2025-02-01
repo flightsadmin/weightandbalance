@@ -16,14 +16,13 @@ class Aircraft extends Model
         'airline_id',
         'aircraft_type_id',
         'registration_number',
-        'serial_number',
-        'manufacture_date',
+        'basic_weight',
+        'basic_index',
         'active',
         'remarks'
     ];
 
     protected $casts = [
-        'manufacture_date' => 'date',
         'active' => 'boolean',
     ];
 
