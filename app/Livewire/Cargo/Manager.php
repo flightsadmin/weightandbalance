@@ -4,6 +4,7 @@ namespace App\Livewire\Cargo;
 
 use App\Models\Cargo;
 use App\Models\Flight;
+use App\Models\Container;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -49,20 +50,22 @@ class Manager extends Component
             return;
         }
 
-        Cargo::whereIn('id', $this->selected)->update([
-            'container_id' => $this->bulkContainer,
-            'status' => 'loaded'
-        ]);
+        $container = Container::find($this->bulkContainer);
+        foreach ($this->selected as $cargoId) {
+            $cargo = Cargo::find($cargoId);
+            $cargo->update([
+                'container_id' => $this->bulkContainer,
+                'status' => 'loaded'
+            ]);
+        }
+
+        $container->updateWeight();
 
         $this->dispatch(
             'alert',
             icon: 'success',
             message: count($this->selected) . ' cargo items loaded to container.'
         );
-
-        // Dispatch event to refresh loadplan
-        $this->dispatch('container-updated');
-        $this->dispatch('refresh-loadplan');
 
         $this->selected = [];
         $this->selectAll = false;
@@ -115,10 +118,6 @@ class Manager extends Component
             icon: 'success',
             message: $containerId ? 'Cargo loaded to container.' : 'Cargo removed from container.'
         );
-
-        // Dispatch event to refresh loadplan
-        $this->dispatch('container-updated');
-        $this->dispatch('refresh-loadplan');
     }
 
     public function delete(Cargo $cargo)

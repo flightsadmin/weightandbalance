@@ -4,6 +4,7 @@ namespace App\Livewire\Baggage;
 
 use App\Models\Flight;
 use App\Models\Baggage;
+use App\Models\Container;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\On;
@@ -17,7 +18,8 @@ class Manager extends Component
     public $showForm = false;
     public $editingBaggage = null;
     public $search = '';
-    public $selectedPassenger = null;
+    public $status = '';
+    public $container_id = '';
     public $selected = [];
     public $selectAll = false;
     public $bulkContainer = null;
@@ -130,10 +132,17 @@ class Manager extends Component
             return;
         }
 
-        Baggage::whereIn('id', $this->selected)->update([
-            'container_id' => $this->bulkContainer,
-            'status' => 'loaded'
-        ]);
+        $container = Container::find($this->bulkContainer);
+
+        foreach ($this->selected as $baggageId) {
+            $baggage = Baggage::find($baggageId);
+            $baggage->update([
+                'container_id' => $this->bulkContainer,
+                'status' => 'loaded'
+            ]);
+        }
+
+        $container->updateWeight();
 
         $this->dispatch(
             'alert',
@@ -157,6 +166,14 @@ class Manager extends Component
                         $q->whereAny(['name', 'ticket_number'], 'like', '%' . $this->search . '%');
                     });
             });
+        }
+
+        if ($this->status) {
+            $query->where('status', $this->status);
+        }
+
+        if ($this->container_id) {
+            $query->where('container_id', $this->container_id);
         }
 
         if ($this->flight) {
