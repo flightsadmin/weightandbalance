@@ -56,7 +56,11 @@ class Show extends Component
 
     public function mount(Airline $airline)
     {
-        $this->airline = $airline->load('settings');
+        $this->airline = $airline->load([
+            'settings',
+            'aircraft.type',
+            'flights' => fn($q) => $q->latest('scheduled_departure_time')->take(5)
+        ]);
     }
 
     public function setSettingCategory($category)

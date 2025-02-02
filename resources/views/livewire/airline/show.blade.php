@@ -30,9 +30,12 @@
             </ul>
 
             @if ($activeTab === 'overview')
-                <div class="row">
-                    <div class="col-md-6">
+                <div class="row g-2">
+                    <div class="col-md-4">
                         <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title m-0">Basic Information</h5>
+                            </div>
                             <div class="card-body">
                                 <table class="table table-sm">
                                     <tr>
@@ -49,53 +52,69 @@
                                     </tr>
                                     <tr>
                                         <th>Phone</th>
-                                        <td>{{ $airline->phone }}</td>
+                                        <td>{{ $airline->phone ?: 'Not s et' }}</td>
                                     </tr>
                                     <tr>
                                         <th>Email</th>
-                                        <td>{{ $airline->email }}</td>
+                                        <td>{{ $airline->email ?: 'Not set' }}</td>
                                     </tr>
                                     <tr>
                                         <th>Address</th>
-                                        <td>{{ $airline->address }}</td>
+                                        <td>{{ $airline->address ?: 'Not set' }}</td>
                                     </tr>
-                                    @if ($airline->description)
-                                        <tr>
-                                            <th>Description</th>
-                                            <td>{{ $airline->description }}</td>
-                                        </tr>
-                                    @endif
                                 </table>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="card mb-3">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="card-title m-0">Aircraft</h5>
+                    <div class="col-md-8">
+                        <div class="card mb-2">
+                            <div class="card-header">
+                                <h5 class="card-title m-0">Stats</h5>
                             </div>
-                            <div class="card-body p-0">
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col">
+                                        <h3 class="mb-0">{{ $airline->aircraft->count() }}</h3>
+                                        <small class="text-muted">All Aircraft</small>
+                                    </div>
+                                    <div class="col">
+                                        <h3 class="mb-0">{{ $airline->aircraft->where('active', true)->count() }}</h3>
+                                        <small class="text-muted">Active Aircraft</small>
+                                    </div>
+                                    <div class="col">
+                                        <h3 class="mb-0">{{ $airline->flights->count() }}</h3>
+                                        <small class="text-muted">Recent Flights</small>
+                                    </div>
+                                    <div class="col">
+                                        <h3 class="mb-0">{{ $airline->flights->where('status', 'scheduled')->count() }}</h3>
+                                        <small class="text-muted">Scheduled</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-2">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title m-0">Active Aircraft</h5>
+                            </div>
+                            <div class="card-body px-2">
                                 <div class="table-responsive">
                                     <table class="table table-hover table-sm mb-0">
                                         <thead>
                                             <tr>
                                                 <th>Registration</th>
                                                 <th>Type</th>
-                                                <th>Model</th>
                                                 <th>Capacity</th>
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @forelse($airline->aircraft as $aircraft)
-                                                <tr wire:key="aircraft-{{ $aircraft->id }}">
-                                                    <td>
-                                                        {{ $aircraft->registration_number }}
-                                                    </td>
-                                                    <td>{{ $aircraft->type->code }} </td>
-                                                    <td>{{ $aircraft->type->name }}</td>
-                                                    <td>{{ $aircraft->type->max_passengers }} pax </td>
+                                            @forelse($airline->aircraft->where('active', true)->take(5) as $aircraft)
+                                                <tr>
+                                                    <td>{{ $aircraft->registration_number }}</td>
+                                                    <td>{{ $aircraft->type->code }}</td>
+                                                    <td>{{ $aircraft->type->max_passengers }} pax</td>
                                                     <td>
                                                         <span class="badge bg-{{ $aircraft->active ? 'success' : 'warning' }}">
                                                             {{ ucfirst($aircraft->active ? 'Active' : 'Inactive') }}
@@ -104,51 +123,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="3" class="text-center">No aircraft found</td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="card-title m-0">Recent Flights</h5>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover table-sm mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Flight</th>
-                                                <th>Route</th>
-                                                <th>Schedule</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($airline->flights as $flight)
-                                                <tr wire:key="flight-{{ $flight->id }}">
-                                                    <td>
-                                                        <a wire:navigate href="{{ route('flights.show', $flight) }}"
-                                                            class="text-decoration-none">
-                                                            {{ $flight->flight_number }}
-                                                        </a>
-                                                    </td>
-                                                    <td>{{ $flight->departure_airport }} → {{ $flight->arrival_airport }}</td>
-                                                    <td>{{ $flight->scheduled_departure_time->format('d M Y H:i') }}</td>
-                                                    <td>
-                                                        <span
-                                                            class="badge bg-{{ $flight->status === 'cancelled' ? 'danger' : ($flight->status === 'arrived' ? 'success' : 'warning') }}">
-                                                            {{ ucfirst($flight->status) }}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="4" class="text-center">No flights found</td>
+                                                    <td colspan="4" class="text-center">No aircraft found</td>
                                                 </tr>
                                             @endforelse
                                         </tbody>
