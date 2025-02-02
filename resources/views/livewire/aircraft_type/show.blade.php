@@ -19,7 +19,7 @@
                     </button>
                     <button class="list-group-item list-group-item-action {{ $activeTab === 'zones' ? 'active' : '' }}"
                         wire:click="$set('activeTab', 'zones')">
-                        <i class="bi bi-collection-play"></i> Cabin Zones
+                        <i class="bi bi-diagram-3-fill"></i> Cabin Zones
                     </button>
                     <button class="list-group-item list-group-item-action {{ $activeTab === 'aircraft' ? 'active' : '' }}"
                         wire:click="$set('activeTab', 'aircraft')">
