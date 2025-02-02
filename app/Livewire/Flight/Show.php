@@ -3,20 +3,32 @@
 namespace App\Livewire\Flight;
 
 use App\Models\Flight;
-use App\Models\WeightBalance;
 use Livewire\Component;
 
 class Show extends Component
 {
     public Flight $flight;
-
+    public $activeTab;
     public function mount(Flight $flight)
     {
         $this->flight = $flight->load(['airline', 'aircraft', 'crew', 'passengers', 'baggage', 'cargo', 'fuel']);
+        $this->activeTab = session('flight_tab', 'overview');
+    }
+
+    public function setTab($tab)
+    {
+        $this->activeTab = $tab;
+        session(['flight_tab' => $tab]);
     }
 
     public function render()
     {
-        return view('livewire.flight.show')->layout('components.layouts.app');
+        return view('livewire.flight.show', [
+            'baggage_count' => $this->flight->baggage_count,
+            'cargo_count' => $this->flight->cargo_count,
+            'passengers_count' => $this->flight->passengers_count,
+            'crew_count' => $this->flight->crew_count,
+            'containers_count' => $this->flight->containers_count,
+        ]);
     }
 }
