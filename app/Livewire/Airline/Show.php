@@ -13,6 +13,9 @@ class Show extends Component
     #[Url]
     public $activeTab = 'overview';
 
+    #[Url]
+    public $settingCategory = 'general';
+
     public $editingSetting = null;
 
     // Form fields
@@ -54,6 +57,16 @@ class Show extends Component
     public function mount(Airline $airline)
     {
         $this->airline = $airline->load('settings');
+    }
+
+    public function setSettingCategory($category)
+    {
+        $this->settingCategory = $category;
+    }
+
+    public function getCurrentCategorySettings()
+    {
+        return $this->defaultSettings[$this->settingCategory] ?? [];
     }
 
     public function editSetting($key, $config)
@@ -109,7 +122,8 @@ class Show extends Component
     {
         return view('livewire.airline.show', [
             'settings' => $this->airline->settings,
-            'defaultSettings' => $this->defaultSettings
+            'defaultSettings' => $this->defaultSettings,
+            'currentSettings' => $this->getCurrentCategorySettings()
         ])->layout('components.layouts.app');
     }
 }

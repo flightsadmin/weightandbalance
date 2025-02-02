@@ -163,7 +163,8 @@
                     <div class="col-md-3">
                         <div class="list-group">
                             @foreach ($defaultSettings as $category => $items)
-                                <button class="list-group-item list-group-item-action">
+                                <button class="list-group-item list-group-item-action {{ $settingCategory === $category ? 'active' : '' }}"
+                                    wire:click="setSettingCategory('{{ $category }}')">
                                     <i
                                         class="bi bi-{{ match ($category) {
                                             'general' => 'gear',
@@ -180,6 +181,9 @@
 
                     <div class="col-md-9">
                         <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title m-0">{{ str_replace('_', ' ', ucfirst($settingCategory)) }} Settings</h5>
+                            </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-sm table-hover">
@@ -192,49 +196,42 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($defaultSettings as $category => $items)
+                                            @foreach ($currentSettings as $key => $config)
+                                                @php
+                                                    $setting = $settings->where('key', $key)->first();
+                                                @endphp
                                                 <tr>
-                                                    <td colspan="4" class="table-light">
-                                                        <strong>{{ str_replace('_', ' ', ucfirst($category)) }}</strong>
+                                                    <td>{{ str_replace('_', ' ', ucfirst($key)) }}</td>
+                                                    <td>
+                                                        @if ($setting)
+                                                            @if ($config['type'] === 'boolean')
+                                                                <span class="badge bg-{{ $setting->value ? 'success' : 'danger' }}">
+                                                                    {{ $setting->value ? 'Yes' : 'No' }}
+                                                                </span>
+                                                            @else
+                                                                {{ $setting->value }}
+                                                            @endif
+                                                        @else
+                                                            <span class="text-muted">Not set</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $config['description'] }}</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-link"
+                                                            wire:click="editSetting('{{ $key }}', {{ json_encode($config) }})"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#settingModal">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                        @if ($setting)
+                                                            <button class="btn btn-sm btn-link text-danger"
+                                                                wire:click="deleteSetting('{{ $key }}')"
+                                                                wire:confirm="Are you sure you want to delete this setting?">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        @endif
                                                     </td>
                                                 </tr>
-                                                @foreach ($items as $key => $config)
-                                                    @php
-                                                        $setting = $settings->where('key', $key)->first();
-                                                    @endphp
-                                                    <tr>
-                                                        <td>{{ str_replace('_', ' ', ucfirst($key)) }}</td>
-                                                        <td>
-                                                            @if ($setting)
-                                                                @if ($config['type'] === 'boolean')
-                                                                    <span class="badge bg-{{ $setting->value ? 'success' : 'danger' }}">
-                                                                        {{ $setting->value ? 'Yes' : 'No' }}
-                                                                    </span>
-                                                                @else
-                                                                    {{ $setting->value }}
-                                                                @endif
-                                                            @else
-                                                                <span class="text-muted">Not set</span>
-                                                            @endif
-                                                        </td>
-                                                        <td>{{ $config['description'] }}</td>
-                                                        <td>
-                                                            <button class="btn btn-sm btn-link"
-                                                                wire:click="editSetting('{{ $key }}', {{ json_encode($config) }})"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#settingModal">
-                                                                <i class="bi bi-pencil"></i>
-                                                            </button>
-                                                            @if ($setting)
-                                                                <button class="btn btn-sm btn-link text-danger"
-                                                                    wire:click="deleteSetting('{{ $key }}')"
-                                                                    wire:confirm="Are you sure you want to delete this setting?">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
-                                                            @endif
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
                                             @endforeach
                                         </tbody>
                                     </table>
