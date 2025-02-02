@@ -22,14 +22,13 @@
 
                 @if (!empty($selected))
                     <select class="form-select form-select-sm w-auto" wire:model="bulkContainer">
-                        <option value="">Select Container</option>
+                        <option value="" disabled selected>Select Container</option>
                         @foreach ($containers as $container)
                             <option value="{{ $container->id }}">{{ $container->container_number }}</option>
                         @endforeach
                     </select>
 
-                    <button class="btn btn-primary btn-sm" wire:click="loadSelectedToContainer"
-                        @if ($bulkContainer) disabled @endif>
+                    <button class="btn btn-primary btn-sm" wire:click="loadSelectedToContainer">
                         Load Selected ({{ count($selected) }})
                     </button>
                 @endif

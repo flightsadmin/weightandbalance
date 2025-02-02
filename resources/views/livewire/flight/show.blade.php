@@ -29,16 +29,6 @@
                         <span class="badge bg-secondary">{{ $cargo_count }}</span>
                     </a>
                 </li>
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-                <li>
-                    <a wire:click.prevent="setTab('containers')" href=""
-                        class="dropdown-item {{ $activeTab === 'containers' ? 'active' : '' }}">
-                        <i class="bi bi-box-seam"></i> Containers
-                        <span class="badge bg-secondary">{{ $containers_count }}</span>
-                    </a>
-                </li>
             </ul>
         </li>
         <li class="nav-item">
@@ -85,8 +75,6 @@
             <livewire:baggage.manager :flight="$flight" />
         @elseif ($activeTab === 'cargo')
             <livewire:cargo.manager :flight="$flight" />
-        @elseif ($activeTab === 'containers')
-            <livewire:flight.container :flight="$flight" />
         @elseif ($activeTab === 'passengers')
             <livewire:passenger.manager :flight="$flight" />
         @elseif ($activeTab === 'crew')

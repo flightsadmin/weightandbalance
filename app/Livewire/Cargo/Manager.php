@@ -60,6 +60,10 @@ class Manager extends Component
             message: count($this->selected) . ' cargo items loaded to container.'
         );
 
+        // Dispatch event to refresh loadplan
+        $this->dispatch('container-updated');
+        $this->dispatch('refresh-loadplan');
+
         $this->selected = [];
         $this->selectAll = false;
         $this->bulkContainer = null;
@@ -111,6 +115,10 @@ class Manager extends Component
             icon: 'success',
             message: $containerId ? 'Cargo loaded to container.' : 'Cargo removed from container.'
         );
+
+        // Dispatch event to refresh loadplan
+        $this->dispatch('container-updated');
+        $this->dispatch('refresh-loadplan');
     }
 
     public function delete(Cargo $cargo)
