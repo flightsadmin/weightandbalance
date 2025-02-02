@@ -56,11 +56,6 @@
                 </a>
             </li>
             <li class="dropdown-item">
-                <a class="nav-link" wire:navigate href="{{ route('aircraft.index') }}">
-                    <i class="bi bi-airplane-engines-fill"></i> Aircraft
-                </a>
-            </li>
-            <li class="dropdown-item">
                 <a class="nav-link" wire:navigate href="{{ route('flights.index') }}">
                     <i class="bi bi-calendar3"></i> Flights
                 </a>
