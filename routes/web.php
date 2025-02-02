@@ -22,7 +22,6 @@ Route::get('/database', function () {
 })->name('migrate');
 
 // Public routes
-Route::get('airlines/{airline}/settings', App\Livewire\Setting\Manager::class)->name('airlines.settings');
 Route::get('airlines', App\Livewire\Airline\Index::class)->name('airlines.index');
 Route::get('aircraft_types', App\Livewire\AircraftType\Manager::class)->name('aircraft_types.index');
 
