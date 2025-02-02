@@ -59,7 +59,7 @@ class Flight extends Model
 
     public function crew()
     {
-        return $this->belongsToMany(Crew::class, 'crew_flight');
+        return $this->belongsToMany(Crew::class, 'crew_flight')->withTimestamps();
     }
 
     public function cargo()
