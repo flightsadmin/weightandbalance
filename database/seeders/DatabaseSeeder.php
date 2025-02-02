@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
-        Airline::factory(1)->create()->each(function ($airline) {
+        Airline::factory(2)->create()->each(function ($airline) {
             AircraftType::factory(1)->forAirline($airline)->create()->each(function ($aircraftType) use ($airline) {
                 Aircraft::factory(3)->create([
                     'airline_id' => $airline->id,

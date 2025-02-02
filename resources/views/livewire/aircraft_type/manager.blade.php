@@ -1,81 +1,145 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <div class="d-flex gap-3 align-items-center">
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <select wire:model.live="selectedAirlineId" class="form-select form-select-sm">
-                    <option value="">Select Airline</option>
+                    <option value="">All Airlines</option>
                     @foreach ($airlines as $airline)
                         <option value="{{ $airline->id }}">{{ $airline->name }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <input type="search" wire:model.live="search" class="form-control form-control-sm"
                     placeholder="Search aircraft types...">
             </div>
         </div>
-        <div class="d-flex justify-content-end align-items-center gap-2">
-            @if ($selectedAirlineId)
-                <button class="btn btn-sm btn-primary">{{ $selectedAirline->name }}</button>
-            @endif
-            <button class="btn btn-primary btn-sm" wire:click="$toggle('showForm')" data-bs-toggle="modal"
-                data-bs-target="#aircraftTypeFormModal">
-                <i class="bi bi-plus-circle"></i> Add Aircraft Type
-            </button>
+        <button class="btn btn-primary btn-sm" wire:click="$toggle('showForm')" data-bs-toggle="modal"
+            data-bs-target="#aircraftTypeFormModal">
+            <i class="bi bi-plus-circle"></i> Add Aircraft Type
+        </button>
+    </div>
+
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <div class="list-group">
+                    @forelse ($aircraftTypes as $type)
+                        <div class="list-group-item {{ $selectedTypeId === $type->id ? 'active' : '' }}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <button wire:click="selectType({{ $type->id }})"
+                                    class="btn btn-link text-decoration-none p-0 {{ $selectedTypeId === $type->id ? 'text-white' : 'text-dark' }}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <strong>{{ $type->code }}</strong>
+                                        <span class="badge bg-secondary">{{ $type->category }}</span>
+                                    </div>
+                                    <small class="text-{{ $selectedTypeId === $type->id ? 'white' : 'muted' }}">
+                                        {{ $type->manufacturer }} {{ $type->name }}
+                                    </small>
+                                    <div class="small mt-1">
+                                        <div class="row text-{{ $selectedTypeId === $type->id ? 'white' : 'muted' }}">
+                                            <div class="col">
+                                                <i class="bi bi-person"></i> {{ $type->max_passengers }}pax
+                                            </div>
+                                            <div class="col">
+                                                <i class="bi bi-arrow-up"></i> {{ number_format($type->max_takeoff_weight) }}kg
+                                            </div>
+                                            <div class="col">
+                                                <i class="bi bi-fuel-pump"></i> {{ number_format($type->max_fuel_capacity) }}L
+                                            </div>
+                                        </div>
+                                    </div>
+                                </button>
+                                <div class="d-flex gap-2">
+                                    <button
+                                        class="btn btn-sm btn-link {{ $selectedTypeId === $type->id ? 'text-white' : '' }}"
+                                        wire:click="edit({{ $type->id }})"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#aircraftTypeFormModal">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button
+                                        class="btn btn-sm btn-link {{ $selectedTypeId === $type->id ? 'text-white' : 'text-danger' }}"
+                                        wire:click="delete({{ $type->id }})"
+                                        wire:confirm="Are you sure you want to remove this aircraft type?">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="list-group-item text-center text-muted">
+                            No aircraft types found
+                        </div>
+                    @endforelse
+                </div>
+
+                <div class="mt-3">
+                    {{ $aircraftTypes->links() }}
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                @if ($this->selectedType)
+                    <div class="card">
+                        <div class="card-header">
+                            <ul class="nav nav-tabs card-header-tabs">
+                                <li class="nav-item">
+                                    <button class="nav-link {{ $activeTab === 'overview' ? 'active' : '' }}"
+                                        wire:click="$set('activeTab', 'overview')">
+                                        <i class="bi bi-info-circle"></i> Overview
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link {{ $activeTab === 'holds' ? 'active' : '' }}"
+                                        wire:click="$set('activeTab', 'holds')">
+                                        <i class="bi bi-box"></i> Holds
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link {{ $activeTab === 'zones' ? 'active' : '' }}"
+                                        wire:click="$set('activeTab', 'zones')">
+                                        <i class="bi bi-collection"></i> Zones
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link {{ $activeTab === 'aircraft' ? 'active' : '' }}"
+                                        wire:click="$set('activeTab', 'aircraft')">
+                                        <i class="bi bi-airplane"></i> Aircraft
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link {{ $activeTab === 'settings' ? 'active' : '' }}"
+                                        wire:click="$set('activeTab', 'settings')">
+                                        <i class="bi bi-gear"></i> Settings
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            @if ($activeTab === 'overview')
+                                <livewire:aircraft-type.overview :key="'overview-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                            @elseif ($activeTab === 'holds')
+                                <livewire:aircraft-type.hold-manager :key="'holds-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                            @elseif ($activeTab === 'zones')
+                                <livewire:aircraft-type.zone-manager :key="'zones-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                            @elseif ($activeTab === 'aircraft')
+                                <livewire:aircraft-type.aircraft-manager :key="'aircraft-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                            @elseif ($activeTab === 'settings')
+                                <livewire:aircraft-type.settings :key="'settings-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                            @endif
+                        </div>
+                    </div>
+                @else
+                    <div class="card">
+                        <div class="card-body text-center text-muted py-5">
+                            <i class="bi bi-airplane display-1"></i>
+                            <p class="mt-3">Select an aircraft type to view details</p>
+                        </div>
+                    </div>
+                @endif
+            </div>
         </div>
-    </div>
-
-    <div class="card-body table-responsive">
-        <table class="table table-sm table-hover">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Manufacturer</th>
-                    <th>Category</th>
-                    <th>Passengers</th>
-                    <th>Cargo (kg)</th>
-                    <th>Fuel (L)</th>
-                    <th>MTOW (kg)</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($aircraftTypes as $type)
-                    <tr wire:key="{{ $type->id }}">
-                        <td>
-                            <a wire:navigate href="{{ route('aircraft_types.show', $type) }}"
-                                class="text-decoration-none">{{ $type->code }}</a>
-                        </td>
-                        <td>{{ $type->name }}</td>
-                        <td>{{ $type->manufacturer }}</td>
-                        <td>{{ $type->category }}</td>
-                        <td>{{ number_format($type->max_passengers) }}</td>
-                        <td>{{ number_format($type->cargo_capacity) }}</td>
-                        <td>{{ number_format($type->max_fuel_capacity) }}</td>
-                        <td>{{ number_format($type->max_takeoff_weight) }}</td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-link" wire:click="edit({{ $type->id }})"
-                                data-bs-toggle="modal" data-bs-target="#aircraftTypeFormModal">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-link text-danger" wire:click="delete({{ $type->id }})"
-                                wire:confirm="Are you sure you want to remove this aircraft type?">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="10" class="text-center">No aircraft types found.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div class="d-flex justify-content-between align-items-center">
-        {{ $aircraftTypes->links() }}
     </div>
 
     <!-- Modal -->

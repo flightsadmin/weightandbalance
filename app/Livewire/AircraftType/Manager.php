@@ -6,15 +6,18 @@ use App\Models\Airline;
 use App\Models\AircraftType;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Computed;
 
 class Manager extends Component
 {
     use WithPagination;
 
+    public $selectedAirlineId = '';
+    public $selectedTypeId = null;
+    public $activeTab = 'overview';
     public $search = '';
     public $showForm = false;
     public $editingAircraftType = null;
-    public $selectedAirlineId;
 
     public $form = [
         'code' => '',
@@ -48,32 +51,33 @@ class Manager extends Component
         'form.max_cabin_crew' => 'required|integer|min:1',
     ];
 
+    #[Computed]
+    public function selectedType()
+    {
+        return $this->selectedTypeId ? AircraftType::find($this->selectedTypeId) : null;
+    }
+
     public function mount()
     {
         $this->selectedAirlineId = session('selected_airline_id');
     }
 
+    public function selectType($id)
+    {
+        $this->selectedTypeId = $id;
+        $this->activeTab = 'overview';
+    }
+
     public function render()
     {
-        $airlines = Airline::orderBy('name')->get();
-
-        $query = AircraftType::query();
-
-        if ($this->search) {
-            $query->where(function ($query) {
-                $query->whereAny(['code', 'name', 'manufacturer'], 'like', '%' . $this->search . '%');
-            });
-        }
-
-        $aircraftTypes = $query
-            ->orderBy('manufacturer')
-            ->orderBy('name')
-            ->paginate(10);
-
         return view('livewire.aircraft_type.manager', [
-            'aircraftTypes' => $aircraftTypes,
-            'airlines' => $airlines,
-            'selectedAirline' => $this->selectedAirlineId ? Airline::find($this->selectedAirlineId) : null
+            'airlines' => Airline::orderBy('name')->get(),
+            'aircraftTypes' => AircraftType::query()
+                ->when($this->selectedAirlineId, fn($q) => $q->where('airline_id', $this->selectedAirlineId))
+                ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%")
+                    ->orWhere('code', 'like', "%{$this->search}%"))
+                ->orderBy('code')
+                ->paginate(10)
         ]);
     }
 
