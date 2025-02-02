@@ -43,7 +43,12 @@
             <tbody>
                 @forelse ($passengers as $passenger)
                     <tr wire:key="{{ $passenger->id }}">
-                        <td>{{ $passenger->name }}</td>
+                        <td>
+                            <a href="#" wire:click.prevent="showPassengerDetails({{ $passenger->id }})"
+                                class="text-decoration-none text-reset">
+                                {{ $passenger->name }}
+                            </a>
+                        </td>
                         <td>{{ ucfirst($passenger->type ?? 'N/A') }}</td>
                         @unless ($flight)
                             <td>
@@ -236,6 +241,113 @@
         </div>
     </div>
 
+    <div class="modal fade" id="passengerDetailsModal" tabindex="-1" wire:ignore.self>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Passenger Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if ($selectedPassenger)
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-decoration-underline mb-3">Personal Information</h6>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <th>Name:</th>
+                                        <td>{{ $selectedPassenger->name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Type:</th>
+                                        <td>{{ ucfirst($selectedPassenger->type) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Ticket Number:</th>
+                                        <td>{{ $selectedPassenger->ticket_number }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Seat Number:</th>
+                                        <td>{{ $selectedPassenger->seat_number }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Acceptance Status:</th>
+                                        <td>
+                                            <span
+                                                class="badge bg-{{ $selectedPassenger->acceptance_status === 'accepted'
+                                                    ? 'success'
+                                                    : ($selectedPassenger->acceptance_status === 'standby'
+                                                        ? 'warning'
+                                                        : 'danger') }}">
+                                                {{ ucfirst($selectedPassenger->acceptance_status) }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Boarding Status:</th>
+                                        <td>
+                                            <span
+                                                class="badge bg-{{ $selectedPassenger->boarding_status === 'boarded' ? 'success' : 'danger' }}">
+                                                {{ ucfirst($selectedPassenger->boarding_status) }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-decoration-underline mb-3">Baggage Information</h6>
+                                @if ($selectedPassenger->baggage->count() > 0)
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Tag Number</th>
+                                                <th>Weight</th>
+                                                <th>Container</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($selectedPassenger->baggage as $bag)
+                                                <tr>
+                                                    <td>{{ $bag->tag_number }}</td>
+                                                    <td>{{ number_format($bag->weight) }} kg</td>
+                                                    <td>
+                                                        @if ($bag->container)
+                                                            {{ $bag->container->container_number }}
+                                                        @else
+                                                            <span class="text-muted">Not assigned</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            class="badge bg-{{ $bag->status === 'loaded' ? 'success' : ($bag->status === 'checked' ? 'warning' : 'danger') }}">
+                                                            {{ ucfirst($bag->status) }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                @else
+                                    <div class="text-muted">No baggage found</div>
+                                @endif
+                            </div>
+                        </div>
+                        @if ($selectedPassenger->notes)
+                            <div class="mt-3">
+                                <h6 class="text-decoration-underline">Notes</h6>
+                                <p class="mb-0">{{ $selectedPassenger->notes }}</p>
+                            </div>
+                        @endif
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary float-end" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @script
         <script>
             $wire.on('passenger-saved', () => {
@@ -245,6 +357,10 @@
             $wire.on('baggage-saved', () => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('baggageModal'));
                 modal.hide();
+            });
+            $wire.on('show-passenger-modal', () => {
+                const modal = new bootstrap.Modal(document.getElementById('passengerDetailsModal'));
+                modal.show();
             });
         </script>
     @endscript

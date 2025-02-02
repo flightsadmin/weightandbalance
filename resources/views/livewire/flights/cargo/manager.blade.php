@@ -123,15 +123,6 @@
                                                 </li>
                                             </ul>
                                         </div>
-
-                                        @if ($item->container)
-                                            <span class="small text-muted">
-                                                ({{ number_format($item->container->total_weight) }}/{{ number_format($item->container->max_weight) }}
-                                                kg)
-                                            </span>
-                                        @else
-                                            <span class="text-muted">Not assigned</span>
-                                        @endif
                                     </td>
                                     <td>
                                         <span

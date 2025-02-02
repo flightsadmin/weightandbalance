@@ -29,6 +29,9 @@ class Manager extends Component
         'notes' => ''
     ];
 
+    public $selectedPassenger = null;
+    public $showPassengerModal = false;
+
     protected $rules = [
         'form.name' => 'required|string|max:255',
         'form.seat_number' => 'required|string|max:4',
@@ -134,6 +137,19 @@ class Manager extends Component
         $this->editingPassenger = $passenger;
         $this->pieces = $passenger->baggage->count();
         $this->weight = $passenger->baggage->sum('weight');
+    }
+
+    public function showPassengerDetails($passengerId)
+    {
+        $this->selectedPassenger = $this->flight->passengers()
+            ->with([
+                'baggage' => function ($query) {
+                    $query->with('container')->latest();
+                }
+            ])
+            ->find($passengerId);
+
+        $this->dispatch('show-passenger-modal');
     }
 
     #[On('passenger-saved')]
