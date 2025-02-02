@@ -28,10 +28,10 @@ class Airline extends Model
         'active' => 'boolean'
     ];
 
-    public const SETTING_STANDARD_PASSENGER_WEIGHT = 'standard_passenger_weight';
-    public const SETTING_STANDARD_COCKPIT_CREW_WEIGHT = 'standard_cockpit_crew_weight';
-    public const SETTING_STANDARD_CABIN_CREW_WEIGHT = 'standard_cabin_crew_weight';
-    public const SETTING_STANDARD_PANTY_WEIGHT = 'standard_pantry_weight';
+    public const STANDARD_PASSENGER_WEIGHT = 'standard_passenger_weight';
+    public const STANDARD_COCKPIT_CREW_WEIGHT = 'standard_cockpit_crew_weight';
+    public const STANDARD_CABIN_CREW_WEIGHT = 'standard_cabin_crew_weight';
+    public const STANDARD_PANTRY_WEIGHT = 'standard_pantry_weight';
 
     public function aircraft(): HasMany
     {
@@ -61,7 +61,7 @@ class Airline extends Model
     public function getStandardPassengerWeight(): float
     {
         return (float) ($this->settings()
-            ->where('key', self::SETTING_STANDARD_PASSENGER_WEIGHT)
+            ->where('key', self::STANDARD_PASSENGER_WEIGHT)
             ->first()
             ->value ?? 75);
     }
@@ -69,7 +69,7 @@ class Airline extends Model
     public function getStandardCockpitCrewWeight(): float
     {
         return (float) ($this->settings()
-            ->where('key', self::SETTING_STANDARD_COCKPIT_CREW_WEIGHT)
+            ->where('key', self::STANDARD_COCKPIT_CREW_WEIGHT)
             ->first()
             ->value ?? 85);
     }
@@ -77,7 +77,7 @@ class Airline extends Model
     public function getStandardCabinCrewWeight(): float
     {
         return (float) ($this->settings()
-            ->where('key', self::SETTING_STANDARD_CABIN_CREW_WEIGHT)
+            ->where('key', self::STANDARD_CABIN_CREW_WEIGHT)
             ->first()
             ->value ?? 75);
     }
@@ -85,7 +85,7 @@ class Airline extends Model
     public function getStandardPantryWeight(): float
     {
         return (float) ($this->settings()
-            ->where('key', self::SETTING_STANDARD_PANTY_WEIGHT)
+            ->where('key', self::STANDARD_PANTRY_WEIGHT)
             ->first()
             ->value ?? 250);
     }

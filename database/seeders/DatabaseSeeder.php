@@ -66,31 +66,35 @@ class DatabaseSeeder extends Seeder
                 $settings = [
                     [
                         'airline_id' => $airline->id,
-                        'key' => Airline::SETTING_STANDARD_COCKPIT_CREW_WEIGHT,
+                        'key' => Airline::STANDARD_COCKPIT_CREW_WEIGHT,
                         'value' => 85,
                     ],
                     [
                         'airline_id' => $airline->id,
-                        'key' => \App\Enums\CrewPosition::CAPTAIN->value,
-                        'value' => 85,
-                    ],
-                    [
-                        'airline_id' => $airline->id,
-                        'key' => Airline::SETTING_STANDARD_CABIN_CREW_WEIGHT,
+                        'key' => Airline::STANDARD_CABIN_CREW_WEIGHT,
                         'value' => 75,
                     ],
                     [
                         'airline_id' => $airline->id,
-                        'key' => Airline::SETTING_STANDARD_PASSENGER_WEIGHT,
+                        'key' => 'standard_crew_weight',
+                        'value' => 85,
+                    ],
+                    [
+                        'airline_id' => $airline->id,
+                        'key' => 'standard_baggage_weight',
+                        'value' => 20,
+                    ],
+                    [
+                        'airline_id' => $airline->id,
+                        'key' => Airline::STANDARD_PASSENGER_WEIGHT,
                         'value' => 84,
                     ],
                     [
                         'airline_id' => $airline->id,
-                        'key' => Airline::SETTING_STANDARD_PANTY_WEIGHT,
+                        'key' => Airline::STANDARD_PANTRY_WEIGHT,
                         'value' => 250,
                     ]
                 ];
-
                 Setting::insert($settings);
             });
         });
