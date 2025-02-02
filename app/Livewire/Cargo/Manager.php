@@ -21,6 +21,28 @@ class Manager extends Component
     public $selected = [];
     public $selectAll = false;
     public $bulkContainer = null;
+    public $showForm = false;
+    public $editingCargo = null;
+
+    public $form = [
+        'awb_number' => '',
+        'type' => '',
+        'weight' => '',
+        'pieces' => '',
+        'container_id' => null,
+        'status' => 'accepted',
+        'notes' => ''
+    ];
+
+    protected $rules = [
+        'form.awb_number' => 'required|string|max:255',
+        'form.type' => 'required|in:general,perishable,dangerous_goods,live_animals,valuable,mail',
+        'form.weight' => 'required|numeric|min:0',
+        'form.pieces' => 'required|numeric|min:0',
+        'form.container_id' => 'nullable|exists:containers,id',
+        'form.status' => 'required|in:accepted,loaded,offloaded',
+        'form.notes' => 'nullable|string'
+    ];
 
     public function mount(Flight $flight)
     {
@@ -128,5 +150,43 @@ class Manager extends Component
             icon: 'success',
             message: 'Cargo removed successfully.'
         );
+    }
+
+    public function edit(Cargo $cargo)
+    {
+        $this->editingCargo = $cargo;
+        $this->form = $cargo->only([
+            'awb_number',
+            'type',
+            'pieces',
+            'weight',
+            'container_id',
+            'status',
+            'notes'
+        ]);
+        $this->showForm = true;
+    }
+
+    public function save()
+    {
+        $this->validate();
+
+        $data = array_merge($this->form, [
+            'flight_id' => $this->flight->id
+        ]);
+
+        if ($this->editingCargo) {
+            $this->editingCargo->update($data);
+        } else {
+            Cargo::create($data);
+        }
+
+        $this->reset('form', 'editingCargo', 'showForm');
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: 'Cargo saved successfully.'
+        );
+        $this->dispatch('cargo-saved');
     }
 }

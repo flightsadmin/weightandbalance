@@ -36,6 +36,12 @@
                     <i class="bi bi-arrow-left"></i> Back to Flight
                 </a>
             </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary btn-sm" wire:click="$toggle('showForm')" data-bs-toggle="modal"
+                    data-bs-target="#cargoFormModal">
+                    <i class="bi bi-plus-circle"></i> Add Cargo
+                </button>
+            </div>
         </div>
 
         <div class="card-body">
@@ -72,6 +78,7 @@
                                 <th>Weight</th>
                                 <th>Container</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -130,6 +137,16 @@
                                             {{ ucfirst($item->status) }}
                                         </span>
                                     </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-link" wire:click="edit({{ $item->id }})" data-bs-toggle="modal"
+                                            data-bs-target="#cargoFormModal">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-link text-danger" wire:click="delete({{ $item->id }})"
+                                            wire:confirm="Are you sure you want to remove this cargo?">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
@@ -146,4 +163,102 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="cargoFormModal" tabindex="-1" wire:ignore.self>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form wire:submit="save">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ $editingCargo ? 'Edit' : 'Add' }} Cargo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">AWB Number</label>
+                                <input type="text" class="form-control form-control-sm" wire:model="form.awb_number">
+                                @error('form.awb_number')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Type</label>
+                                <select class="form-select form-select-sm" wire:model="form.type">
+                                    <option value="">Select Type</option>
+                                    <option value="general">General</option>
+                                    <option value="perishable">Perishable</option>
+                                    <option value="dangerous_goods">Dangerous Goods</option>
+                                    <option value="live_animals">Live Animals</option>
+                                    <option value="valuable">Valuable</option>
+                                    <option value="mail">Mail</option>
+                                </select>
+                                @error('form.type')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Pieces</label>
+                                <input type="number" class="form-control form-control-sm" wire:model="form.pieces">
+                                @error('form.pieces')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Weight (kg)</label>
+                                <input type="number" class="form-control form-control-sm" wire:model="form.weight">
+                                @error('form.weight')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Container</label>
+                                <select class="form-select form-select-sm" wire:model="form.container_id">
+                                    <option value="">No Container</option>
+                                    @foreach ($containers as $container)
+                                        <option value="{{ $container->id }}">
+                                            {{ $container->container_number }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('form.container_id')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select class="form-select form-select-sm" wire:model="form.status">
+                                    <option value="accepted">Accepted</option>
+                                    <option value="loaded">Loaded</option>
+                                    <option value="offloaded">Offloaded</option>
+                                </select>
+                                @error('form.status')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Notes</label>
+                                <textarea class="form-control form-control-sm" wire:model="form.notes" rows="2"></textarea>
+                                @error('form.notes')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Save Cargo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+
+@script
+    <script>
+        $wire.on('cargo-saved', () => {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('cargoFormModal'));
+            modal.hide();
+        });
+    </script>
+@endscript
