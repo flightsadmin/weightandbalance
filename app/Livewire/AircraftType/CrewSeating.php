@@ -4,7 +4,9 @@ namespace App\Livewire\AircraftType;
 
 use App\Models\AircraftType;
 use App\Models\CrewSeating as CrewSeatingModel;
+use App\Models\CrewDistribution;
 use Livewire\Component;
+use Illuminate\Support\Str;
 
 class CrewSeating extends Component
 {
@@ -13,6 +15,9 @@ class CrewSeating extends Component
 
     public $deck_crew = [];
     public $cabin_crew = [];
+
+    // For crew distribution
+    public $crewSeats = [];
 
     protected $rules = [
         'deck_crew.*.location' => 'required|string',
@@ -23,11 +28,13 @@ class CrewSeating extends Component
         'cabin_crew.*.max_number' => 'required|numeric',
         'cabin_crew.*.arm' => 'required|numeric',
         'cabin_crew.*.index_per_kg' => 'required|numeric',
+        'crewSeats.*.number' => 'required|integer|distinct|min:1',
     ];
 
     public function mount()
     {
         $this->loadCrewSeating();
+        $this->loadCrewDistribution();
     }
 
     protected function loadCrewSeating()
@@ -80,6 +87,83 @@ class CrewSeating extends Component
                     'index_per_kg' => ''
                 ]
             ];
+        }
+    }
+
+    protected function loadCrewDistribution()
+    {
+        $distributions = $this->aircraftType->crewDistributions()
+            ->orderBy('crew_count')
+            ->get();
+
+        if ($distributions->isEmpty()) {
+            $this->crewSeats = [
+                [
+                    'number' => 1,
+                ]
+            ];
+            return;
+        }
+
+        $this->crewSeats = $distributions->map(function ($dist) {
+            return array_merge(
+                ['number' => $dist->crew_count],
+                $dist->distribution
+            );
+        })->toArray();
+    }
+
+    public function getCrewLocationsProperty()
+    {
+        return collect($this->cabin_crew)->map(function ($crew) {
+            return [
+                'location' => $crew['location'],
+                'max_number' => $crew['max_number']
+            ];
+        })->toArray();
+    }
+
+    public function addSeat()
+    {
+        $newSeat = ['number' => count($this->crewSeats) + 1];
+
+        foreach ($this->crewLocations as $location) {
+            $key = Str::snake(strtolower($location['location']));
+            $newSeat[$key] = 0;
+        }
+
+        $this->crewSeats[] = $newSeat;
+    }
+
+    public function removeSeat($index)
+    {
+        $crewCount = $this->crewSeats[$index]['number'];
+
+        // Delete from database if exists
+        $this->aircraftType->crewDistributions()
+            ->where('crew_count', $crewCount)
+            ->delete();
+
+        unset($this->crewSeats[$index]);
+        $this->crewSeats = array_values($this->crewSeats);
+    }
+
+    protected function saveCrewDistributions()
+    {
+        // First, remove all existing distributions
+        $this->aircraftType->crewDistributions()->delete();
+
+        // Create new distributions
+        foreach ($this->crewSeats as $seat) {
+            $crewCount = $seat['number'];
+            $distribution = collect($seat)
+                ->except('number')
+                ->all();
+
+            $this->aircraftType->crewDistributions()->create([
+                'crew_count' => $crewCount,
+                'distribution' => $distribution
+            ]);
         }
     }
 
@@ -147,10 +231,14 @@ class CrewSeating extends Component
             }
         }
 
+        // Save crew distributions
+        $this->saveCrewDistributions();
+
         $this->dispatch('refreshAvailable', $this->aircraftType->id);
         $this->dispatch('alert', icon: 'success', message: 'Crew data saved successfully.');
         $this->toggleEdit();
         $this->loadCrewSeating();
+        $this->loadCrewDistribution();
     }
 
     public function render()

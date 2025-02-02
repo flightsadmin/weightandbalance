@@ -96,4 +96,9 @@ class AircraftType extends Model
     {
         return $this->hasMany(CrewSeating::class);
     }
+
+    public function crewDistributions(): HasMany
+    {
+        return $this->hasMany(CrewDistribution::class);
+    }
 }
