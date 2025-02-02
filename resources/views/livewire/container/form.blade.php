@@ -64,7 +64,7 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label class="form-label">Tare Weight (kg)</label>
-                            <input type="number" wire:model="tare_weight" class="form-control" step="0.1" required>
+                            <input type="number" wire:model="tare_weight" class="form-control" step="1" required>
                             @error('tare_weight')
                                 <span class="text-danger small">{{ $message }}</span>
                             @enderror
@@ -73,7 +73,7 @@
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label class="form-label">Maximum Weight (kg)</label>
-                            <input type="number" wire:model="max_weight" class="form-control" step="0.1" required>
+                            <input type="number" wire:model="max_weight" class="form-control" step="1" required>
                             @error('max_weight')
                                 <span class="text-danger small">{{ $message }}</span>
                             @enderror

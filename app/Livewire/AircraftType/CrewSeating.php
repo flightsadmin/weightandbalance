@@ -16,7 +16,6 @@ class CrewSeating extends Component
     public $deck_crew = [];
     public $cabin_crew = [];
 
-    // For crew distribution
     public $crewSeats = [];
 
     protected $rules = [

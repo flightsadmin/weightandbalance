@@ -17,19 +17,19 @@ class HoldFactory extends Factory
                 'name' => 'Forward Hold',
                 'code' => 'FH',
                 'position' => 1,
-                'index' => $this->faker->randomFloat(5, 0, 1),
+                'index' => $this->faker->randomFloat(4, 0, 1),
             ],
             'AH' => [
                 'name' => 'Aft Hold',
                 'code' => 'AH',
                 'position' => 2,
-                'index' => $this->faker->randomFloat(5, 0, 1),
+                'index' => $this->faker->randomFloat(4, 0, 1),
             ],
             'BH' => [
                 'name' => 'Bulk Hold',
                 'code' => 'BH',
                 'position' => 3,
-                'index' => $this->faker->randomFloat(5, 0, 1),
+                'index' => $this->faker->randomFloat(4, 0, 1),
             ]
         ];
 

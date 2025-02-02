@@ -1,20 +1,4 @@
 <div class="card">
-    {{-- <div class="card-header">
-        <h5 class="card-title">Baggage</h5>
-        <div class="d-flex justify-content-between align-items-center">
-            <div class="col-md-4">
-                <input type="search" wire:model.live="search" class="form-control form-control-sm"
-                    placeholder="Search by tag number, passenger name...">
-            </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-primary btn-sm" wire:click="$toggle('showForm')" data-bs-toggle="modal"
-                    data-bs-target="#baggageFormModal">
-                    <i class="bi bi-plus-circle"></i> Add Baggage
-                </button>
-            </div>
-        </div>
-    </div> --}}
-
     <div class="card-header d-flex justify-content-between align-items-center">
         <h2 class="card-title m-0">Baggage</h2>
         <div class="d-flex align-items-center gap-3">
