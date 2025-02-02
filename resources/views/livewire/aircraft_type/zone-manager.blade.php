@@ -21,7 +21,7 @@
                     @forelse($aircraftType->cabinZones as $zone)
                         <tr>
                             <td>{{ $zone->name }}</td>
-                            <td>{{ number_format($zone->max_capacity) }} kg</td>
+                            <td>{{ number_format($zone->max_capacity) }} pax</td>
                             <td>{{ number_format($zone->index, 4) }}</td>
                             <td>{{ number_format($zone->arm, 4) }}</td>
                             <td>

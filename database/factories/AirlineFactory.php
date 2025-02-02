@@ -32,14 +32,14 @@ class AirlineFactory extends Factory
                 'active' => true,
             ],
             [
-                'name' => 'Qatar Airways',
-                'iata_code' => 'QR',
-                'icao_code' => 'QTR',
-                'country' => 'Qatar',
-                'address' => 'Doha, Qatar',
+                'name' => 'Jambojet',
+                'iata_code' => 'JM',
+                'icao_code' => 'JMA',
+                'country' => 'Kenya',
+                'address' => 'Nairobi, Kenya',
                 'phone' => '021-12345678',
-                'email' => 'info@qatarairways.com',
-                'description' => 'Qatar Airways is a Qatari airline headquartered in Doha.',
+                'email' => 'info@jambojet.com',
+                'description' => 'Jambojet is a Kenyan airline headquartered in Nairobi.',
                 'active' => true,
             ]
         ];

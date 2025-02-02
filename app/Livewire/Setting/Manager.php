@@ -3,16 +3,17 @@
 namespace App\Livewire\Setting;
 
 use App\Models\Airline;
-use App\Models\AircraftType;
 use App\Models\Setting;
 use Livewire\Component;
 use Livewire\WithPagination;
-
+use Livewire\Attributes\Url;
 class Manager extends Component
 {
     use WithPagination;
 
     public Airline $airline;
+
+    #[Url]
     public $activeTab = 'settings.general';
     public $editingSetting = null;
     public $selectedType = null;
@@ -48,17 +49,6 @@ class Manager extends Component
             'enable_sms_notifications' => '',
             'email_notifications_recipient' => '',
             'sms_notifications_recipient' => '',
-        ],
-        'aircraft' => [
-            'ref_sta_at' => '',
-            'k_constant' => '',
-            'c_constant' => '',
-            'length_of_mac_rc' => '',
-            'lemac_at' => '',
-
-            'fuel_capacity_center_tank' => '',
-            'fuel_capacity_left_wing' => '',
-            'fuel_capacity_right_wing' => '',
         ]
     ];
 

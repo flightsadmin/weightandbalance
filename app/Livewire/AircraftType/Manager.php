@@ -7,6 +7,7 @@ use App\Models\AircraftType;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Url;
 
 class Manager extends Component
 {
@@ -14,7 +15,10 @@ class Manager extends Component
 
     public $selectedAirlineId = '';
     public $selectedTypeId = null;
+
+    #[Url]
     public $activeTab = 'overview';
+
     public $search = '';
     public $showForm = false;
     public $editingAircraftType = null;
@@ -65,7 +69,6 @@ class Manager extends Component
     public function selectType($id)
     {
         $this->selectedTypeId = $id;
-        $this->activeTab = 'overview';
     }
 
     public function render()
@@ -89,7 +92,7 @@ class Manager extends Component
             session()->forget('selected_airline_id');
         }
         $this->resetPage();
-        return redirect()->route('aircraft_types.index');
+        return $this->redirectRoute('aircraft_types.index', navigate: true);
     }
 
     public function edit(AircraftType $aircraftType)

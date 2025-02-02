@@ -34,23 +34,17 @@
                                         <span class="badge bg-secondary">{{ $type->category }}</span>
                                     </div>
                                     <small class="text-{{ $selectedTypeId === $type->id ? 'white' : 'muted' }}">
-                                        {{ $type->manufacturer }} {{ $type->name }}
+                                        {{ $type->name }}
                                     </small>
-                                    <div class="small mt-1">
+                                    <small class="small mt-1 text-start">
                                         <div class="row text-{{ $selectedTypeId === $type->id ? 'white' : 'muted' }}">
                                             <div class="col">
                                                 <i class="bi bi-person"></i> {{ $type->max_passengers }}pax
                                             </div>
-                                            <div class="col">
-                                                <i class="bi bi-arrow-up"></i> {{ number_format($type->max_takeoff_weight) }}kg
-                                            </div>
-                                            <div class="col">
-                                                <i class="bi bi-fuel-pump"></i> {{ number_format($type->max_fuel_capacity) }}L
-                                            </div>
                                         </div>
-                                    </div>
+                                    </small>
                                 </button>
-                                <div class="d-flex gap-2">
+                                <div class="d-flex">
                                     <button
                                         class="btn btn-sm btn-link {{ $selectedTypeId === $type->id ? 'text-white' : '' }}"
                                         wire:click="edit({{ $type->id }})"

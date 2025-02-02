@@ -49,7 +49,7 @@ class FlightFactory extends Factory
         return [
             'airline_id' => $airline->id,
             'aircraft_id' => $aircraft->id,
-            'flight_number' => strtoupper($airline->iata_code . fake()->numberBetween(100, 9999)),
+            'flight_number' => $airline->iata_code . str_pad(fake()->numberBetween(100, 999), 4, '0', STR_PAD_LEFT),
             'departure_airport' => $departure,
             'arrival_airport' => $arrival,
             'scheduled_departure_time' => $scheduled_departure_time,
