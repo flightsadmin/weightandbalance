@@ -94,7 +94,7 @@ class Flight extends Model
 
     public function getTotalCrewWeight(): float
     {
-        return $this->crew()->count() * $this->airline->getStandardCrewWeight();
+        return $this->crew()->count() * $this->airline->getStandardCockpitCrewWeight();
     }
 
     public function calculateTotalWeight(): float

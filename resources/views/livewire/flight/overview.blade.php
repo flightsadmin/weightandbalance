@@ -118,10 +118,6 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title m-0">Load Summary</h5>
-                        <button wire:click="calculateWeightBalance({{ $flight }})"
-                            class="btn btn-sm btn-{{ $flight->weightBalance ? 'warning' : 'primary' }}">
-                            {{ $flight->weightBalance ? 'Recalculate' : 'Calculate' }} <i class="bi bi-calculator"></i>
-                        </button>
                     </div>
                     <div class="card-body">
                         <div class="row">

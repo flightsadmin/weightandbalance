@@ -13,89 +13,126 @@
     </div>
 
     <div class="card-body table-responsive">
-        <table class="table table-sm table-hover">
-            <thead>
-                <tr>
-                    <th>Tag Number</th>
-                    @unless ($flight)
-                        <th>Flight</th>
-                    @endunless
-                    <th>Passenger</th>
-                    <th>Seat</th>
-                    <th>Weight</th>
-                    <th>Container</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($baggage as $bag)
-                    <tr wire:key="{{ $bag->id }}">
-                        <td>{{ $bag->tag_number }}</td>
-                        @unless ($flight)
-                            <td>
-                                @if ($bag->flight)
-                                    {{ $bag->flight->flight_number }}
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
-                        @endunless
-                        <td>{{ $bag->passenger->name }}</td>
-                        <td>{{ $bag->passenger->seat_number }}</td>
-                        <td>{{ number_format($bag->weight) }} kg</td>
-                        <td>
-                            <div class="dropdown d-inline">
-                                <button
-                                    class="btn btn-sm btn-{{ $bag->container_id ? 'success' : 'danger' }} dropdown-toggle"
-                                    type="button" data-bs-toggle="dropdown">
-                                    {{ $bag->container_id ? $bag->container->container_number : 'Not loaded' }}
-                                </button>
-                                <ul class="dropdown-menu">
-                                    @foreach ($containers as $container)
-                                        <li>
-                                            <button class="dropdown-item"
-                                                wire:click="updateContainer({{ $bag->id }}, {{ $container->id }})">
-                                                <i class="bi bi-check-circle text-success"></i> {{ $container->container_number }}
-                                            </button>
-                                        </li>
-                                    @endforeach
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li>
-                                        <button class="dropdown-item"
-                                            wire:click="updateContainer({{ $bag->id }}, null)">
-                                            <i class="bi bi-x-circle text-danger"></i> Offloaded
+        @if ($baggage->count() > 0)
+            <div class="mb-3 d-flex gap-2 align-items-center">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" wire:model.live="selectAll" id="selectAll">
+                    <label class="form-check-label" for="selectAll">Select All</label>
+                </div>
+
+                @if (!empty($selected))
+                    <select class="form-select form-select-sm w-auto" wire:model="bulkContainer">
+                        <option value="">Select Container</option>
+                        @foreach ($containers as $container)
+                            <option value="{{ $container->id }}">{{ $container->container_number }}</option>
+                        @endforeach
+                    </select>
+
+                    <button class="btn btn-primary btn-sm" wire:click="loadSelectedToContainer"
+                        @if ($bulkContainer) disabled @endif>
+                        Load Selected ({{ count($selected) }})
+                    </button>
+                @endif
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" wire:model.live="selectAll"></th>
+                            <th>Tag Number</th>
+                            @unless ($flight)
+                                <th>Flight</th>
+                            @endunless
+                            <th>Passenger</th>
+                            <th>Seat</th>
+                            <th>Weight</th>
+                            <th>Container</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($baggage as $bag)
+                            <tr wire:key="{{ $bag->id }}">
+                                <td>
+                                    <input type="checkbox" wire:model.live="selected" value="{{ $bag->id }}">
+                                </td>
+                                <td>{{ $bag->tag_number }}</td>
+                                @unless ($flight)
+                                    <td>
+                                        @if ($bag->flight)
+                                            {{ $bag->flight->flight_number }}
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                @endunless
+                                <td>{{ $bag->passenger->name }}</td>
+                                <td>{{ $bag->passenger->seat_number }}</td>
+                                <td>{{ number_format($bag->weight) }} kg</td>
+                                <td>
+                                    <div class="dropdown d-inline">
+                                        <button
+                                            class="btn btn-sm btn-{{ $bag->container_id ? 'success' : 'danger' }} dropdown-toggle"
+                                            type="button" data-bs-toggle="dropdown">
+                                            {{ $bag->container_id ? $bag->container->container_number : 'Not loaded' }}
                                         </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                        <td>
-                            <span
-                                class="badge bg-{{ $bag->status === 'loaded' ? 'success' : ($bag->status === 'offloaded' ? 'danger' : 'warning') }}">
-                                {{ ucfirst($bag->status) }}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-link" wire:click="edit({{ $bag->id }})" data-bs-toggle="modal"
-                                data-bs-target="#baggageFormModal">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-link text-danger" wire:click="delete({{ $bag->id }})"
-                                wire:confirm="Are you sure you want to remove this baggage?">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="{{ $flight ? 6 : 7 }}" class="text-center">No baggage found.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                                        <ul class="dropdown-menu">
+                                            @foreach ($containers as $container)
+                                                <li>
+                                                    <button class="dropdown-item"
+                                                        wire:click="updateContainer({{ $bag->id }}, {{ $container->id }})">
+                                                        <i class="bi bi-check-circle text-success"></i> {{ $container->container_number }}
+                                                    </button>
+                                                </li>
+                                            @endforeach
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item"
+                                                    wire:click="updateContainer({{ $bag->id }}, null)">
+                                                    <i class="bi bi-x-circle text-danger"></i> Offloaded
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    @if ($bag->container)
+                                        <span class="small text-muted">
+                                            ({{ number_format($bag->container->total_weight) }}/{{ number_format($bag->container->max_weight) }}
+                                            kg)
+                                        </span>
+                                    @else
+                                        <span class="text-muted">Not assigned</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span
+                                        class="badge bg-{{ $bag->status === 'loaded' ? 'success' : ($bag->status === 'offloaded' ? 'danger' : 'warning') }}">
+                                        {{ ucfirst($bag->status) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-link" wire:click="edit({{ $bag->id }})" data-bs-toggle="modal"
+                                        data-bs-target="#baggageFormModal">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-link text-danger" wire:click="delete({{ $bag->id }})"
+                                        wire:confirm="Are you sure you want to remove this baggage?">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="{{ $flight ? 6 : 7 }}" class="text-center">No baggage found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        @endif
     </div>
 
     <div class="d-flex justify-content-between align-items-center">

@@ -17,13 +17,55 @@ class Manager extends Component
     public $type;
     public $status;
     public $container_id;
+    public $selected = [];
+    public $selectAll = false;
+    public $bulkContainer = null;
 
     public function mount(Flight $flight)
     {
         $this->flight = $flight;
     }
 
-    public function render()
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selected = $this->getCargoQuery()
+                ->pluck('id')
+                ->map(fn($id) => (string) $id)
+                ->toArray();
+        } else {
+            $this->selected = [];
+        }
+    }
+
+    public function updatedSelected()
+    {
+        $this->selectAll = count($this->selected) === $this->getCargoQuery()->count();
+    }
+
+    public function loadSelectedToContainer()
+    {
+        if (empty($this->selected) || !$this->bulkContainer) {
+            return;
+        }
+
+        Cargo::whereIn('id', $this->selected)->update([
+            'container_id' => $this->bulkContainer,
+            'status' => 'loaded'
+        ]);
+
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: count($this->selected) . ' cargo items loaded to container.'
+        );
+
+        $this->selected = [];
+        $this->selectAll = false;
+        $this->bulkContainer = null;
+    }
+
+    protected function getCargoQuery()
     {
         $query = Cargo::query();
         if ($this->search) {
@@ -43,12 +85,18 @@ class Manager extends Component
                 $q->where('flight_id', $this->flight->id);
             });
         }
+        return $query;
+    }
+
+    public function render()
+    {
+        $query = $this->getCargoQuery();
+
         return view('livewire.flights.cargo.manager', [
             'cargo' => $query->latest()->paginate(20),
             'containers' => $this->flight->containers()->where('type', 'cargo')->latest()->paginate(20),
         ])->layout('components.layouts.app');
     }
-
 
     public function updateContainer($cargoId, $containerId)
     {

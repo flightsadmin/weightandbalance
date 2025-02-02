@@ -24,7 +24,7 @@ class FlightFactory extends Factory
         $aircraft = Aircraft::where('active', true)->inRandomOrder()->first();
         $airline = $aircraft->airline;
 
-        $scheduled_departure_time = fake()->dateTimeBetween('now', '+1 week');
+        $scheduled_departure_time = fake()->dateTimeBetween('now' . '-1 day', '+1 week');
         $scheduled_arrival_time = clone $scheduled_departure_time;
         $scheduled_arrival_time->modify('+' . fake()->numberBetween(1, 12) . ' hours');
 

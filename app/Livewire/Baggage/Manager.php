@@ -18,6 +18,9 @@ class Manager extends Component
     public $editingBaggage = null;
     public $search = '';
     public $selectedPassenger = null;
+    public $selected = [];
+    public $selectAll = false;
+    public $bulkContainer = null;
 
     public $form = [
         'passenger_id' => '',
@@ -104,8 +107,46 @@ class Manager extends Component
         );
     }
 
-    #[On('baggage-saved')]
-    public function render()
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selected = $this->getBaggageQuery()
+                ->pluck('id')
+                ->map(fn($id) => (string) $id)
+                ->toArray();
+        } else {
+            $this->selected = [];
+        }
+    }
+
+    public function updatedSelected()
+    {
+        $this->selectAll = count($this->selected) === $this->getBaggageQuery()->count();
+    }
+
+    public function loadSelectedToContainer()
+    {
+        if (empty($this->selected) || !$this->bulkContainer) {
+            return;
+        }
+
+        Baggage::whereIn('id', $this->selected)->update([
+            'container_id' => $this->bulkContainer,
+            'status' => 'loaded'
+        ]);
+
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: count($this->selected) . ' baggage items loaded to container.'
+        );
+
+        $this->selected = [];
+        $this->selectAll = false;
+        $this->bulkContainer = null;
+    }
+
+    protected function getBaggageQuery()
     {
         $query = Baggage::query()->with(['passenger', 'container', 'flight']);
 
@@ -124,6 +165,13 @@ class Manager extends Component
             });
         }
 
+        return $query;
+    }
+
+    #[On('baggage-saved')]
+    public function render()
+    {
+        $query = $this->getBaggageQuery();
         $query->orderByDesc('created_at');
 
         return view('livewire.flights.baggage.manager', [
