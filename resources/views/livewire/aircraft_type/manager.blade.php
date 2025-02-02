@@ -108,6 +108,12 @@
                                         <i class="bi bi-gear"></i> Settings
                                     </button>
                                 </li>
+                                <li class="nav-item">
+                                    <button class="nav-link {{ $activeTab === 'crew_seating' ? 'active' : '' }}"
+                                        wire:click="$set('activeTab', 'crew_seating')">
+                                        <i class="bi bi-person-workspace"></i> Crew Seating
+                                    </button>
+                                </li>
                             </ul>
                         </div>
                         <div class="card-body">
@@ -121,6 +127,8 @@
                                 <livewire:aircraft-type.aircraft-manager :key="'aircraft-' . $selectedTypeId" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'settings')
                                 <livewire:aircraft-type.settings :key="'settings-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                            @elseif ($activeTab === 'crew_seating')
+                                <livewire:aircraft-type.crew-seating :key="'crew_seating-' . $selectedTypeId" :aircraftType="$this->selectedType" />
                             @endif
                         </div>
                     </div>

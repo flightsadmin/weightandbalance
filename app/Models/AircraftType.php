@@ -91,4 +91,9 @@ class AircraftType extends Model
     {
         return $this->hasMany(CabinZone::class)->orderBy('index');
     }
+
+    public function crewSeating(): HasMany
+    {
+        return $this->hasMany(CrewSeating::class);
+    }
 }
