@@ -33,7 +33,6 @@
             @endif
         </div>
     @else
-        {{-- Regular Hold Position Display --}}
         @php
             $containerId = array_search($position->id, $containerPositions);
             $container = $containerId ? $containers->firstWhere('id', $containerId) : null;

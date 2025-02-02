@@ -156,47 +156,65 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control form-control-sm" wire:model="form.name">
-                            @error('form.name')
-                                <div class="text-danger small">{{ $message }}</div>
-                            @enderror
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Name</label>
+                                    <input type="text" class="form-control form-control-sm" wire:model="form.name">
+                                    @error('form.name')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Position</label>
+                                    <select class="form-select form-select-sm" wire:model="form.position">
+                                        <option value="">Select Position</option>
+                                        <option value="captain">Captain</option>
+                                        <option value="first_officer">First Officer</option>
+                                        <option value="purser">Purser</option>
+                                        <option value="cabin_crew">Cabin Crew</option>
+                                    </select>
+                                    @error('form.position')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Employee ID</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                        wire:model="form.employee_id">
+                                    @error('form.employee_id')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Position</label>
-                            <select class="form-select form-select-sm" wire:model="form.position">
-                                <option value="">Select Position</option>
-                                <option value="captain">Captain</option>
-                                <option value="first_officer">First Officer</option>
-                                <option value="purser">Purser</option>
-                                <option value="cabin_crew">Cabin Crew</option>
-                            </select>
-                            @error('form.position')
-                                <div class="text-danger small">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Employee ID</label>
-                            <input type="text" class="form-control form-control-sm" wire:model="form.employee_id">
-                            @error('form.employee_id')
-                                <div class="text-danger small">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Notes</label>
-                            <textarea class="form-control form-control-sm" wire:model="form.notes" rows="3"></textarea>
-                            @error('form.notes')
-                                <div class="text-danger small">{{ $message }}</div>
-                            @enderror
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Notes</label>
+                                    <textarea class="form-control form-control-sm" wire:model="form.notes"
+                                        rows="3"></textarea>
+                                    @error('form.notes')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="bi bi-save"></i> Save
+                        </button>
                     </div>
                 </form>
             </div>

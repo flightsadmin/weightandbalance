@@ -55,7 +55,8 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <a wire:navigate href="{{ route('flights.show', $container->flight) }}" class="text-decoration-none">
+                                    <a wire:navigate href="{{ route('flights.show', $container->flight) }}"
+                                        class="text-decoration-none">
                                         {{ $container->flight->flight_number }}
                                     </a>
                                 </td>
@@ -76,7 +77,8 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a wire:navigate href="{{ route('containers.edit', $container) }}" class="btn btn-sm btn-primary">
+                                    <a wire:navigate href="{{ route('containers.edit', $container) }}"
+                                        class="btn btn-sm btn-primary">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                 </td>

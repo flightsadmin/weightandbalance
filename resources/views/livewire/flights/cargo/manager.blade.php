@@ -32,7 +32,7 @@
                 </select>
             </div>
             <div>
-                <a wire:navigate href="{{ route('flights.show', $flight) }}" class="btn btn-sm btn-secondary">
+                <a href="{{ route('flights.show', $flight) }}" wire:navigate class="btn btn-sm btn-secondary">
                     <i class="bi bi-arrow-left"></i> Back to Flight
                 </a>
             </div>
@@ -91,7 +91,7 @@
                                         {{ $item->awb_number }}
                                     </td>
                                     <td>
-                                        <a wire:navigate href="{{ route('flights.show', $item->flight) }}"
+                                        <a href="{{ route('flights.show', $item->flight) }}" wire:navigate
                                             class="text-decoration-none">
                                             {{ $item->flight->flight_number }}
                                         </a>
