@@ -25,6 +25,10 @@
                         wire:click="$set('activeTab', 'aircraft')">
                         <i class="bi bi-airplane"></i> Aircraft
                     </button>
+                    <button class="list-group-item list-group-item-action {{ $activeTab === 'settings' ? 'active' : '' }}"
+                        wire:click="$set('activeTab', 'settings')">
+                        <i class="bi bi-gear"></i> Settings
+                    </button>
                 </div>
             </div>
 
@@ -37,6 +41,8 @@
                     <livewire:aircraft-type.zone-manager :aircraftType="$aircraftType" />
                 @elseif ($activeTab === 'aircraft')
                     <livewire:aircraft-type.aircraft-manager :aircraftType="$aircraftType" />
+                @elseif ($activeTab === 'settings')
+                    <livewire:aircraft-type.settings :aircraftType="$aircraftType" />
                 @endif
             </div>
         </div>

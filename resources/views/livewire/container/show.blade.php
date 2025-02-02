@@ -118,10 +118,7 @@
                                 <tr>
                                     <th>Aircraft</th>
                                     <td>
-                                        <a wire:navigate href="{{ route('aircraft.show', $container->flight->aircraft) }}"
-                                            class="text-decoration-none">
-                                            {{ $container->flight->aircraft->registration_number }}
-                                        </a>
+                                        {{ $container->flight->aircraft->registration_number }}
                                     </td>
                                 </tr>
                             </table>

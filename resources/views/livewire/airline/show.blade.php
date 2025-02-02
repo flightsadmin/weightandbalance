@@ -64,9 +64,6 @@
                     <div class="card mb-3">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="card-title m-0">Aircraft</h5>
-                            <a wire:navigate href="{{ route('airlines.aircraft', $airline) }}" class="btn btn-sm btn-primary">
-                                <i class="bi bi-card-list"></i> All Aircraft
-                            </a>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -84,10 +81,7 @@
                                         @forelse($airline->aircraft as $aircraft)
                                             <tr wire:key="aircraft-{{ $aircraft->id }}">
                                                 <td>
-                                                    <a wire:navigate href="{{ route('aircraft.show', $aircraft) }}"
-                                                        class="text-decoration-none">
-                                                        {{ $aircraft->registration_number }}
-                                                    </a>
+                                                    {{ $aircraft->registration_number }}
                                                 </td>
                                                 <td>{{ $aircraft->type->code }} </td>
                                                 <td>{{ $aircraft->type->name }}</td>
@@ -112,9 +106,6 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="card-title m-0">Recent Flights</h5>
-                            <a wire:navigate href="{{ route('airlines.flights', $airline) }}" class="btn btn-sm btn-primary">
-                                <i class="bi bi-card-list"></i> All Flights
-                            </a>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
