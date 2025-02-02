@@ -9,6 +9,7 @@ use App\Models\Cargo;
 use App\Models\Flight;
 use App\Models\Airline;
 use App\Models\Baggage;
+use App\Models\Setting;
 use App\Models\Aircraft;
 use App\Models\Container;
 use App\Models\Passenger;
@@ -62,6 +63,35 @@ class DatabaseSeeder extends Seeder
                         Container::factory(rand(1, 3))->forFlight($flight)->create();
                     });
                 });
+                $settings = [
+                    [
+                        'airline_id' => $airline->id,
+                        'key' => Airline::SETTING_STANDARD_COCKPIT_CREW_WEIGHT,
+                        'value' => 85,
+                    ],
+                    [
+                        'airline_id' => $airline->id,
+                        'key' => \App\Enums\CrewPosition::CAPTAIN->value,
+                        'value' => 85,
+                    ],
+                    [
+                        'airline_id' => $airline->id,
+                        'key' => Airline::SETTING_STANDARD_CABIN_CREW_WEIGHT,
+                        'value' => 75,
+                    ],
+                    [
+                        'airline_id' => $airline->id,
+                        'key' => Airline::SETTING_STANDARD_PASSENGER_WEIGHT,
+                        'value' => 84,
+                    ],
+                    [
+                        'airline_id' => $airline->id,
+                        'key' => Airline::SETTING_STANDARD_PANTY_WEIGHT,
+                        'value' => 250,
+                    ]
+                ];
+
+                Setting::insert($settings);
             });
         });
     }
