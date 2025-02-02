@@ -177,7 +177,7 @@ class Manager extends Component
         return view('livewire.flights.baggage.manager', [
             'baggage' => $query->paginate(10),
             'passengers' => $this->flight ? $this->flight->passengers()->get() : collect(),
-            'containers' => $this->flight ? $this->flight->containers()->get() : collect()
+            'containers' => $this->flight ? $this->flight->containers()->where('type', 'baggage')->get() : collect()
         ]);
     }
 }
