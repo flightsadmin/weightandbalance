@@ -55,7 +55,7 @@
                                 <td>{{ ucfirst($container->compartment ?? '-') }}</td>
                                 <td>
                                     <span class="badge bg-{{ $container->status === 'loaded' ? 'success' : 'warning' }}">
-                                        {{ ucfirst($container->status ?? '-') }}
+                                        {{ ucfirst($container->status ?? 'Not Loaded') }}
                                     </span>
                                 </td>
                                 <td>{{ number_format($container->tare_weight) }} kg</td>

@@ -17,7 +17,7 @@ class Container extends Component
     public function render()
     {
 
-        return view('livewire.flight.containers', [
+        return view('livewire.flights.container.containers', [
             'containers' => $this->flight->containers()->latest()->paginate(10),
         ]);
 
