@@ -10,9 +10,6 @@
                     <i class="bi bi-{{ $airline->active ? 'check' : 'x' }}"></i>
                     {{ $airline->active ? 'Active' : 'Inactive' }}
                 </button>
-                <a wire:navigate href="{{ route('airlines.edit', $airline) }}" class="btn btn-sm btn-primary">
-                    <i class="bi bi-pencil"></i> Edit
-                </a>
                 <a wire:navigate href="{{ route('airlines.index') }}" class="btn btn-sm btn-secondary">
                     <i class="bi bi-arrow-left"></i> Back
                 </a>

@@ -9,41 +9,76 @@ use Livewire\WithPagination;
 class Index extends Component
 {
     use WithPagination;
-    public $paginationTheme = 'bootstrap';
-    public $search = '';
-    public $status = '';
-    public $sortField = 'name';
-    public $sortDirection = 'asc';
 
-    public function sortBy($field)
+    public $search = '';
+    public $showModal = false;
+    public $editingAirline = null;
+
+    // Form fields
+    public $form = [
+        'name' => '',
+        'iata_code' => '',
+        'country' => '',
+        'phone' => '',
+        'email' => '',
+        'address' => '',
+        'description' => '',
+    ];
+
+    protected $rules = [
+        'form.name' => 'required|string|max:255',
+        'form.iata_code' => 'required|string|size:2',
+        'form.country' => 'required|string|max:255',
+        'form.phone' => 'nullable|string|max:255',
+        'form.email' => 'nullable|email|max:255',
+        'form.address' => 'nullable|string|max:255',
+        'form.description' => 'nullable|string',
+    ];
+
+    public function edit(Airline $airline)
     {
-        if ($this->sortField === $field) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortField = $field;
-            $this->sortDirection = 'asc';
-        }
+        $this->editingAirline = $airline;
+        $this->form = $airline->only(['name', 'iata_code', 'country', 'phone', 'email', 'address', 'description']);
+        $this->showModal = true;
     }
 
-    public function render()
+    public function save()
     {
-        $query = Airline::with('flights')
-            ->when($this->search, function ($query) {
-                $query->whereAny(['name', 'iata_code', 'address', 'phone', 'email'], 'like', '%' . $this->search . '%');
-            })
-            ->when($this->status !== '', fn($q) => $q->where('active', $this->status === 'active'));
-        return view('livewire.airline.index', [
-            'airlines' => $query->orderBy($this->sortField, $this->sortDirection)->paginate(10),
-        ])->layout('components.layouts.app', ['title' => 'Airlines']);
+        $this->validate();
+
+        if ($this->editingAirline) {
+            $this->editingAirline->update($this->form);
+            $message = 'Airline updated successfully.';
+        } else {
+            Airline::create($this->form);
+            $message = 'Airline created successfully.';
+        }
+
+        $this->dispatch('alert', icon: 'success', message: $message);
+        $this->dispatch('airline-saved');
+        $this->reset(['form', 'editingAirline', 'showModal']);
     }
 
     public function toggleStatus(Airline $airline)
     {
         $airline->update(['active' => !$airline->active]);
-        $this->dispatch(
-            'alert',
-            icon: 'success',
-            message: 'Airline status updated successfully.'
-        );
+        $this->dispatch('alert', icon: 'success', message: 'Airline status updated successfully.');
+    }
+
+    public function remove(Airline $airline)
+    {
+        $airline->delete();
+        $this->dispatch('alert', icon: 'success', message: 'Airline deleted successfully.');
+    }
+
+    public function render()
+    {
+        return view('livewire.airline.index', [
+            'airlines' => Airline::query()
+                ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%")
+                    ->orWhere('iata_code', 'like', "%{$this->search}%"))
+                ->orderBy('name')
+                ->paginate(10)
+        ])->layout('components.layouts.app');
     }
 }
