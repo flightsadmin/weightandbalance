@@ -267,7 +267,6 @@
     font-size: 0.75rem; 
 }
 
-/* Remove drag-related styles */
 .dragging,
 .dragover {
     display: none;
