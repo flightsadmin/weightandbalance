@@ -40,7 +40,7 @@ class Loadplan extends Component
                     $query->where('id', $toPosition);
                 })->first();
             $holdType = $position?->code;
-            $compartment = $holdType . '-' . $toPosition;
+            $compartment = $toPosition;
         }
 
         // Find current position if fromPosition is null
