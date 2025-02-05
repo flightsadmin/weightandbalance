@@ -218,12 +218,11 @@
                     </div>
                 </div>
 
-                <!-- Add this section after the weights section -->
+                <!-- Balance Data Section -->
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title">Balance Data</h5>
-
                         </div>
                         <div class="card-body">
                             <table class="table table-sm">
