@@ -60,7 +60,7 @@ class AircraftType extends Model
     {
         return $this->holds
             ->where('is_active', true)
-            ->flatMap(fn($hold) => $hold->getPositions())
+            ->flatMap(fn ($hold) => $hold->getPositions())
             ->values();
     }
 
@@ -102,6 +102,11 @@ class AircraftType extends Model
         return $this->hasMany(CrewDistribution::class);
     }
 
+    public function envelopes(): HasMany
+    {
+        return $this->hasMany(Envelope::class);
+    }
+
     public function getPantryDetails($pantryCode)
     {
         $pantryCode = strtolower($pantryCode);
@@ -120,6 +125,7 @@ class AircraftType extends Model
             ->get())
             ->map(function ($setting) {
                 $code = str_replace(['pantry_', '_name'], '', $setting->key);
+
                 return array_merge(
                     ['code' => $code],
                     $this->getPantryDetails($code)

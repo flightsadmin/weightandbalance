@@ -271,6 +271,23 @@
                     </div>
                 </div>
 
+                <!-- Manage Pantry Codes Section -->
+                <div class="mt-4">
+                    <h3 class="text-lg font-medium text-gray-900">Manage Pantry Codes</h3>
+                    <div class="mt-2">
+                        <input type="text" wire:model="newPantryCode" placeholder="Enter new pantry code" class="form-control">
+                        <button wire:click="addPantryCode" class="btn btn-primary mt-2">Add</button>
+                    </div>
+                    <ul class="list-group mt-2">
+                        @foreach($pantryCodes as $code)
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ $code }}</span>
+                                <button wire:click="removePantryCode('{{ $code }}')" class="btn btn-danger btn-sm">Remove</button>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
                 <!-- Signatures Section -->
                 @if ($loadsheet->final)
                     <div class="row mt-4">

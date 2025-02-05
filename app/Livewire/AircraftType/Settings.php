@@ -31,7 +31,7 @@ class Settings extends Component
             'length_of_mac' => ['type' => 'float', 'description' => 'Length of MAC (meters)'],
             'lemac_at' => ['type' => 'float', 'description' => 'Leading Edge MAC (meters)'],
             'fuel_density' => ['type' => 'float', 'description' => 'Fuel density (kg/L)'],
-        ]
+        ],
     ];
 
     public function mount(AircraftType $aircraftType)

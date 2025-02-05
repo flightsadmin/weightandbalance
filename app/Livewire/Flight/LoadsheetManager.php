@@ -15,6 +15,10 @@ class LoadsheetManager extends Component
 
     public $showModal = false;
 
+    public $pantryCodes = [];
+
+    public $newPantryCode;
+
     public function mount(Flight $flight)
     {
         $this->flight = $flight->load([
@@ -29,6 +33,7 @@ class LoadsheetManager extends Component
         ]);
 
         $this->loadplan = $this->flight->loadplans()->latest()->first();
+        $this->pantryCodes = $this->flight->pantryCodes()->pluck('code')->toArray();
     }
 
     public function finalizeLoadsheet()
@@ -44,13 +49,13 @@ class LoadsheetManager extends Component
 
     public function generateLoadsheet()
     {
-        if (!$this->flight->fuel) {
+        if (! $this->flight->fuel) {
             $this->dispatch('alert', icon: 'error', message: 'Fuel data must be added before generating loadsheet.');
 
             return;
         }
 
-        if (!$this->loadplan || $this->loadplan->status !== 'released') {
+        if (! $this->loadplan || $this->loadplan->status !== 'released') {
             $this->dispatch('alert', icon: 'error', message: 'Load plan must be released before generating loadsheet.');
 
             return;
@@ -111,6 +116,7 @@ class LoadsheetManager extends Component
             'balance' => $balance,
             'passenger_distribution' => $this->getPassengerDistribution(),
             'crew_distribution' => $crewDistribution,
+            'pantry_codes' => $this->pantryCodes,
         ];
 
         // Create new loadsheet
@@ -121,7 +127,7 @@ class LoadsheetManager extends Component
         ]);
 
         // Create weight balance record if needed
-        if (!$this->flight->weightBalance) {
+        if (! $this->flight->weightBalance) {
             $this->flight->weightBalance()->create([
                 'weights' => $distribution['weights'
                 ],
@@ -270,13 +276,13 @@ class LoadsheetManager extends Component
     private function calculateCargoWeight()
     {
         return $this->flight->containers
-            ->sum(fn($container) => $container->cargo->sum('weight'));
+            ->sum(fn ($container) => $container->cargo->sum('weight'));
     }
 
     private function calculateBaggageWeight()
     {
         return $this->flight->containers
-            ->sum(fn($container) => $container->baggage->sum('weight'));
+            ->sum(fn ($container) => $container->baggage->sum('weight'));
     }
 
     private function calculateCrewWeight($standardWeights)
@@ -303,13 +309,13 @@ class LoadsheetManager extends Component
                 return $hold->positions->contains('id', $positionId);
             });
 
-            if (!$container || !$position) {
+            if (! $container || ! $position) {
                 continue;
             }
 
             $holdId = $position->id;
             if (
-                !isset($loadsByHold[$holdId
+                ! isset($loadsByHold[$holdId
                 ])
             ) {
                 $loadsByHold[$holdId
@@ -339,19 +345,25 @@ class LoadsheetManager extends Component
     {
         return $this->flight->passengers
             ->groupBy('type')
-            ->map(fn($group) => $group->count())
+            ->map(fn ($group) => $group->count())
             ->toArray();
     }
 
-    public function calculatePantryLoad()
+    public function addPantryCode()
     {
-        $pantryCode = $this->flight->fuel->pantry ?? 'A';
-        $pantryDetails = $this->flight->aircraft->type->getPantryDetails($pantryCode);
+        if ($this->newPantryCode) {
+            $this->flight->pantryCodes()->create(['code' => $this->newPantryCode]);
+            $this->pantryCodes[] = $this->newPantryCode;
+            $this->newPantryCode = '';
+            $this->dispatch('alert', icon: 'success', message: 'Pantry code added successfully.');
+        }
+    }
 
-        return [
-            'weight' => $pantryDetails['weight'],
-            'index' => $pantryDetails['index']
-        ];
+    public function removePantryCode($code)
+    {
+        $this->flight->pantryCodes()->where('code', $code)->delete();
+        $this->pantryCodes = array_filter($this->pantryCodes, fn ($c) => $c !== $code);
+        $this->dispatch('alert', icon: 'success', message: 'Pantry code removed successfully.');
     }
 
     public function render()
@@ -360,6 +372,7 @@ class LoadsheetManager extends Component
             'livewire.flight.loadsheet-manager',
             [
                 'loadsheets' => $this->flight->loadsheets()->latest()->get(),
+                'pantryCodes' => $this->pantryCodes,
             ]
         );
     }

@@ -42,7 +42,7 @@ class PantryManager extends Component
             [
                 'value' => $this->pantryForm['weight'],
                 'type' => 'float',
-                'description' => "{$this->pantryForm['name']} weight (kg)"
+                'description' => "{$this->pantryForm['name']} weight (kg)",
             ]
         );
 
@@ -54,10 +54,9 @@ class PantryManager extends Component
             [
                 'value' => $this->pantryForm['name'],
                 'type' => 'string',
-                'description' => "Pantry name"
+                'description' => 'Pantry name',
             ]
         );
-
 
         $this->aircraftType->settings()->updateOrCreate(
             [
@@ -68,7 +67,7 @@ class PantryManager extends Component
                 'value' => $this->pantryForm['index'],
 
                 'type' => 'float',
-                'description' => "{$this->pantryForm['name']} index"
+                'description' => "{$this->pantryForm['name']} index",
             ]
         );
 
@@ -100,7 +99,7 @@ class PantryManager extends Component
             ->whereIn('key', [
                 "pantry_{$code}_name",
                 "pantry_{$code}_weight",
-                "pantry_{$code}_index"
+                "pantry_{$code}_index",
             ])
             ->delete();
 
@@ -114,6 +113,7 @@ class PantryManager extends Component
             ->get())
             ->map(function ($setting) {
                 $code = str_replace(['pantry_', '_name'], '', $setting->key);
+
                 return [
                     'code' => $code,
                     'name' => $setting->value,
@@ -123,7 +123,7 @@ class PantryManager extends Component
             });
 
         return view('livewire.aircraft_type.pantry-manager', [
-            'pantries' => $pantries
+            'pantries' => $pantries,
         ]);
     }
 }

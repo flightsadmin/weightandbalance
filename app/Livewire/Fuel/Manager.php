@@ -71,8 +71,8 @@ class Manager extends Component
                     $pantry['code'] => [
                         'name' => $pantry['name'],
                         'weight' => $pantry['weight'],
-                        'index' => $pantry['index']
-                    ]
+                        'index' => $pantry['index'],
+                    ],
                 ];
             });
     }

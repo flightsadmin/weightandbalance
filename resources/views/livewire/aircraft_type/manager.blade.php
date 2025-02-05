@@ -120,6 +120,12 @@
                                         <i class="bi bi-box"></i> Pantries
                                     </button>
                                 </li>
+                                <li class="nav-item">
+                                    <button class="nav-link {{ $activeTab === 'envelopes' ? 'active' : '' }}"
+                                        wire:click="$set('activeTab', 'envelopes')">
+                                        <i class="bi bi-box"></i> Envelopes
+                                    </button>
+                                </li>
                             </ul>
                         </div>
                         <div class="card-body">
@@ -137,6 +143,8 @@
                                 <livewire:aircraft-type.crew-seating :key="'crew_seating-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'pantry')
                                 <livewire:aircraft-type.pantry-manager :key="'pantry-' . $selectedAircraft" :aircraftType="$this->selectedType" />
+                            @elseif ($activeTab === 'envelopes')
+                                <livewire:aircraft-type.envelope-manager :key="'envelopes-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @endif
                         </div>
                     </div>
