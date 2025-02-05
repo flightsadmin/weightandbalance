@@ -63,10 +63,25 @@ class Manager extends Component
         $this->dispatch('close-modal');
     }
 
+    public function getPantryOptions()
+    {
+        return $this->flight->aircraft->type->getAllPantries()
+            ->mapWithKeys(function ($pantry) {
+                return [
+                    $pantry['code'] => [
+                        'name' => $pantry['name'],
+                        'weight' => $pantry['weight'],
+                        'index' => $pantry['index']
+                    ]
+                ];
+            });
+    }
+
     public function render()
     {
         return view('livewire.flights.fuel.manager', [
             'fuel' => $this->flight->fuel,
+            'pantryOptions' => $this->getPantryOptions(),
         ]);
     }
 }

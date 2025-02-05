@@ -31,19 +31,7 @@ class Settings extends Component
             'length_of_mac' => ['type' => 'float', 'description' => 'Length of MAC (meters)'],
             'lemac_at' => ['type' => 'float', 'description' => 'Leading Edge MAC (meters)'],
             'fuel_density' => ['type' => 'float', 'description' => 'Fuel density (kg/L)'],
-        ],
-        'fuel_tanks' => [
-            'center_tank_index' => ['type' => 'float', 'description' => 'Center tank index'],
-            'left_wing_tank_index' => ['type' => 'float', 'description' => 'Left wing tank index'],
-            'right_wing_tank_index' => ['type' => 'float', 'description' => 'Right wing tank index'],
-            'trim_tank_index' => ['type' => 'float', 'description' => 'Trim tank index'],
-        ],
-        'crew_positions' => [
-            'cockpit_crew_index' => ['type' => 'float', 'description' => 'Cockpit crew index'],
-            'cabin_crew_front_index' => ['type' => 'float', 'description' => 'Front cabin crew index'],
-            'cabin_crew_mid_index' => ['type' => 'float', 'description' => 'Mid cabin crew index'],
-            'cabin_crew_aft_index' => ['type' => 'float', 'description' => 'Aft cabin crew index'],
-        ],
+        ]
     ];
 
     public function mount(AircraftType $aircraftType)

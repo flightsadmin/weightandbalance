@@ -343,6 +343,17 @@ class LoadsheetManager extends Component
             ->toArray();
     }
 
+    public function calculatePantryLoad()
+    {
+        $pantryCode = $this->flight->fuel->pantry ?? 'A';
+        $pantryDetails = $this->flight->aircraft->type->getPantryDetails($pantryCode);
+
+        return [
+            'weight' => $pantryDetails['weight'],
+            'index' => $pantryDetails['index']
+        ];
+    }
+
     public function render()
     {
         return view(

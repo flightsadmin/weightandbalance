@@ -163,8 +163,11 @@
                                             <label class="form-label">Pantry</label>
                                             <select wire:model="pantry" class="form-select form-select-sm" required>
                                                 <option value="" disabled selected>Select Pantry</option>
-                                                <option value="A">A</option>
-                                                <option value="B">B</option>
+                                                @foreach ($pantryOptions as $key => $pantry)
+                                                    <option value="{{ $key }}">
+                                                        {{ $pantry['name'] }} ({{ number_format($pantry['weight']) }} kg)
+                                                    </option>
+                                                @endforeach
                                             </select>
                                             @error('pantry')
                                                 <span class="text-danger small">{{ $message }}</span>

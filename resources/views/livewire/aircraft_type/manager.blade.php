@@ -114,6 +114,12 @@
                                         <i class="bi bi-person-workspace"></i> Crew Seating
                                     </button>
                                 </li>
+                                <li class="nav-item">
+                                    <button class="nav-link {{ $activeTab === 'pantry' ? 'active' : '' }}"
+                                        wire:click="$set('activeTab', 'pantry')">
+                                        <i class="bi bi-box"></i> Pantries
+                                    </button>
+                                </li>
                             </ul>
                         </div>
                         <div class="card-body">
@@ -129,6 +135,8 @@
                                 <livewire:aircraft-type.settings :key="'settings-' . $selectedTypeId" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'crew_seating')
                                 <livewire:aircraft-type.crew-seating :key="'crew_seating-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                            @elseif ($activeTab === 'pantry')
+                                <livewire:aircraft-type.pantry-manager :key="'pantry-' . $selectedTypeId" :aircraftType="$this->selectedType" />
                             @endif
                         </div>
                     </div>

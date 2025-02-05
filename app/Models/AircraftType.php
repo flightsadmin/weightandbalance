@@ -60,7 +60,7 @@ class AircraftType extends Model
     {
         return $this->holds
             ->where('is_active', true)
-            ->flatMap(fn ($hold) => $hold->getPositions())
+            ->flatMap(fn($hold) => $hold->getPositions())
             ->values();
     }
 
@@ -100,5 +100,30 @@ class AircraftType extends Model
     public function crewDistributions(): HasMany
     {
         return $this->hasMany(CrewDistribution::class);
+    }
+
+    public function getPantryDetails($pantryCode)
+    {
+        $pantryCode = strtolower($pantryCode);
+
+        return [
+            'name' => $this->getSetting("pantry_{$pantryCode}_name", ''),
+            'weight' => $this->getSetting("pantry_{$pantryCode}_weight", 0),
+            'index' => $this->getSetting("pantry_{$pantryCode}_index", 0),
+        ];
+    }
+
+    public function getAllPantries()
+    {
+        return collect($this->settings()
+            ->where('key', 'like', 'pantry_%_name')
+            ->get())
+            ->map(function ($setting) {
+                $code = str_replace(['pantry_', '_name'], '', $setting->key);
+                return array_merge(
+                    ['code' => $code],
+                    $this->getPantryDetails($code)
+                );
+            });
     }
 }
