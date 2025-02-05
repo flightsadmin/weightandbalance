@@ -9,8 +9,11 @@ use Livewire\Component;
 class LoadsheetManager extends Component
 {
     public Flight $flight;
+
     public $loadsheet;
+
     public $loadplan;
+
     public $showModal = false;
 
     public function mount(Flight $flight)
@@ -124,7 +127,7 @@ class LoadsheetManager extends Component
             'total_pieces' => $this->flight->cargo->sum('pieces'),
             'by_type' => $this->flight->cargo
                 ->groupBy('type')
-                ->map(fn($group) => [
+                ->map(fn ($group) => [
                     'weight' => $group->sum('weight'),
                     'pieces' => $group->sum('pieces'),
                 ])
@@ -145,11 +148,13 @@ class LoadsheetManager extends Component
         }
 
         foreach ($this->flight->containers as $container) {
-            $holdId = $container->hold_id;
-            $loadsByHold[$holdId]['total_weight'] += $container->cargo->sum('weight');
-        }
+            if ($container->hold_id) {
+                $loadsByHold[$container->hold_id]['total_weight'] +=
+                    $container->cargo->sum('weight') +
+                    $container->baggage->sum('weight');
 
-        dd($loadsByHold);
+            }
+        }
 
         return $loadsByHold;
     }
@@ -158,7 +163,7 @@ class LoadsheetManager extends Component
     {
         return $this->flight->passengers
             ->groupBy('type')
-            ->map(fn($group) => $group->count())
+            ->map(fn ($group) => $group->count())
             ->toArray();
     }
 

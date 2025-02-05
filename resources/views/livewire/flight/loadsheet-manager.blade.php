@@ -1,10 +1,10 @@
-<div>
+<div class="mb-4">
     <div class="row">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">Load Sheet</h3>
-                    <div class="d-flex gap-2">
+                    <h3 class="card-title m-0">Load Sheet</h3>
+                    <div class="d-flex gap-2 m-0">
                         @if ($loadsheet && !$loadsheet->final)
                             <button class="btn btn-success btn-sm m-0" wire:click="finalizeLoadsheet">
                                 <i class="bi bi-check2-circle"></i> Finalize Loadsheet</button>
@@ -149,10 +149,9 @@
                             <div>STAB TRIM SETTING</div>
                             <div>STAB TO 1.9 NOSE UP</div>
                             <div>TRIM BY SEAT ROW</div>
-                            <div>N/A</div>
                             <table class="table table-sm table-borderless m-0">
                                 <tr>
-                                    <td style="width: 40%">UNDERLOAD BEFORE LMC</td>
+                                    <td style="width: 35%">UNDERLOAD BEFORE LMC</td>
                                     <td>{{ $underload }}</td>
                                     <td>LMC TOTAL</td>
                                 </tr>
@@ -182,6 +181,18 @@
                         </div>
                     </div>
                 @endif
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title m-0">Load Sheet</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center py-4">
+                        <p class="text-muted">No loadsheet generated yet.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
