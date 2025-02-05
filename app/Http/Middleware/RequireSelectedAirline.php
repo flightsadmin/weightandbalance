@@ -9,7 +9,7 @@ class RequireSelectedAirline
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!session()->has('selected_airline_id')) {
+        if (! session()->has('selected_airline_id')) {
             return redirect()->route('aircraft_types.index')
                 ->with('error', 'Please select an airline first.');
         }

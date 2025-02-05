@@ -21,12 +21,12 @@ class Cargo extends Model
         'type',
         'description',
         'status',
-        'special_instructions'
+        'special_instructions',
     ];
 
     protected $casts = [
         'weight' => 'integer',
-        'pieces' => 'integer'
+        'pieces' => 'integer',
     ];
 
     public function flight(): BelongsTo

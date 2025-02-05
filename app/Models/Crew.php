@@ -16,11 +16,11 @@ class Crew extends Model
         'name',
         'position',
         'email',
-        'notes'
+        'notes',
     ];
 
     protected $casts = [
-        'weight' => 'integer'
+        'weight' => 'integer',
     ];
 
     public function flights()

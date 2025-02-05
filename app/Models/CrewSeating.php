@@ -14,7 +14,7 @@ class CrewSeating extends Model
         'location',
         'max_number',
         'arm',
-        'index_per_kg'
+        'index_per_kg',
     ];
 
     public function aircraftType(): BelongsTo

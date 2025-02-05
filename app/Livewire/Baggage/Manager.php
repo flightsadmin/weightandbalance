@@ -2,26 +2,35 @@
 
 namespace App\Livewire\Baggage;
 
-use App\Models\Flight;
 use App\Models\Baggage;
 use App\Models\Container;
+use App\Models\Flight;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\On;
 
 class Manager extends Component
 {
     use WithPagination;
 
     protected $paginationTheme = 'bootstrap';
+
     public $flight = null;
+
     public $showForm = false;
+
     public $editingBaggage = null;
+
     public $search = '';
+
     public $status = '';
+
     public $container_id = '';
+
     public $selected = [];
+
     public $selectAll = false;
+
     public $bulkContainer = null;
 
     public $form = [
@@ -30,7 +39,7 @@ class Manager extends Component
         'weight' => '',
         'container_id' => null,
         'status' => 'pending',
-        'notes' => ''
+        'notes' => '',
     ];
 
     protected $rules = [
@@ -39,7 +48,7 @@ class Manager extends Component
         'form.weight' => 'required|numeric|min:0',
         'form.container_id' => 'nullable|exists:containers,id',
         'form.status' => 'required|in:pending,loaded,offloaded',
-        'form.notes' => 'nullable|string'
+        'form.notes' => 'nullable|string',
     ];
 
     public function mount(?Flight $flight = null)
@@ -56,7 +65,7 @@ class Manager extends Component
             'weight',
             'container_id',
             'status',
-            'notes'
+            'notes',
         ]);
         $this->showForm = true;
     }
@@ -66,7 +75,7 @@ class Manager extends Component
         $this->validate();
 
         $data = array_merge($this->form, [
-            'flight_id' => $this->flight?->id
+            'flight_id' => $this->flight?->id,
         ]);
 
         if ($this->editingBaggage) {
@@ -99,7 +108,7 @@ class Manager extends Component
         $baggage = Baggage::findOrFail($baggageId);
         $baggage->update([
             'container_id' => $containerId ? $containerId : null,
-            'status' => $containerId ? 'loaded' : 'offloaded'
+            'status' => $containerId ? 'loaded' : 'offloaded',
         ]);
 
         $this->dispatch(
@@ -114,7 +123,7 @@ class Manager extends Component
         if ($value) {
             $this->selected = $this->getBaggageQuery()
                 ->pluck('id')
-                ->map(fn($id) => (string) $id)
+                ->map(fn ($id) => (string) $id)
                 ->toArray();
         } else {
             $this->selected = [];
@@ -128,7 +137,7 @@ class Manager extends Component
 
     public function loadSelectedToContainer()
     {
-        if (empty($this->selected) || !$this->bulkContainer) {
+        if (empty($this->selected) || ! $this->bulkContainer) {
             return;
         }
 
@@ -138,7 +147,7 @@ class Manager extends Component
             $baggage = Baggage::find($baggageId);
             $baggage->update([
                 'container_id' => $this->bulkContainer,
-                'status' => 'loaded'
+                'status' => 'loaded',
             ]);
         }
 
@@ -147,7 +156,7 @@ class Manager extends Component
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: count($this->selected) . ' baggage items loaded to container.'
+            message: count($this->selected).' baggage items loaded to container.'
         );
 
         $this->selected = [];
@@ -161,9 +170,9 @@ class Manager extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('tag_number', 'like', '%' . $this->search . '%')
+                $q->where('tag_number', 'like', '%'.$this->search.'%')
                     ->orWhereHas('passenger', function ($q) {
-                        $q->whereAny(['name', 'ticket_number'], 'like', '%' . $this->search . '%');
+                        $q->whereAny(['name', 'ticket_number'], 'like', '%'.$this->search.'%');
                     });
             });
         }
@@ -194,7 +203,7 @@ class Manager extends Component
         return view('livewire.flights.baggage.manager', [
             'baggage' => $query->paginate(10),
             'passengers' => $this->flight ? $this->flight->passengers()->get() : collect(),
-            'containers' => $this->flight ? $this->flight->containers()->where('type', 'baggage')->get() : collect()
+            'containers' => $this->flight ? $this->flight->containers()->where('type', 'baggage')->get() : collect(),
         ]);
     }
 }

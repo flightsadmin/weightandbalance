@@ -18,4 +18,4 @@ class Overview extends Component
     {
         return view('livewire.aircraft_type.overview');
     }
-} 
+}

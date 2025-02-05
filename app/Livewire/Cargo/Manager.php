@@ -3,8 +3,8 @@
 namespace App\Livewire\Cargo;
 
 use App\Models\Cargo;
-use App\Models\Flight;
 use App\Models\Container;
+use App\Models\Flight;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -13,15 +13,25 @@ class Manager extends Component
     use WithPagination;
 
     protected $paginationTheme = 'bootstrap';
+
     public $flight;
+
     public $search;
+
     public $type;
+
     public $status;
+
     public $container_id;
+
     public $selected = [];
+
     public $selectAll = false;
+
     public $bulkContainer = null;
+
     public $showForm = false;
+
     public $editingCargo = null;
 
     public $form = [
@@ -31,7 +41,7 @@ class Manager extends Component
         'pieces' => '',
         'container_id' => null,
         'status' => 'accepted',
-        'notes' => ''
+        'notes' => '',
     ];
 
     protected $rules = [
@@ -41,7 +51,7 @@ class Manager extends Component
         'form.pieces' => 'required|numeric|min:0',
         'form.container_id' => 'nullable|exists:containers,id',
         'form.status' => 'required|in:accepted,loaded,offloaded',
-        'form.notes' => 'nullable|string'
+        'form.notes' => 'nullable|string',
     ];
 
     public function mount(Flight $flight)
@@ -54,7 +64,7 @@ class Manager extends Component
         if ($value) {
             $this->selected = $this->getCargoQuery()
                 ->pluck('id')
-                ->map(fn($id) => (string) $id)
+                ->map(fn ($id) => (string) $id)
                 ->toArray();
         } else {
             $this->selected = [];
@@ -68,7 +78,7 @@ class Manager extends Component
 
     public function loadSelectedToContainer()
     {
-        if (empty($this->selected) || !$this->bulkContainer) {
+        if (empty($this->selected) || ! $this->bulkContainer) {
             return;
         }
 
@@ -77,7 +87,7 @@ class Manager extends Component
             $cargo = Cargo::find($cargoId);
             $cargo->update([
                 'container_id' => $this->bulkContainer,
-                'status' => 'loaded'
+                'status' => 'loaded',
             ]);
         }
 
@@ -86,7 +96,7 @@ class Manager extends Component
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: count($this->selected) . ' cargo items loaded to container.'
+            message: count($this->selected).' cargo items loaded to container.'
         );
 
         $this->selected = [];
@@ -98,7 +108,7 @@ class Manager extends Component
     {
         $query = Cargo::query();
         if ($this->search) {
-            $query->whereAny(['awb_number'], 'like', '%' . $this->search . '%');
+            $query->whereAny(['awb_number'], 'like', '%'.$this->search.'%');
         }
         if ($this->type) {
             $query->where('type', $this->type);
@@ -114,6 +124,7 @@ class Manager extends Component
                 $q->where('flight_id', $this->flight->id);
             });
         }
+
         return $query;
     }
 
@@ -132,7 +143,7 @@ class Manager extends Component
         $cargo = Cargo::findOrFail($cargoId);
         $cargo->update([
             'container_id' => $containerId ? $containerId : null,
-            'status' => $containerId ? 'loaded' : 'offloaded'
+            'status' => $containerId ? 'loaded' : 'offloaded',
         ]);
 
         $this->dispatch(
@@ -162,7 +173,7 @@ class Manager extends Component
             'weight',
             'container_id',
             'status',
-            'notes'
+            'notes',
         ]);
         $this->showForm = true;
     }
@@ -172,7 +183,7 @@ class Manager extends Component
         $this->validate();
 
         $data = array_merge($this->form, [
-            'flight_id' => $this->flight->id
+            'flight_id' => $this->flight->id,
         ]);
 
         if ($this->editingCargo) {

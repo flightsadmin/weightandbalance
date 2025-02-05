@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class HoldPosition extends Model
 {
@@ -16,13 +16,13 @@ class HoldPosition extends Model
         'side',      // 'L' or 'R' or null for center
         'max_weight',
         'index',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [
         'max_weight' => 'integer',
         'index' => 'float',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
     public function hold()
@@ -32,6 +32,6 @@ class HoldPosition extends Model
 
     public function getFullCode()
     {
-        return $this->hold->code . $this->code;
+        return $this->hold->code.$this->code;
     }
 }

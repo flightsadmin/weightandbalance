@@ -23,7 +23,7 @@ class PassengerFactory extends Factory
         static $seatNumber = 1;
         $row = ceil($seatNumber / 6); // 6 seats per row (A-F)
         $letter = chr(65 + (($seatNumber - 1) % 6)); // A through F
-        $currentSeat = $row . $letter;
+        $currentSeat = $row.$letter;
         $seatNumber++;
 
         return [
@@ -34,7 +34,7 @@ class PassengerFactory extends Factory
             'ticket_number' => strtoupper(fake()->bothify('#############')),
             'acceptance_status' => fake()->randomElement(['booked', 'accepted', 'standby', 'offloaded']),
             'boarding_status' => fake()->randomElement(['boarding', 'boarding', 'unboarded']),
-            'notes' => fake()->optional(0.2)->sentence()
+            'notes' => fake()->optional(0.2)->sentence(),
         ];
     }
 

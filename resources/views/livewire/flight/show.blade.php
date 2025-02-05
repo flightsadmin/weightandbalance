@@ -82,7 +82,7 @@
         @elseif ($activeTab === 'loadplan')
             <livewire:flight.loadplan :flight="$flight" />
         @elseif ($activeTab === 'loadsheet')
-            <livewire:flight.weight-balance :flight="$flight" />
+            <livewire:flight.loadsheet-manager :flight="$flight" />
         @endif
     </div>
 </div>

@@ -2,25 +2,28 @@
 
 namespace App\Livewire\AircraftType;
 
-use App\Models\Airline;
 use App\Models\AircraftType;
-use Livewire\Component;
-use Livewire\WithPagination;
+use App\Models\Airline;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class Manager extends Component
 {
     use WithPagination;
 
     public $selectedAirlineId = '';
+
     public $selectedTypeId = null;
 
     #[Url]
     public $activeTab = 'overview';
 
     public $search = '';
+
     public $showForm = false;
+
     public $editingAircraftType = null;
 
     public $form = [
@@ -76,11 +79,11 @@ class Manager extends Component
         return view('livewire.aircraft_type.manager', [
             'airlines' => Airline::orderBy('name')->get(),
             'aircraftTypes' => AircraftType::query()
-                ->when($this->selectedAirlineId, fn($q) => $q->where('airline_id', $this->selectedAirlineId))
-                ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%")
+                ->when($this->selectedAirlineId, fn ($q) => $q->where('airline_id', $this->selectedAirlineId))
+                ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%")
                     ->orWhere('code', 'like', "%{$this->search}%"))
                 ->orderBy('code')
-                ->paginate(10)
+                ->paginate(10),
         ]);
     }
 
@@ -92,6 +95,7 @@ class Manager extends Component
             session()->forget('selected_airline_id');
         }
         $this->resetPage();
+
         return $this->redirectRoute('aircraft_types.index', navigate: true);
     }
 
@@ -109,7 +113,7 @@ class Manager extends Component
             ? tap($this->editingAircraftType)->update($this->form)
             : AircraftType::create($this->form);
 
-        if ($this->selectedAirlineId && !$this->editingAircraftType) {
+        if ($this->selectedAirlineId && ! $this->editingAircraftType) {
             $airline = Airline::find($this->selectedAirlineId);
             $airline->aircraftTypes()->syncWithoutDetaching([$aircraftType->id]);
         }

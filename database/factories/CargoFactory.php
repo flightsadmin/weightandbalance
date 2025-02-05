@@ -18,7 +18,7 @@ class CargoFactory extends Factory
             'dangerous_goods' => ['min' => 10, 'max' => 200],
             'live_animals' => ['min' => 30, 'max' => 300],
             'valuable' => ['min' => 5, 'max' => 100],
-            'mail' => ['min' => 50, 'max' => 800]
+            'mail' => ['min' => 50, 'max' => 800],
         ];
 
         $type = fake()->randomElement(array_keys($cargoTypes));
@@ -33,7 +33,7 @@ class CargoFactory extends Factory
             'type' => $type,
             'status' => 'accepted',
             'description' => fake()->optional(10)->sentence(),
-            'special_instructions' => fake()->optional(10)->sentence()
+            'special_instructions' => fake()->optional(10)->sentence(),
         ];
     }
 

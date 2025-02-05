@@ -9,12 +9,13 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class Setting extends Model
 {
     protected $table = 'settings';
+
     protected $fillable = [
         'key',
         'value',
         'type',
         'description',
-        'airline_id'
+        'airline_id',
     ];
 
     protected $casts = [
@@ -34,6 +35,7 @@ class Setting extends Model
     public static function get(string $key, $default = null)
     {
         $setting = static::where('key', $key)->first();
+
         return $setting ? $setting->value : $default;
     }
 

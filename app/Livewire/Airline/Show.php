@@ -3,8 +3,8 @@
 namespace App\Livewire\Airline;
 
 use App\Models\Airline;
-use Livewire\Component;
 use Livewire\Attributes\Url;
+use Livewire\Component;
 
 class Show extends Component
 {
@@ -23,7 +23,7 @@ class Show extends Component
         'key' => '',
         'value' => '',
         'type' => 'string',
-        'description' => ''
+        'description' => '',
     ];
 
     // Grouped settings
@@ -51,7 +51,7 @@ class Show extends Component
             'enable_sms_notifications' => ['type' => 'boolean', 'description' => 'Enable SMS notifications'],
             'notification_email' => ['type' => 'string', 'description' => 'Notification email address'],
             'notification_phone' => ['type' => 'string', 'description' => 'Notification phone number'],
-        ]
+        ],
     ];
 
     public function mount(Airline $airline)
@@ -59,7 +59,7 @@ class Show extends Component
         $this->airline = $airline->load([
             'settings',
             'aircraft.type',
-            'flights' => fn($q) => $q->latest('scheduled_departure_time')->take(5)
+            'flights' => fn ($q) => $q->latest('scheduled_departure_time')->take(5),
         ]);
     }
 
@@ -81,7 +81,7 @@ class Show extends Component
             'key' => $key,
             'value' => $setting?->value ?? '',
             'type' => $config['type'],
-            'description' => $config['description']
+            'description' => $config['description'],
         ];
 
         $this->editingSetting = $setting;
@@ -91,7 +91,7 @@ class Show extends Component
     {
         $this->validate([
             'form.value' => 'required',
-            'form.type' => 'required|in:string,float,integer,boolean'
+            'form.type' => 'required|in:string,float,integer,boolean',
         ]);
 
         $this->airline->settings()->updateOrCreate(
@@ -99,7 +99,7 @@ class Show extends Component
             [
                 'value' => $this->form['value'],
                 'type' => $this->form['type'],
-                'description' => $this->form['description']
+                'description' => $this->form['description'],
             ]
         );
 
@@ -116,7 +116,7 @@ class Show extends Component
 
     public function toggleStatus()
     {
-        $this->airline->active = !$this->airline->active;
+        $this->airline->active = ! $this->airline->active;
         $this->airline->save();
 
         $this->dispatch('alert', icon: 'success', message: 'Airline status updated successfully.');
@@ -127,7 +127,7 @@ class Show extends Component
         return view('livewire.airline.show', [
             'settings' => $this->airline->settings,
             'defaultSettings' => $this->defaultSettings,
-            'currentSettings' => $this->getCurrentCategorySettings()
+            'currentSettings' => $this->getCurrentCategorySettings(),
         ])->layout('components.layouts.app');
     }
 }

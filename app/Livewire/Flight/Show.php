@@ -8,7 +8,9 @@ use Livewire\Component;
 class Show extends Component
 {
     public Flight $flight;
+
     public $activeTab;
+
     public function mount(Flight $flight)
     {
         $this->flight = $flight->load(['airline', 'aircraft', 'crew', 'passengers', 'baggage', 'cargo', 'fuel']);

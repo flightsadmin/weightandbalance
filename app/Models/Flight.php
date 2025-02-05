@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Flight extends Model
 {
     use HasFactory;
+
     protected $table = 'flights';
 
     protected $fillable = [
@@ -18,7 +19,7 @@ class Flight extends Model
         'arrival_airport',
         'scheduled_departure_time',
         'scheduled_arrival_time',
-        'status'
+        'status',
     ];
 
     protected $casts = [
@@ -72,6 +73,11 @@ class Flight extends Model
         return $this->hasOne(Fuel::class);
     }
 
+    public function loadsheets()
+    {
+        return $this->hasMany(Loadsheet::class);
+    }
+
     public function weightBalance()
     {
         return $this->hasOne(WeightBalance::class);
@@ -119,7 +125,7 @@ class Flight extends Model
             'cargo',
             'passengers',
             'crew',
-            'containers'
+            'containers',
         ]);
     }
 

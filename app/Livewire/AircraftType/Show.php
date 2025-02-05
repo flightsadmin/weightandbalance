@@ -8,6 +8,7 @@ use Livewire\Component;
 class Show extends Component
 {
     public AircraftType $aircraftType;
+
     public $activeTab = 'overview';
 
     public function mount(AircraftType $aircraft_type)

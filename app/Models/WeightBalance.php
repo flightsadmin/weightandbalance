@@ -9,15 +9,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class WeightBalance extends Model
 {
     protected $table = 'weight_balances';
+
     use HasFactory;
 
     protected $fillable = [
         'flight_id',
-        'weights'
+        'weights',
     ];
 
     protected $casts = [
-        'weights' => 'json'
+        'weights' => 'json',
     ];
 
     public function flight(): BelongsTo

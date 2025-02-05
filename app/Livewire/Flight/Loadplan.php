@@ -9,8 +9,11 @@ use Livewire\Component;
 class Loadplan extends Component
 {
     public $flight;
+
     public $loadplan;
+
     public $containerPositions = [];
+
     public $isDragging = false;
 
     public function mount(Flight $flight)
@@ -20,7 +23,7 @@ class Loadplan extends Component
             ?? $flight->loadplans()->create([
                 'status' => 'draft',
                 'version' => 0,
-                'last_modified_by' => auth()->id()
+                'last_modified_by' => auth()->id(),
             ]);
 
         $this->containerPositions = $this->loadplan->container_positions ?? [];
@@ -44,7 +47,7 @@ class Loadplan extends Component
         }
 
         // Find current position if fromPosition is null
-        if (!$fromPosition && isset($this->containerPositions[$containerId])) {
+        if (! $fromPosition && isset($this->containerPositions[$containerId])) {
             $fromPosition = $this->containerPositions[$containerId];
         }
 
@@ -58,20 +61,20 @@ class Loadplan extends Component
             $this->containerPositions[$containerId] = $toPosition;
             $container->update([
                 'status' => 'loaded',
-                'compartment' => $compartment
+                'compartment' => $compartment,
             ]);
         } else {
             // If dropped back to unplanned, reset status and compartment
             $container->update([
                 'status' => 'unloaded',
-                'compartment' => null
+                'compartment' => null,
             ]);
         }
 
         // Save changes to loadplan
         $this->loadplan->update([
             'container_positions' => $this->containerPositions,
-            'last_modified_by' => auth()->id()
+            'last_modified_by' => auth()->id(),
         ]);
 
         // Force a refresh of the component
@@ -82,7 +85,7 @@ class Loadplan extends Component
     {
         // Validate total weight per hold
         $overweightHolds = $this->flight->aircraft->type->holds
-            ->filter(fn($hold) => $hold->isOverweight(
+            ->filter(fn ($hold) => $hold->isOverweight(
                 $hold->getCurrentWeight($this->containerPositions, $this->flight->containers)
             ));
 
@@ -94,6 +97,7 @@ class Loadplan extends Component
                     message: "{$hold->name} is over its maximum weight limit."
                 );
             }
+
             return;
         }
 
@@ -101,7 +105,7 @@ class Loadplan extends Component
             'status' => 'released',
             'released_by' => auth()->id(),
             'released_at' => now(),
-            'version' => $this->loadplan->increment('version')
+            'version' => $this->loadplan->increment('version'),
         ]);
 
         $this->dispatch(
@@ -126,7 +130,7 @@ class Loadplan extends Component
             'containers' => $containers,
             'availableContainers' => $availableContainers,
             'holds' => $holds,
-            'aircraft' => $this->flight->aircraft
+            'aircraft' => $this->flight->aircraft,
         ]);
     }
 }

@@ -9,15 +9,15 @@ class CrewDistribution extends Model
 {
     protected $fillable = [
         'crew_count',
-        'distribution'
+        'distribution',
     ];
 
     protected $casts = [
-        'distribution' => 'array'
+        'distribution' => 'array',
     ];
 
     public function aircraftType(): BelongsTo
     {
         return $this->belongsTo(AircraftType::class);
     }
-} 
+}

@@ -9,20 +9,23 @@ use Livewire\Component;
 class ZoneManager extends Component
 {
     public AircraftType $aircraftType;
+
     public $showCabinZoneModal = false;
+
     public $editingZone = null;
+
     public $zoneForm = [
         'name' => '',
         'max_capacity' => '',
         'index' => '',
-        'arm' => ''
+        'arm' => '',
     ];
 
     protected $rules = [
         'zoneForm.name' => 'required|string|max:255',
         'zoneForm.max_capacity' => 'required|numeric|min:0',
         'zoneForm.index' => 'required|numeric',
-        'zoneForm.arm' => 'required|numeric'
+        'zoneForm.arm' => 'required|numeric',
     ];
 
     public function mount(AircraftType $aircraftType)
@@ -37,7 +40,7 @@ class ZoneManager extends Component
             'name' => $zone->name,
             'max_capacity' => $zone->max_capacity,
             'index' => $zone->index,
-            'arm' => $zone->arm
+            'arm' => $zone->arm,
         ];
         $this->showCabinZoneModal = true;
     }

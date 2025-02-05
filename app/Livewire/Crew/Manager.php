@@ -2,17 +2,22 @@
 
 namespace App\Livewire\Crew;
 
-use App\Models\Flight;
 use App\Models\Crew;
+use App\Models\Flight;
 use Livewire\Component;
 
 class Manager extends Component
 {
     public Flight $flight;
+
     public $search = '';
+
     public $position = '';
+
     public $showCrewModal = false;
+
     public $showAvailableModal = false;
+
     public $editingCrew = null;
 
     // Form fields
@@ -20,14 +25,14 @@ class Manager extends Component
         'name' => '',
         'position' => 'cabin_crew',
         'employee_id' => '',
-        'notes' => ''
+        'notes' => '',
     ];
 
     protected $rules = [
         'form.name' => 'required|string|max:255',
         'form.position' => 'required|string|max:255',
         'form.employee_id' => 'nullable|string|max:255',
-        'form.notes' => 'nullable|string'
+        'form.notes' => 'nullable|string',
     ];
 
     public function mount(Flight $flight)
@@ -95,7 +100,7 @@ class Manager extends Component
             })
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->whereAny(['name', 'employee_id'], 'like', '%' . $this->search . '%');
+                    $q->whereAny(['name', 'employee_id'], 'like', '%'.$this->search.'%');
                 });
             })
             ->get()->sortBy('position');
@@ -110,11 +115,11 @@ class Manager extends Component
                 })
                 ->when($this->search, function ($query) {
                     $query->where(function ($q) {
-                        $q->whereAny(['name', 'employee_id'], 'like', '%' . $this->search . '%');
+                        $q->whereAny(['name', 'employee_id'], 'like', '%'.$this->search.'%');
                     });
                 })
                 ->get(),
-            'availableCrew' => $this->availableCrew
+            'availableCrew' => $this->availableCrew,
         ]);
     }
 }

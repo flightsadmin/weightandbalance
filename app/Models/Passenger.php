@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Passenger extends Model
 {
     use HasFactory;
+
     protected $table = 'passengers';
 
     protected $fillable = [
@@ -20,7 +21,7 @@ class Passenger extends Model
         'ticket_number',
         'acceptance_status',
         'boarding_status',
-        'notes'
+        'notes',
     ];
 
     public function flight(): BelongsTo

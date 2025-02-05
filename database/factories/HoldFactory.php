@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Hold;
 use App\Models\AircraftType;
+use App\Models\Hold;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class HoldFactory extends Factory
@@ -30,7 +30,7 @@ class HoldFactory extends Factory
                 'code' => 'BH',
                 'position' => 3,
                 'index' => $this->faker->randomFloat(4, 0, 1),
-            ]
+            ],
         ];
 
         $code = $this->faker->randomElement(array_keys($holds));
@@ -45,6 +45,7 @@ class HoldFactory extends Factory
             'is_active' => fake()->boolean(90),
         ];
     }
+
     public function forAircraftType(AircraftType $aircraftType)
     {
         return $this->state(function (array $attributes) use ($aircraftType) {

@@ -14,22 +14,31 @@ class Manager extends Component
     use WithPagination;
 
     protected $paginationTheme = 'bootstrap';
+
     public $flight = null;
+
     public $showForm = false;
+
     public $editingPassenger = null;
+
     public $editingBaggage = null;
+
     public $search = '';
+
     public $pieces = '';
+
     public $weight = '';
+
     public $form = [
         'name' => '',
         'seat_number' => '',
         'ticket_number' => '',
         'type' => '',
-        'notes' => ''
+        'notes' => '',
     ];
 
     public $selectedPassenger = null;
+
     public $showPassengerModal = false;
 
     protected $rules = [
@@ -37,7 +46,7 @@ class Manager extends Component
         'form.seat_number' => 'required|string|max:4',
         'form.ticket_number' => 'nullable|string|max:255',
         'form.type' => 'required|in:male,female,child,infant',
-        'form.notes' => 'nullable|string'
+        'form.notes' => 'nullable|string',
     ];
 
     public function mount(?Flight $flight = null)
@@ -53,7 +62,7 @@ class Manager extends Component
             'seat_number',
             'ticket_number',
             'type',
-            'notes'
+            'notes',
         ]);
         $this->showForm = true;
     }
@@ -63,7 +72,7 @@ class Manager extends Component
         $this->validate();
 
         $data = array_merge($this->form, [
-            'flight_id' => $this->flight?->id
+            'flight_id' => $this->flight?->id,
         ]);
 
         if ($this->editingPassenger) {
@@ -95,13 +104,13 @@ class Manager extends Component
     {
         $passenger = Passenger::findOrFail($passengerId);
         $passenger->update([
-            'acceptance_status' => $status
+            'acceptance_status' => $status,
         ]);
 
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: ucfirst($status) . ' passenger successfully.'
+            message: ucfirst($status).' passenger successfully.'
         );
     }
 
@@ -109,23 +118,24 @@ class Manager extends Component
     {
         $passenger = Passenger::findOrFail($passengerId);
         $passenger->update([
-            'boarding_status' => $status
+            'boarding_status' => $status,
         ]);
 
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: ucfirst($status) . ' passenger successfully.'
+            message: ucfirst($status).' passenger successfully.'
         );
     }
+
     public function saveBaggage()
     {
         $this->editingPassenger->baggage()->delete();
         for ($i = 0; $i < $this->pieces; $i++) {
             $this->editingPassenger->baggage()->create([
                 'flight_id' => $this->editingPassenger->flight->id,
-                'tag_number' => $this->editingPassenger->flight->airline->iata_code . str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
-                'weight' => $this->weight / $this->pieces
+                'tag_number' => $this->editingPassenger->flight->airline->iata_code.str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
+                'weight' => $this->weight / $this->pieces,
             ]);
         }
         $this->dispatch('alert', icon: 'success', message: 'Baggage saved successfully.');
@@ -145,7 +155,7 @@ class Manager extends Component
             ->with([
                 'baggage' => function ($query) {
                     $query->with('container')->latest();
-                }
+                },
             ])
             ->find($passengerId);
 
@@ -161,9 +171,9 @@ class Manager extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('ticket_number', 'like', '%' . $this->search . '%')
-                    ->orWhere('seat_number', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('ticket_number', 'like', '%'.$this->search.'%')
+                    ->orWhere('seat_number', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -176,7 +186,7 @@ class Manager extends Component
         $query->orderByDesc('created_at');
 
         return view('livewire.flights.passenger.manager', [
-            'passengers' => $query->paginate(10)
+            'passengers' => $query->paginate(10),
         ]);
     }
 }

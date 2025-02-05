@@ -2,15 +2,16 @@
 
 namespace App\Livewire\Components;
 
+use App\Models\Flight;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Flight;
 
 class Sidebar extends Component
 {
     use WithPagination;
 
     public $selectedDate;
+
     public $selectedFlight;
 
     public function mount()

@@ -41,10 +41,10 @@ class AirlineFactory extends Factory
                 'email' => 'info@jambojet.com',
                 'description' => 'Jambojet is a Kenyan airline headquartered in Nairobi.',
                 'active' => true,
-            ]
+            ],
         ];
         $airline = fake()->unique()->randomElement($airlines);
+
         return $airline;
     }
 }
-

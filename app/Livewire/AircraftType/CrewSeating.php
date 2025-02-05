@@ -4,16 +4,17 @@ namespace App\Livewire\AircraftType;
 
 use App\Models\AircraftType;
 use App\Models\CrewSeating as CrewSeatingModel;
-use App\Models\CrewDistribution;
-use Livewire\Component;
 use Illuminate\Support\Str;
+use Livewire\Component;
 
 class CrewSeating extends Component
 {
     public AircraftType $aircraftType;
+
     public $isEditable = false;
 
     public $deck_crew = [];
+
     public $cabin_crew = [];
 
     public $crewSeats = [];
@@ -47,7 +48,7 @@ class CrewSeating extends Component
                     'location' => $crew->location,
                     'max_number' => $crew->max_number,
                     'arm' => $crew->arm,
-                    'index_per_kg' => $crew->index_per_kg
+                    'index_per_kg' => $crew->index_per_kg,
                 ];
             })
             ->toArray();
@@ -61,7 +62,7 @@ class CrewSeating extends Component
                     'location' => $crew->location,
                     'max_number' => $crew->max_number,
                     'arm' => $crew->arm,
-                    'index_per_kg' => $crew->index_per_kg
+                    'index_per_kg' => $crew->index_per_kg,
                 ];
             })
             ->toArray();
@@ -72,8 +73,8 @@ class CrewSeating extends Component
                     'location' => '',
                     'max_number' => '',
                     'arm' => '',
-                    'index_per_kg' => ''
-                ]
+                    'index_per_kg' => '',
+                ],
             ];
         }
 
@@ -83,8 +84,8 @@ class CrewSeating extends Component
                     'location' => '',
                     'max_number' => '',
                     'arm' => '',
-                    'index_per_kg' => ''
-                ]
+                    'index_per_kg' => '',
+                ],
             ];
         }
     }
@@ -99,8 +100,9 @@ class CrewSeating extends Component
             $this->crewSeats = [
                 [
                     'number' => 1,
-                ]
+                ],
             ];
+
             return;
         }
 
@@ -117,7 +119,7 @@ class CrewSeating extends Component
         return collect($this->cabin_crew)->map(function ($crew) {
             return [
                 'location' => $crew['location'],
-                'max_number' => $crew['max_number']
+                'max_number' => $crew['max_number'],
             ];
         })->toArray();
     }
@@ -161,14 +163,14 @@ class CrewSeating extends Component
 
             $this->aircraftType->crewDistributions()->create([
                 'crew_count' => $crewCount,
-                'distribution' => $distribution
+                'distribution' => $distribution,
             ]);
         }
     }
 
     public function toggleEdit()
     {
-        $this->isEditable = !$this->isEditable;
+        $this->isEditable = ! $this->isEditable;
     }
 
     public function addCrew()
@@ -203,7 +205,7 @@ class CrewSeating extends Component
                 'location' => $crew['location'],
                 'max_number' => $crew['max_number'],
                 'arm' => $crew['arm'],
-                'index_per_kg' => $crew['index_per_kg']
+                'index_per_kg' => $crew['index_per_kg'],
             ];
 
             if (isset($crew['id'])) {
@@ -220,7 +222,7 @@ class CrewSeating extends Component
                 'location' => $crew['location'],
                 'max_number' => $crew['max_number'],
                 'arm' => $crew['arm'],
-                'index_per_kg' => $crew['index_per_kg']
+                'index_per_kg' => $crew['index_per_kg'],
             ];
 
             if (isset($crew['id'])) {

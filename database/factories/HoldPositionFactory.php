@@ -17,7 +17,7 @@ class HoldPositionFactory extends Factory
 
         return [
             'hold_id' => null,
-            'code' => $row . ($side ?? ''),
+            'code' => $row.($side ?? ''),
             'row' => $row,
             'side' => $side,
             'max_weight' => fake()->numberBetween(1000, 2000),

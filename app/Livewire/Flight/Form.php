@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Flight;
 
-use App\Models\Flight;
-use App\Models\Airline;
 use App\Models\Aircraft;
+use App\Models\Airline;
+use App\Models\Flight;
 use Livewire\Component;
 
 class Form extends Component
@@ -12,13 +12,21 @@ class Form extends Component
     public ?Flight $flight = null;
 
     public $airline_id = '';
+
     public $aircraft_id = '';
+
     public $flight_number = '';
+
     public $departure_airport = '';
+
     public $arrival_airport = '';
+
     public $scheduled_departure_time = '';
+
     public $scheduled_arrival_time = '';
+
     public $status = 'scheduled';
+
     public $notes = '';
 
     public function mount(Flight $flight)
@@ -42,13 +50,13 @@ class Form extends Component
         $validated = $this->validate([
             'airline_id' => 'required|exists:airlines,id',
             'aircraft_id' => 'required|exists:aircraft,id',
-            'flight_number' => 'required|string|max:10|unique:flights,flight_number,' . ($this->flight?->id ?: 'NULL'),
+            'flight_number' => 'required|string|max:10|unique:flights,flight_number,'.($this->flight?->id ?: 'NULL'),
             'departure_airport' => 'required|string|max:4',
             'arrival_airport' => 'required|string|max:4',
             'scheduled_departure_time' => 'required|date',
             'scheduled_arrival_time' => 'required|date|after:scheduled_departure_time',
             'status' => 'required|string|in:scheduled,boarding,departed,arrived,cancelled',
-            'notes' => 'nullable|string|max:1000'
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         if ($this->flight) {

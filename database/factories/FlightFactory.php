@@ -24,9 +24,9 @@ class FlightFactory extends Factory
         $aircraft = Aircraft::where('active', true)->inRandomOrder()->first();
         $airline = $aircraft->airline;
 
-        $scheduled_departure_time = fake()->dateTimeBetween('now' . '-1 day', '+1 week');
+        $scheduled_departure_time = fake()->dateTimeBetween('now'.'-1 day', '+1 week');
         $scheduled_arrival_time = clone $scheduled_departure_time;
-        $scheduled_arrival_time->modify('+' . fake()->numberBetween(1, 12) . ' hours');
+        $scheduled_arrival_time->modify('+'.fake()->numberBetween(1, 12).' hours');
 
         $airports = [
             'JFK' => 'New York',
@@ -38,7 +38,7 @@ class FlightFactory extends Factory
             'LHR' => 'London',
             'CDG' => 'Paris',
             'FRA' => 'Frankfurt',
-            'DXB' => 'Dubai'
+            'DXB' => 'Dubai',
         ];
 
         $departure = fake()->randomElement(array_keys($airports));
@@ -49,7 +49,7 @@ class FlightFactory extends Factory
         return [
             'airline_id' => $airline->id,
             'aircraft_id' => $aircraft->id,
-            'flight_number' => $airline->iata_code . str_pad(fake()->numberBetween(100, 999), 4, '0', STR_PAD_LEFT),
+            'flight_number' => $airline->iata_code.str_pad(fake()->numberBetween(100, 999), 4, '0', STR_PAD_LEFT),
             'departure_airport' => $departure,
             'arrival_airport' => $arrival,
             'scheduled_departure_time' => $scheduled_departure_time,

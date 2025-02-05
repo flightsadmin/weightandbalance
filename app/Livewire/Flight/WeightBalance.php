@@ -9,7 +9,9 @@ use Livewire\Component;
 class WeightBalance extends Component
 {
     public Flight $flight;
+
     public $showSummaryModal = false;
+
     public $summary = [];
 
     public function mount(Flight $flight)
@@ -21,7 +23,7 @@ class WeightBalance extends Component
             'cargo',
             'fuel',
             'containers',
-            'weightBalance'
+            'weightBalance',
         ]);
     }
 
@@ -40,7 +42,7 @@ class WeightBalance extends Component
         ];
         // Crew weights
         $crew = $this->flight->fuel?->crew ?? '2/4';
-        list($cockpitCrew, $cabinCrew) = explode('/', $crew);
+        [$cockpitCrew, $cabinCrew] = explode('/', $crew);
         $crewWeight = ($cockpitCrew * $airline->getStandardCockpitCrewWeight()) +
             ($cabinCrew * $airline->getStandardCabinCrewWeight());
 
@@ -112,7 +114,8 @@ class WeightBalance extends Component
         $passengersByZone = $passengers->groupBy(function ($passenger) {
             preg_match('/\d+/', $passenger->seat_number, $matches);
             $seatNumber = $matches[0] ?? 0;
-            return 'Zone ' . str_pad(ceil($seatNumber / 10), 3, '0', STR_PAD_LEFT);
+
+            return 'Zone '.str_pad(ceil($seatNumber / 10), 3, '0', STR_PAD_LEFT);
         })->map->count();
 
         // 2. Baggage Summary by Hold
@@ -124,7 +127,7 @@ class WeightBalance extends Component
             ->map(function ($containers) {
                 return [
                     'count' => $containers->count(),
-                    'weight' => $containers->sum('weight')
+                    'weight' => $containers->sum('weight'),
                 ];
             });
 
@@ -137,7 +140,7 @@ class WeightBalance extends Component
             ->map(function ($containers) {
                 return [
                     'count' => $containers->count(),
-                    'weight' => $containers->sum('weight')
+                    'weight' => $containers->sum('weight'),
                 ];
             });
 
@@ -146,7 +149,7 @@ class WeightBalance extends Component
                 'by_gender' => $passengersByGender,
                 'by_zone' => $passengersByZone,
                 'count' => $passengers->count(),
-                'total_weight' => $passengers->count() * ($settings['standard_passenger_weight'] ?? 75)
+                'total_weight' => $passengers->count() * ($settings['standard_passenger_weight'] ?? 75),
             ],
             'baggage' => $baggageByHold,
             'cargo' => $cargoByHold,

@@ -11,7 +11,9 @@ class Index extends Component
     use WithPagination;
 
     public $search = '';
+
     public $showModal = false;
+
     public $editingAirline = null;
 
     // Form fields
@@ -61,7 +63,7 @@ class Index extends Component
 
     public function toggleStatus(Airline $airline)
     {
-        $airline->update(['active' => !$airline->active]);
+        $airline->update(['active' => ! $airline->active]);
         $this->dispatch('alert', icon: 'success', message: 'Airline status updated successfully.');
     }
 
@@ -75,10 +77,10 @@ class Index extends Component
     {
         return view('livewire.airline.index', [
             'airlines' => Airline::query()
-                ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%")
+                ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%")
                     ->orWhere('iata_code', 'like', "%{$this->search}%"))
                 ->orderBy('name')
-                ->paginate(10)
+                ->paginate(10),
         ])->layout('components.layouts.app');
     }
 }

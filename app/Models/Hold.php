@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -18,13 +18,13 @@ class Hold extends Model
         'position',
         'max_weight',
         'index',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [
         'max_weight' => 'integer',
         'index' => 'float',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
     public function aircraftType(): BelongsTo
@@ -40,7 +40,7 @@ class Hold extends Model
     public function getCurrentWeight($containerPositions, $containers)
     {
         return $containers->whereIn('id', array_keys($containerPositions))
-            ->filter(fn($container) => str_starts_with($containerPositions[$container->id], $this->code))
+            ->filter(fn ($container) => str_starts_with($containerPositions[$container->id], $this->code))
             ->sum('weight');
     }
 

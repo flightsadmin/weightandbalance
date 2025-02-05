@@ -8,13 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('loadplans', function (Blueprint $table) {
+        Schema::create('loadsheets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('flight_id')->constrained()->cascadeOnDelete();
-            $table->string('status')->default('draft');
-            $table->integer('version')->default(0);
-            $table->json('container_positions')->nullable();
-            $table->foreignId('last_modified_by')->nullable()->constrained('users');
+            $table->json('payload_distribution');
+            $table->integer('edition')->default(1);
+            $table->boolean('final')->default(false);
+            $table->foreignId('created_by')->nullable()->constrained('users');
             $table->foreignId('released_by')->nullable()->constrained('users');
             $table->timestamp('released_at')->nullable();
             $table->timestamps();
@@ -23,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('loadplans');
+        Schema::dropIfExists('loadsheets');
     }
 };

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Aircraft extends Model
 {
     use HasFactory;
+
     protected $table = 'aircraft';
 
     protected $fillable = [
@@ -19,7 +20,7 @@ class Aircraft extends Model
         'basic_weight',
         'basic_index',
         'active',
-        'remarks'
+        'remarks',
     ];
 
     protected $casts = [

@@ -19,11 +19,11 @@ class Baggage extends Model
         'tag_number',
         'weight',
         'status',
-        'notes'
+        'notes',
     ];
 
     protected $casts = [
-        'weight' => 'integer'
+        'weight' => 'integer',
     ];
 
     public function passenger(): BelongsTo

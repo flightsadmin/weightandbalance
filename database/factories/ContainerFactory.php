@@ -10,6 +10,7 @@ class ContainerFactory extends Factory
     public function definition(): array
     {
         $type = fake()->randomElement(['baggage', 'cargo']);
+
         return [
             'flight_id' => null,
             'container_number' => null,
@@ -26,10 +27,11 @@ class ContainerFactory extends Factory
     public function forFlight(Flight $flight)
     {
         $uld = fake()->randomElement(['AKE', 'PMC', 'PLA']);
+
         return $this->state(function (array $attributes) use ($flight, $uld) {
             return [
                 'flight_id' => $flight->id,
-                'container_number' => $uld . strtoupper(fake()->bothify('#####')) . $flight->airline->iata_code
+                'container_number' => $uld.strtoupper(fake()->bothify('#####')).$flight->airline->iata_code,
             ];
         });
     }

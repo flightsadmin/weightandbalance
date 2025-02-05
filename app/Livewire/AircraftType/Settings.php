@@ -9,7 +9,9 @@ use Livewire\Component;
 class Settings extends Component
 {
     public AircraftType $aircraftType;
+
     public $showSettingModal = false;
+
     public $editingSetting = null;
 
     // Setting form
@@ -17,7 +19,7 @@ class Settings extends Component
         'key' => '',
         'value' => '',
         'type' => 'string',
-        'description' => ''
+        'description' => '',
     ];
 
     // Default settings structure
@@ -28,20 +30,20 @@ class Settings extends Component
             'c_constant' => ['type' => 'float', 'description' => 'C constant for index calculation'],
             'length_of_mac' => ['type' => 'float', 'description' => 'Length of MAC (meters)'],
             'lemac_at' => ['type' => 'float', 'description' => 'Leading Edge MAC (meters)'],
-            'fuel_density' => ['type' => 'float', 'description' => 'Fuel density (kg/L)']
+            'fuel_density' => ['type' => 'float', 'description' => 'Fuel density (kg/L)'],
         ],
         'fuel_tanks' => [
             'center_tank_index' => ['type' => 'float', 'description' => 'Center tank index'],
             'left_wing_tank_index' => ['type' => 'float', 'description' => 'Left wing tank index'],
             'right_wing_tank_index' => ['type' => 'float', 'description' => 'Right wing tank index'],
-            'trim_tank_index' => ['type' => 'float', 'description' => 'Trim tank index']
+            'trim_tank_index' => ['type' => 'float', 'description' => 'Trim tank index'],
         ],
         'crew_positions' => [
             'cockpit_crew_index' => ['type' => 'float', 'description' => 'Cockpit crew index'],
             'cabin_crew_front_index' => ['type' => 'float', 'description' => 'Front cabin crew index'],
             'cabin_crew_mid_index' => ['type' => 'float', 'description' => 'Mid cabin crew index'],
-            'cabin_crew_aft_index' => ['type' => 'float', 'description' => 'Aft cabin crew index']
-        ]
+            'cabin_crew_aft_index' => ['type' => 'float', 'description' => 'Aft cabin crew index'],
+        ],
     ];
 
     public function mount(AircraftType $aircraftType)
@@ -55,7 +57,7 @@ class Settings extends Component
             'key' => $key,
             'value' => '',
             'type' => $config['type'],
-            'description' => $config['description']
+            'description' => $config['description'],
         ];
         $this->showSettingModal = true;
     }
@@ -67,7 +69,7 @@ class Settings extends Component
             'key' => $setting->key,
             'value' => $setting->value,
             'type' => $setting->type,
-            'description' => $setting->description
+            'description' => $setting->description,
         ];
         $this->showSettingModal = true;
     }
@@ -78,18 +80,18 @@ class Settings extends Component
             'settingForm.key' => 'required|string',
             'settingForm.value' => 'required',
             'settingForm.type' => 'required|in:string,float,integer,boolean',
-            'settingForm.description' => 'nullable|string'
+            'settingForm.description' => 'nullable|string',
         ]);
 
         $this->aircraftType->settings()->updateOrCreate(
             [
                 'key' => $this->settingForm['key'],
-                'airline_id' => $this->aircraftType->airline_id
+                'airline_id' => $this->aircraftType->airline_id,
             ],
             [
                 'value' => $this->settingForm['value'],
                 'type' => $this->settingForm['type'],
-                'description' => $this->settingForm['description']
+                'description' => $this->settingForm['description'],
             ]
         );
 
@@ -108,7 +110,7 @@ class Settings extends Component
     {
         return view('livewire.aircraft_type.settings', [
             'settings' => $this->aircraftType->settings,
-            'defaultSettings' => $this->defaultSettings
+            'defaultSettings' => $this->defaultSettings,
         ]);
     }
 }

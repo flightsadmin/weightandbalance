@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class CrewFactory extends Factory
 {
     protected $model = Crew::class;
+
     protected $static = 1;
 
     /**
@@ -33,21 +34,21 @@ class CrewFactory extends Factory
 
     public function captain(): self
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'position' => 'captain',
         ]);
     }
 
     public function firstOfficer(): self
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'position' => 'first_officer',
         ]);
     }
 
     public function cabinCrew(): self
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'position' => 'cabin_crew',
         ]);
     }

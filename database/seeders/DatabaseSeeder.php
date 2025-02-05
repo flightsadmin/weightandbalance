@@ -2,19 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Models\Crew;
-use App\Models\Fuel;
-use App\Models\Hold;
-use App\Models\Cargo;
-use App\Models\Flight;
+use App\Models\Aircraft;
+use App\Models\AircraftType;
 use App\Models\Airline;
 use App\Models\Baggage;
-use App\Models\Setting;
-use App\Models\Aircraft;
+use App\Models\Cargo;
 use App\Models\Container;
-use App\Models\Passenger;
-use App\Models\AircraftType;
+use App\Models\Crew;
+use App\Models\Flight;
+use App\Models\Fuel;
+use App\Models\Hold;
 use App\Models\HoldPosition;
+use App\Models\Passenger;
+use App\Models\Setting;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             AircraftType::factory(1)->forAirline($airline)->create()->each(function ($aircraftType) use ($airline) {
                 Aircraft::factory(3)->create([
                     'airline_id' => $airline->id,
-                    'aircraft_type_id' => $aircraftType->id
+                    'aircraft_type_id' => $aircraftType->id,
                 ])->each(function ($aircraft) use ($airline, $aircraftType) {
                     Hold::factory()->forAircraftType($aircraftType)->create()->each(function ($hold) {
                         $hold->positions()->saveMany(HoldPosition::factory(2)->make());
@@ -48,16 +48,16 @@ class DatabaseSeeder extends Seeder
 
                         Passenger::factory(rand(10, 30))->forFlight($flight)->create()->each(function ($passenger) use ($flight) {
                             $passenger->baggage()->saveMany(Baggage::factory(rand(1, 2))->make([
-                                'flight_id' => $flight->id
+                                'flight_id' => $flight->id,
                             ]));
                         });
 
                         Cargo::factory(rand(5, 10))->create([
-                            'flight_id' => $flight->id
+                            'flight_id' => $flight->id,
                         ]);
 
                         Fuel::factory()->create([
-                            'flight_id' => $flight->id
+                            'flight_id' => $flight->id,
                         ]);
 
                         Container::factory(rand(1, 3))->forFlight($flight)->create();
@@ -93,11 +93,10 @@ class DatabaseSeeder extends Seeder
                         'airline_id' => $airline->id,
                         'key' => Airline::STANDARD_PANTRY_WEIGHT,
                         'value' => 250,
-                    ]
+                    ],
                 ];
                 Setting::insert($settings);
             });
         });
     }
 }
-

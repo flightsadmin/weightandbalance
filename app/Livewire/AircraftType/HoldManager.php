@@ -9,7 +9,9 @@ use Livewire\Component;
 class HoldManager extends Component
 {
     public AircraftType $aircraftType;
+
     public $showHoldModal = false;
+
     public $editingHold = null;
 
     public $holdForm = [
@@ -19,7 +21,7 @@ class HoldManager extends Component
         'max_weight' => 2000,
         'index' => 0.9001,
         'is_active' => true,
-        'positions' => []
+        'positions' => [],
     ];
 
     protected $rules = [
@@ -51,9 +53,9 @@ class HoldManager extends Component
                     'side' => $position->side,
                     'index' => $position->index,
                     'max_weight' => $position->max_weight,
-                    'is_active' => $position->is_active
+                    'is_active' => $position->is_active,
                 ];
-            })->toArray()
+            })->toArray(),
         ]);
         $this->showHoldModal = true;
     }
@@ -82,7 +84,7 @@ class HoldManager extends Component
                 'side' => null,
                 'max_weight' => 2000,
                 'index' => 0.9001,
-                'is_active' => true
+                'is_active' => true,
             ];
         } else {
             $this->holdForm['positions'][] = [
@@ -90,14 +92,14 @@ class HoldManager extends Component
                 'side' => 'L',
                 'max_weight' => 2000,
                 'index' => 0.9001,
-                'is_active' => true
+                'is_active' => true,
             ];
             $this->holdForm['positions'][] = [
                 'row' => $lastRow + 1,
                 'side' => 'R',
                 'max_weight' => 2000,
                 'index' => 0.9001,
-                'is_active' => true
+                'is_active' => true,
             ];
         }
     }
@@ -139,7 +141,7 @@ class HoldManager extends Component
     public function render()
     {
         return view('livewire.aircraft_type.hold-manager', [
-            'holds' => $this->aircraftType->holds()->with('positions')->orderBy('position')->get()
+            'holds' => $this->aircraftType->holds()->with('positions')->orderBy('position')->get(),
         ]);
     }
 }

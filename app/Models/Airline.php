@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Airline extends Model
 {
     use HasFactory;
+
     protected $table = 'airlines';
 
     protected $fillable = [
@@ -21,16 +21,19 @@ class Airline extends Model
         'phone',
         'email',
         'description',
-        'active'
+        'active',
     ];
 
     protected $casts = [
-        'active' => 'boolean'
+        'active' => 'boolean',
     ];
 
     public const STANDARD_PASSENGER_WEIGHT = 'standard_passenger_weight';
+
     public const STANDARD_COCKPIT_CREW_WEIGHT = 'standard_cockpit_crew_weight';
+
     public const STANDARD_CABIN_CREW_WEIGHT = 'standard_cabin_crew_weight';
+
     public const STANDARD_PANTRY_WEIGHT = 'standard_pantry_weight';
 
     public function aircraft(): HasMany

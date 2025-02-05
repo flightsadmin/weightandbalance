@@ -2,8 +2,8 @@
 
 namespace App\Livewire\AircraftType;
 
-use App\Models\AircraftType;
 use App\Models\Aircraft;
+use App\Models\AircraftType;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -12,14 +12,17 @@ class AircraftManager extends Component
     use WithPagination;
 
     public AircraftType $aircraftType;
+
     public $showAircraftModal = false;
+
     public $editingAircraft = null;
+
     public $aircraftForm = [
         'registration_number' => '',
         'basic_weight' => '',
         'basic_index' => '',
         'remarks' => '',
-        'active' => true
+        'active' => true,
     ];
 
     public function mount(AircraftType $aircraftType)
@@ -35,7 +38,7 @@ class AircraftManager extends Component
             'basic_weight' => $aircraft->basic_weight,
             'basic_index' => $aircraft->basic_index,
             'remarks' => $aircraft->remarks,
-            'active' => $aircraft->active
+            'active' => $aircraft->active,
         ];
         $this->showAircraftModal = true;
     }
@@ -47,12 +50,12 @@ class AircraftManager extends Component
             'aircraftForm.basic_weight' => 'required|integer|min:0',
             'aircraftForm.basic_index' => 'required|numeric|min:0',
             'aircraftForm.remarks' => 'nullable|string',
-            'aircraftForm.active' => 'boolean'
+            'aircraftForm.active' => 'boolean',
         ]);
 
         $data = array_merge($this->aircraftForm, [
             'airline_id' => $this->aircraftType->airline_id,
-            'aircraft_type_id' => $this->aircraftType->id
+            'aircraft_type_id' => $this->aircraftType->id,
         ]);
 
         $this->aircraftType->aircraft()->updateOrCreate(
@@ -79,7 +82,7 @@ class AircraftManager extends Component
             'aircraft' => $this->aircraftType->aircraft()
                 ->with('airline')
                 ->orderBy('registration_number')
-                ->paginate(10)
+                ->paginate(10),
         ]);
     }
 }

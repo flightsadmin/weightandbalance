@@ -3,20 +3,25 @@
 namespace App\Livewire\Fuel;
 
 use App\Models\Flight;
-use App\Models\Fuel;
 use Livewire\Component;
 
 class Manager extends Component
 {
     public Flight $flight;
+
     public $showModal = false;
 
     // Form fields
     public $block_fuel;
+
     public $take_off_fuel;
+
     public $taxi_fuel;
+
     public $trip_fuel;
+
     public $crew;
+
     public $pantry;
 
     public function mount(Flight $flight)
@@ -24,7 +29,6 @@ class Manager extends Component
         $this->flight = $flight;
         $this->loadFuelData();
     }
-
 
     public function loadFuelData()
     {
@@ -62,7 +66,7 @@ class Manager extends Component
     public function render()
     {
         return view('livewire.flights.fuel.manager', [
-            'fuel' => $this->flight->fuel
+            'fuel' => $this->flight->fuel,
         ]);
     }
 }

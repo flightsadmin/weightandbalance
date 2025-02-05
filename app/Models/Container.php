@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Container extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'container_number',
         'flight_id',
@@ -19,7 +20,7 @@ class Container extends Model
         'tare_weight',
         'weight',
         'max_weight',
-        'notes'
+        'notes',
     ];
 
     public function flight(): BelongsTo

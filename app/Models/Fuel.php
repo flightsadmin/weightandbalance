@@ -19,7 +19,7 @@ class Fuel extends Model
         'taxi_fuel',
         'trip_fuel',
         'crew',
-        'pantry'
+        'pantry',
     ];
 
     protected $casts = [
