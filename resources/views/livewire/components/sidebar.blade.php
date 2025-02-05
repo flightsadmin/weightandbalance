@@ -38,7 +38,7 @@
             <li>
                 <form action="{{ route('migrate') }}" method="GET" style="margin: 0;">
                     @csrf
-                    <button type="submit" class="dropdown-item text-danger">
+                    <button type="submit" class="dropdown-item text-danger bi-database-fill-gear">
                         Seed Database
                     </button>
                 </form>

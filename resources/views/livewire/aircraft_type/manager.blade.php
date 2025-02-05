@@ -25,19 +25,19 @@
             <div class="col-md-3">
                 <div class="list-group">
                     @forelse ($aircraftTypes as $type)
-                        <div class="list-group-item {{ $selectedTypeId === $type->id ? 'active' : '' }}">
+                        <div class="list-group-item {{ $selectedAircraft === $type->id ? 'active' : '' }}">
                             <div class="d-flex justify-content-between align-items-start">
                                 <button wire:click="selectType({{ $type->id }})"
-                                    class="btn btn-link text-decoration-none p-0 {{ $selectedTypeId === $type->id ? 'text-white' : 'text-dark' }}">
+                                    class="btn btn-link text-decoration-none p-0 {{ $selectedAircraft === $type->id ? 'text-white' : 'text-dark' }}">
                                     <div class="d-flex align-items-center gap-2">
                                         <strong>{{ $type->code }}</strong>
                                         <span class="badge bg-secondary">{{ $type->category }}</span>
                                     </div>
-                                    <small class="text-{{ $selectedTypeId === $type->id ? 'white' : 'muted' }}">
+                                    <small class="text-{{ $selectedAircraft === $type->id ? 'white' : 'muted' }}">
                                         {{ $type->name }}
                                     </small>
                                     <small class="small mt-1 text-start">
-                                        <div class="row text-{{ $selectedTypeId === $type->id ? 'white' : 'muted' }}">
+                                        <div class="row text-{{ $selectedAircraft === $type->id ? 'white' : 'muted' }}">
                                             <div class="col">
                                                 <i class="bi bi-person"></i> {{ $type->max_passengers }}pax
                                             </div>
@@ -46,14 +46,14 @@
                                 </button>
                                 <div class="d-flex">
                                     <button
-                                        class="btn btn-sm btn-link {{ $selectedTypeId === $type->id ? 'text-white' : '' }}"
+                                        class="btn btn-sm btn-link {{ $selectedAircraft === $type->id ? 'text-white' : '' }}"
                                         wire:click="edit({{ $type->id }})"
                                         data-bs-toggle="modal"
                                         data-bs-target="#aircraftTypeFormModal">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <button
-                                        class="btn btn-sm btn-link {{ $selectedTypeId === $type->id ? 'text-white' : 'text-danger' }}"
+                                        class="btn btn-sm btn-link {{ $selectedAircraft === $type->id ? 'text-white' : 'text-danger' }}"
                                         wire:click="delete({{ $type->id }})"
                                         wire:confirm="Are you sure you want to remove this aircraft type?">
                                         <i class="bi bi-trash"></i>
@@ -124,19 +124,19 @@
                         </div>
                         <div class="card-body">
                             @if ($activeTab === 'overview')
-                                <livewire:aircraft-type.overview :key="'overview-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                                <livewire:aircraft-type.overview :key="'overview-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'holds')
-                                <livewire:aircraft-type.hold-manager :key="'holds-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                                <livewire:aircraft-type.hold-manager :key="'holds-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'zones')
-                                <livewire:aircraft-type.zone-manager :key="'zones-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                                <livewire:aircraft-type.zone-manager :key="'zones-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'aircraft')
-                                <livewire:aircraft-type.aircraft-manager :key="'aircraft-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                                <livewire:aircraft-type.aircraft-manager :key="'aircraft-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'settings')
-                                <livewire:aircraft-type.settings :key="'settings-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                                <livewire:aircraft-type.settings :key="'settings-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'crew_seating')
-                                <livewire:aircraft-type.crew-seating :key="'crew_seating-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                                <livewire:aircraft-type.crew-seating :key="'crew_seating-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'pantry')
-                                <livewire:aircraft-type.pantry-manager :key="'pantry-' . $selectedTypeId" :aircraftType="$this->selectedType" />
+                                <livewire:aircraft-type.pantry-manager :key="'pantry-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @endif
                         </div>
                     </div>
