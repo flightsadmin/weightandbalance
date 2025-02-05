@@ -22,7 +22,7 @@
 
     <div class="card-body">
         <div class="row g-2">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="list-group">
                     @forelse ($aircraftTypes as $type)
                         <div class="list-group-item {{ $selectedAircraft === $type->id ? 'active' : '' }}">
@@ -73,7 +73,7 @@
                 </div>
             </div>
 
-            <div class="col-md-9">
+            <div class="col-md-10">
                 @if ($this->selectedType)
                     <div class="card">
                         <div class="card-header">
@@ -126,6 +126,12 @@
                                         <i class="bi bi-box"></i> Envelopes
                                     </button>
                                 </li>
+                                <li class="nav-item">
+                                    <button class="nav-link {{ $activeTab === 'seats' ? 'active' : '' }}"
+                                        wire:click="$set('activeTab', 'seats')">
+                                        <i class="bi bi-person-workspace"></i> Seats
+                                    </button>
+                                </li>
                             </ul>
                         </div>
                         <div class="card-body">
@@ -145,6 +151,8 @@
                                 <livewire:aircraft-type.pantry-manager :key="'pantry-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'envelopes')
                                 <livewire:aircraft-type.envelope-manager :key="'envelopes-' . $selectedAircraft" :aircraftType="$this->selectedType" />
+                            @elseif ($activeTab === 'seats')
+                                <livewire:aircraft-type.seat-manager :aircraftType="$this->selectedType" />
                             @endif
                         </div>
                     </div>

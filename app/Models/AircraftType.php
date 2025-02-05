@@ -132,4 +132,9 @@ class AircraftType extends Model
                 );
             });
     }
+
+    public function seats(): HasMany
+    {
+        return $this->hasMany(Seat::class);
+    }
 }
