@@ -85,6 +85,12 @@
                                     </button>
                                 </li>
                                 <li class="nav-item">
+                                    <button class="nav-link {{ $activeTab === 'aircraft' ? 'active' : '' }}"
+                                        wire:click="$set('activeTab', 'aircraft')">
+                                        <i class="bi bi-airplane"></i> Aircraft
+                                    </button>
+                                </li>
+                                <li class="nav-item">
                                     <button class="nav-link {{ $activeTab === 'holds' ? 'active' : '' }}"
                                         wire:click="$set('activeTab', 'holds')">
                                         <i class="bi bi-box"></i> Holds
@@ -94,12 +100,6 @@
                                     <button class="nav-link {{ $activeTab === 'zones' ? 'active' : '' }}"
                                         wire:click="$set('activeTab', 'zones')">
                                         <i class="bi bi-collection"></i> Zones
-                                    </button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="nav-link {{ $activeTab === 'aircraft' ? 'active' : '' }}"
-                                        wire:click="$set('activeTab', 'aircraft')">
-                                        <i class="bi bi-airplane"></i> Aircraft
                                     </button>
                                 </li>
                                 <li class="nav-item">
@@ -131,12 +131,12 @@
                         <div class="card-body">
                             @if ($activeTab === 'overview')
                                 <livewire:aircraft-type.overview :key="'overview-' . $selectedAircraft" :aircraftType="$this->selectedType" />
+                            @elseif ($activeTab === 'aircraft')
+                                <livewire:aircraft-type.aircraft-manager :key="'aircraft-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'holds')
                                 <livewire:aircraft-type.hold-manager :key="'holds-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'zones')
                                 <livewire:aircraft-type.zone-manager :key="'zones-' . $selectedAircraft" :aircraftType="$this->selectedType" />
-                            @elseif ($activeTab === 'aircraft')
-                                <livewire:aircraft-type.aircraft-manager :key="'aircraft-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'settings')
                                 <livewire:aircraft-type.settings :key="'settings-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'crew_seating')
