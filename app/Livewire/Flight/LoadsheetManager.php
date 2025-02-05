@@ -15,10 +15,6 @@ class LoadsheetManager extends Component
 
     public $showModal = false;
 
-    public $pantryCodes = [];
-
-    public $newPantryCode;
-
     public function mount(Flight $flight)
     {
         $this->flight = $flight->load([
@@ -33,11 +29,15 @@ class LoadsheetManager extends Component
         ]);
 
         $this->loadplan = $this->flight->loadplans()->latest()->first();
-        $this->pantryCodes = $this->flight->pantryCodes()->pluck('code')->toArray();
+        $this->loadsheet = $this->flight->loadsheets()->latest()->first();
     }
 
     public function finalizeLoadsheet()
     {
+        if (!$this->loadsheet) {
+            return;
+        }
+
         $this->loadsheet->update([
             'final' => true,
             'released_by' => auth()->id(),
@@ -49,293 +49,181 @@ class LoadsheetManager extends Component
 
     public function generateLoadsheet()
     {
-        if (! $this->flight->fuel) {
-            $this->dispatch('alert', icon: 'error', message: 'Fuel data must be added before generating loadsheet.');
-
+        // Validate requirements
+        if (!$this->flight->fuel) {
+            $this->dispatch('alert', icon: 'error', message: 'Fuel data is required to generate loadsheet.');
             return;
         }
 
-        if (! $this->loadplan || $this->loadplan->status !== 'released') {
-            $this->dispatch('alert', icon: 'error', message: 'Load plan must be released before generating loadsheet.');
-
+        if (!$this->loadplan || $this->loadplan->status !== 'released') {
+            $this->dispatch('alert', icon: 'error', message: 'Released loadplan is required to generate loadsheet.');
             return;
         }
-        // Get airline standard weights
-        $airline = $this->flight->airline;
-        $standardWeights = [
-            'standard_male_weight' => $airline->getStandardPassengerWeight(),
-            'standard_female_weight' => $airline->getStandardPassengerWeight(),
-            'standard_child_weight' => 35,
-            'standard_infant_weight' => 10,
-            'standard_captain_weight' => $airline->getStandardCockpitCrewWeight(),
-            'standard_first_officer_weight' => $airline->getStandardCockpitCrewWeight(),
-            'standard_cabin_crew_weight' => $airline->getStandardCabinCrewWeight(),
-        ];
 
-        // Calculate weights
-        $weights = [
-            'passenger' => $this->calculatePassengerWeight($standardWeights),
-            'cargo' => $this->calculateCargoWeight(),
-            'baggage' => $this->calculateBaggageWeight(),
-            'crew' => $this->calculateCrewWeight($standardWeights),
-        ];
-
-        // Get fuel data
-        $fuel = [
-            'block' => $this->flight->fuel->block_fuel,
-            'taxi' => $this->flight->fuel->taxi_fuel,
-            'trip' => $this->flight->fuel->trip_fuel,
-            'take_off' => $this->flight->fuel->block_fuel - $this->flight->fuel->taxi_fuel,
-        ];
-
-        // Calculate operating weights
-        $operatingWeights = $this->calculateOperatingWeights($weights, $fuel);
-
-        // Calculate weight and balance
-        $balance = $this->calculateBalance($operatingWeights);
-
-        // Get load distribution by compartment
-        $loads = $this->calculateCompartmentLoads();
-
-        // Get crew distribution
-        $crewDistribution = [
-            'deck' => $this->flight->crew->whereIn(
-                'position',
-                [
-                    'captain',
-                    'first_officer',
-                ]
-            )->count(),
-            'cabin' => $this->flight->crew->where('position', 'cabin_crew')->count(),
-        ];
-
-        $distribution = [
-            'weights' => array_merge($weights, $operatingWeights),
-            'fuel' => $fuel,
-            'loads' => $loads,
-            'balance' => $balance,
-            'passenger_distribution' => $this->getPassengerDistribution(),
-            'crew_distribution' => $crewDistribution,
-            'pantry_codes' => $this->pantryCodes,
-        ];
+        // Calculate payload distribution
+        $payloadDistribution = $this->getPayloadDistribution();
 
         // Create new loadsheet
         $this->loadsheet = $this->flight->loadsheets()->create([
-            'payload_distribution' => $distribution,
-            'created_by' => auth()->id(),
+            'payload_distribution' => $payloadDistribution,
             'edition' => $this->flight->loadsheets()->count() + 1,
+            'created_by' => auth()->id(),
         ]);
-
-        // Create weight balance record if needed
-        if (! $this->flight->weightBalance) {
-            $this->flight->weightBalance()->create([
-                'weights' => $distribution['weights'
-                ],
-                'balance' => $distribution['balance'
-                ],
-            ]);
-        }
 
         $this->dispatch('alert', icon: 'success', message: 'Loadsheet generated successfully.');
     }
 
-    private function calculateOperatingWeights($weights, $fuel)
+    private function getPayloadDistribution()
     {
-        $aircraft = $this->flight->aircraft;
+        if (!$this->flight->fuel) {
+            return null;
+        }
 
-        $dow = $aircraft->basic_weight + $weights['crew'
-        ];
-        $zfw = $dow + $weights['passenger'
-        ] + $weights['cargo'
-                ] + $weights['baggage'
-                ];
-        $tow = $zfw + $fuel['block'
-        ] - $fuel['taxi'
-                ];
-        $ldw = $tow - $fuel['trip'
-        ];
+        $pantryDetails = $this->getPantryDistribution();
+        $crewDistribution = $this->getCrewDistribution();
+        $fuelData = $this->getFuelData();
+        $weightAndBalance = $this->getWeightAndBalance();
+
+        // Calculate total weights
+        $totalPayload = 0;
+        $totalFuel = $fuelData['block'] ?? 0;
+
+        // Add crew weights
+        foreach ($crewDistribution as $position => $count) {
+            $weight = match ($position) {
+                'captain', 'first_officer' => $count * $this->flight->airline->getStandardCockpitCrewWeight(),
+                'cabin_crew' => $count * $this->flight->airline->getStandardCabinCrewWeight(),
+                default => 0,
+            };
+            $totalPayload += $weight;
+        }
+
+        // Add pantry weight
+        if ($pantryDetails) {
+            $totalPayload += $pantryDetails['weight'];
+        }
+
+        // Add passenger and baggage weights
+        $passengerWeight = $this->getTotalPassengerWeight();
+        $baggageWeight = $this->flight->baggage->sum('weight');
+        $cargoWeight = $this->flight->cargo->sum('weight');
+        
+        $totalPayload += $passengerWeight + $baggageWeight + $cargoWeight;
 
         return [
-            'dry_operating' => $dow,
-            'zero_fuel' => $zfw,
-            'take_off' => $tow,
-            'landing' => $ldw,
+            'weights' => [
+                'basic' => $this->flight->aircraft->basic_weight,
+                'zero_fuel' => $this->calculateZeroFuelWeight(),
+                'takeoff' => $this->calculateTakeoffWeight(),
+                'landing' => $this->calculateLandingWeight(),
+                'total_payload' => $totalPayload,
+                'total_fuel' => $totalFuel,
+                'total' => $totalPayload + $totalFuel,
+            ],
+            'loads' => [
+                'passengers' => [
+                    'count' => $this->flight->passengers->count(),
+                    'weight' => $passengerWeight,
+                ],
+                'baggage' => [
+                    'count' => $this->flight->baggage->count(),
+                    'weight' => $baggageWeight,
+                ],
+                'cargo' => [
+                    'count' => $this->flight->cargo->count(),
+                    'weight' => $cargoWeight,
+                ],
+                'crew' => $crewDistribution,
+                'pantry' => $pantryDetails,
+                'fuel' => $fuelData,
+            ],
         ];
     }
 
-    private function calculateBalance($weights)
+    private function getWeightAndBalance()
     {
-        $type = $this->flight->aircraft->type;
-        $settings = $type->settings()->pluck('value', 'key');
-
-        // Get MAC parameters
-        $refSta = (float) $settings->get(
-            'ref_sta',
-            18.850
-        ); // Reference station at 18.850 meters
-        $lemac = (float) $settings->get(
-            'lemac_at',
-            17.8015
-        ); // LEMAC at 17.8015 meters
-        $mac = (float) $settings->get(
-            'length_of_mac',
-            4.194
-        ); // MAC length 4.194 meters
-        $k = (float) $settings->get(
-            'k_constant',
-            50
-        ); // K constant = 50
-        $c = (float) $settings->get(
-            'c_constant',
-            1000
-        ); // C constant = 1000
-
-        // Calculate indices and MAC percentages for each weight condition
-        $zfw = $this->calculateWeightBalance($weights['zero_fuel'
-        ], $refSta, $lemac, $mac, $k, $c);
-        $tow = $this->calculateWeightBalance($weights['take_off'
-        ], $refSta, $lemac, $mac, $k, $c);
-        $ldw = $this->calculateWeightBalance($weights['landing'
-        ], $refSta, $lemac, $mac, $k, $c);
-
         return [
-            'mac_parameters' => [
-                'ref_sta' => $refSta,
-                'lemac' => $lemac,
-                'mac' => $mac,
-                'k' => $k,
-                'c' => $c,
-            ],
-            'indices' => [
-                'zfw' => $zfw['index'
-                ],
-                'tow' => $tow['index'
-                ],
-                'ldw' => $ldw['index'
-                ],
-            ],
-            'mac_percentages' => [
-                'zfw' => $zfw['mac_percentage'
-                ],
-                'tow' => $tow['mac_percentage'
-                ],
-                'ldw' => $ldw['mac_percentage'
-                ],
-            ],
-            'arms' => [
-                'zfw' => $zfw['arm'
-                ],
-                'tow' => $tow['arm'
-                ],
-                'ldw' => $ldw['arm'
-                ],
-            ],
+            'basic_weight' => $this->flight->aircraft->basic_weight,
+            'basic_index' => $this->flight->aircraft->basic_index,
+            'zero_fuel_weight' => $this->calculateZeroFuelWeight(),
+            'takeoff_weight' => $this->calculateTakeoffWeight(),
+            'landing_weight' => $this->calculateLandingWeight(),
         ];
     }
 
-    private function calculateWeightBalance($weight, $refSta, $lemac, $mac, $k, $c)
+    private function calculateZeroFuelWeight()
     {
-        $arm = $this->calculateArm($weight);
-        $index = round(
-            ($weight * ($arm - $refSta)) / $c + $k,
-            1
-        );
-        $macPercentage = round(
-            (($c * ($index - $k)) / $weight + $refSta - $lemac) / ($mac / 100),
-            1
-        );
-
-        return [
-            'arm' => $arm,
-            'index' => $index,
-            'mac_percentage' => $macPercentage,
-        ];
+        return $this->flight->aircraft->basic_weight
+            + $this->getTotalPassengerWeight()
+            + $this->getTotalCargoWeight()
+            + $this->getTotalCrewWeight()
+            + $this->getTotalPantryWeight();
     }
 
-    private function calculateArm($weight)
+    private function calculateTakeoffWeight()
     {
-        $aircraft = $this->flight->aircraft;
-        $basicArm = $aircraft->basic_index;
-        $weightFactor = 0.01;
-
-        return round(
-            $basicArm + ($weight - $aircraft->basic_weight) * $weightFactor,
-            3
-        );
+        return $this->calculateZeroFuelWeight() + $this->flight->fuel->take_off_fuel;
     }
 
-    private function calculatePassengerWeight($standardWeights)
+    private function calculateLandingWeight()
     {
-        return $this->flight->passengers->sum(function ($passenger) use ($standardWeights) {
-            return $standardWeights[
-                "standard_{$passenger->type}_weight"
-            ] ?? 75;
+        return $this->calculateTakeoffWeight() - $this->flight->fuel->trip_fuel;
+    }
+
+    private function getTotalPassengerWeight()
+    {
+        $standardWeight = $this->flight->airline->getStandardPassengerWeight();
+        return $this->flight->passengers->count() * $standardWeight;
+    }
+
+    private function getTotalCargoWeight()
+    {
+        return $this->flight->containers->sum('weight');
+    }
+
+    private function getTotalCrewWeight()
+    {
+        $cockpitCrewWeight = $this->flight->airline->getStandardCockpitCrewWeight();
+        $cabinCrewWeight = $this->flight->airline->getStandardCabinCrewWeight();
+
+        return $this->flight->crew->sum(function ($crew) use ($cockpitCrewWeight, $cabinCrewWeight) {
+            return $crew->position === 'cabin_crew' ? $cabinCrewWeight : $cockpitCrewWeight;
         });
     }
 
-    private function calculateCargoWeight()
+    private function getTotalPantryWeight()
     {
-        return $this->flight->containers
-            ->sum(fn ($container) => $container->cargo->sum('weight'));
+        $pantryCode = $this->flight->fuel->pantry ?? null;
+        if (!$pantryCode) {
+            return 0;
+        }
+
+        $pantryDetails = $this->flight->aircraft->type->getPantryDetails($pantryCode);
+        return $pantryDetails['weight'] ?? 0;
     }
 
-    private function calculateBaggageWeight()
+    private function getHoldDistribution()
     {
-        return $this->flight->containers
-            ->sum(fn ($container) => $container->baggage->sum('weight'));
-    }
-
-    private function calculateCrewWeight($standardWeights)
-    {
-        return $this->flight->crew->sum(function ($crew) use ($standardWeights) {
-            return $standardWeights[
-                "standard_{$crew->position}_weight"
-            ] ?? 75;
-        });
-    }
-
-    private function calculateCompartmentLoads()
-    {
-        $holds = $this->flight->aircraft->type->holds()
-            ->with('positions')
-            ->get()
-            ->keyBy('id');
-
         $loadsByHold = [];
 
-        foreach ($this->loadplan->container_positions as $containerId => $positionId) {
-            $container = $this->flight->containers->find($containerId);
-            $position = $holds->first(function ($hold) use ($positionId) {
-                return $hold->positions->contains('id', $positionId);
-            });
+        foreach ($this->flight->aircraft->type->holds as $hold) {
+            $loadsByHold[$hold->id] = [
+                'name' => $hold->name,
+                'code' => $hold->code,
+                'max_weight' => $hold->max_weight,
+                'total_weight' => 0,
+                'containers' => [],
+            ];
+        }
 
-            if (! $container || ! $position) {
-                continue;
-            }
-
-            $holdId = $position->id;
-            if (
-                ! isset($loadsByHold[$holdId
-                ])
-            ) {
-                $loadsByHold[$holdId
-                ] = [
-                    'hold_name' => $position->name,
-                    'cargo_weight' => 0,
-                    'baggage_weight' => 0,
-                    'total_weight' => 0,
-                ];
-            }
-
-            $loadsByHold[$holdId
-            ]['cargo_weight'
-            ] += $container->cargo->sum('weight');
-            $loadsByHold[$holdId
-            ]['baggage_weight'
-            ] += $container->baggage->sum('weight');
-            $loadsByHold[$holdId
-            ]['total_weight'
-            ] += $container->total_weight;
+        foreach ($this->flight->containers as $container) {
+            $holdId = $container->hold_id;
+            $loadsByHold[$holdId]['containers'][] = [
+                'number' => $container->container_number,
+                'weight' => $container->weight,
+                'type' => $container->type,
+            ];
+            $loadsByHold[$holdId]['total_weight'] += $container->weight;
         }
 
         return $loadsByHold;
@@ -345,35 +233,65 @@ class LoadsheetManager extends Component
     {
         return $this->flight->passengers
             ->groupBy('type')
-            ->map(fn ($group) => $group->count())
+            ->map(fn($group) => $group->count())
             ->toArray();
     }
 
-    public function addPantryCode()
+    private function getCargoDistribution()
     {
-        if ($this->newPantryCode) {
-            $this->flight->pantryCodes()->create(['code' => $this->newPantryCode]);
-            $this->pantryCodes[] = $this->newPantryCode;
-            $this->newPantryCode = '';
-            $this->dispatch('alert', icon: 'success', message: 'Pantry code added successfully.');
-        }
+        return $this->flight->containers
+            ->pluck('cargo')
+            ->flatten()
+            ->groupBy('type')
+            ->map(fn($group) => [
+                'pieces' => $group->sum('pieces'),
+                'weight' => $group->sum('weight'),
+            ])
+            ->toArray();
     }
 
-    public function removePantryCode($code)
+    private function getFuelData()
     {
-        $this->flight->pantryCodes()->where('code', $code)->delete();
-        $this->pantryCodes = array_filter($this->pantryCodes, fn ($c) => $c !== $code);
-        $this->dispatch('alert', icon: 'success', message: 'Pantry code removed successfully.');
+        if (!$this->flight->fuel) {
+            return null;
+        }
+
+        return [
+            'block' => $this->flight->fuel->block_fuel,
+            'taxi' => $this->flight->fuel->taxi_fuel,
+            'trip' => $this->flight->fuel->trip_fuel,
+            'takeoff' => $this->flight->fuel->take_off_fuel,
+        ];
+    }
+
+    private function getCrewDistribution()
+    {
+        return $this->flight->crew
+            ->groupBy('position')
+            ->map(fn($group) => $group->count())
+            ->toArray();
+    }
+
+    private function getPantryDistribution()
+    {
+        $pantryCode = $this->flight->fuel->pantry ?? null;
+        if (!$pantryCode) {
+            return null;
+        }
+
+        $pantryDetails = $this->flight->aircraft->type->getPantryDetails($pantryCode);
+        return [
+            'code' => $pantryCode,
+            'name' => $pantryDetails['name'],
+            'weight' => $pantryDetails['weight'],
+            'index' => $pantryDetails['index'],
+        ];
     }
 
     public function render()
     {
-        return view(
-            'livewire.flight.loadsheet-manager',
-            [
-                'loadsheets' => $this->flight->loadsheets()->latest()->get(),
-                'pantryCodes' => $this->pantryCodes,
-            ]
-        );
+        return view('livewire.flight.loadsheet-manager', [
+            'loadsheets' => $this->flight->loadsheets()->latest()->get(),
+        ]);
     }
 }

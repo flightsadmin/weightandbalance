@@ -33,6 +33,12 @@
                                 <th>A/C Reg:</th>
                                 <td>{{ $flight->aircraft->registration_number }}</td>
                             </tr>
+                            <tr>
+                                <th>Crew:</th>
+                                <td>{{ $flight->fuel->crew }}</td>
+                                <th>Pantry:</th>
+                                <td>{{ $flight->fuel->pantry }}</td>
+                            </tr>
                         </table>
                     </div>
                     <div class="col-md-6 text-end">
@@ -43,249 +49,68 @@
                     </div>
                 </div>
 
+                <!-- Weight Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h5>Weight Summary</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Basic Weight:</th>
+                                <td>{{ number_format($loadsheet->payload_distribution['weights']['basic']) }} kg</td>
+                                <th>Total Payload:</th>
+                                <td>{{ number_format($loadsheet->payload_distribution['weights']['total_payload']) }} kg</td>
+                            </tr>
+                            <tr>
+                                <th>Zero Fuel Weight:</th>
+                                <td>{{ number_format($loadsheet->payload_distribution['weights']['zero_fuel']) }} kg</td>
+                                <th>Total Fuel:</th>
+                                <td>{{ number_format($loadsheet->payload_distribution['weights']['total_fuel']) }} kg</td>
+                            </tr>
+                            <tr>
+                                <th>Take Off Weight:</th>
+                                <td>{{ number_format($loadsheet->payload_distribution['weights']['takeoff']) }} kg</td>
+                                <th>Total Weight:</th>
+                                <td>{{ number_format($loadsheet->payload_distribution['weights']['total']) }} kg</td>
+                            </tr>
+                            <tr>
+                                <th>Landing Weight:</th>
+                                <td colspan="3">{{ number_format($loadsheet->payload_distribution['weights']['landing']) }} kg</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Load Distribution -->
                 <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Load Distribution</h5>
-                            </div>
-                            <div class="card-body">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Hold</th>
-                                            <th class="text-end">Cargo</th>
-                                            <th class="text-end">Baggage</th>
-                                            <th class="text-end">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($loadsheet->payload_distribution['loads'] as $holdId => $load)
-                                            <tr>
-                                                <td>{{ $load['hold_name'] }}</td>
-                                                <td class="text-end">{{ number_format($load['cargo_weight']) }}</td>
-                                                <td class="text-end">{{ number_format($load['baggage_weight']) }}</td>
-                                                <td class="text-end">{{ number_format($load['total_weight']) }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Passenger & Crew Distribution</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <h6>Passengers</h6>
-                                        <table class="table table-sm">
-                                            <tr>
-                                                <td>Male</td>
-                                                <td class="text-end">
-                                                    {{ $loadsheet->payload_distribution['passenger_distribution']['male'] ?? 0 }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Female</td>
-                                                <td class="text-end">
-                                                    {{ $loadsheet->payload_distribution['passenger_distribution']['female'] ?? 0 }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Child</td>
-                                                <td class="text-end">
-                                                    {{ $loadsheet->payload_distribution['passenger_distribution']['child'] ?? 0 }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Infant</td>
-                                                <td class="text-end">
-                                                    {{ $loadsheet->payload_distribution['passenger_distribution']['infant'] ?? 0 }}</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <div class="col-6">
-                                        <h6>Crew</h6>
-                                        <table class="table table-sm">
-                                            <tr>
-                                                <td>Flight Deck</td>
-                                                <td class="text-end">{{ $loadsheet->payload_distribution['crew_distribution']['deck'] }}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Cabin</td>
-                                                <td class="text-end">{{ $loadsheet->payload_distribution['crew_distribution']['cabin'] }}
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Weights Summary -->
-                <div class="row">
                     <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Weight Summary</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <h6>Operating Weights</h6>
-                                        <table class="table table-sm">
-                                            <tr>
-                                                <td>DOW</td>
-                                                <td class="text-end">
-                                                    {{ number_format($loadsheet->payload_distribution['weights']['dry_operating']) }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>ZFW</td>
-                                                <td class="text-end">
-                                                    {{ number_format($loadsheet->payload_distribution['weights']['zero_fuel']) }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>TOW</td>
-                                                <td class="text-end">
-                                                    {{ number_format($loadsheet->payload_distribution['weights']['take_off']) }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>LDW</td>
-                                                <td class="text-end">
-                                                    {{ number_format($loadsheet->payload_distribution['weights']['landing']) }}</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <h6>Payload Weights</h6>
-                                        <table class="table table-sm">
-                                            <tr>
-                                                <td>Passengers</td>
-                                                <td class="text-end">
-                                                    {{ number_format($loadsheet->payload_distribution['weights']['passenger']) }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Cargo</td>
-                                                <td class="text-end">
-                                                    {{ number_format($loadsheet->payload_distribution['weights']['cargo']) }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Baggage</td>
-                                                <td class="text-end">
-                                                    {{ number_format($loadsheet->payload_distribution['weights']['baggage']) }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Crew</td>
-                                                <td class="text-end">
-                                                    {{ number_format($loadsheet->payload_distribution['weights']['crew']) }}</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <h6>Fuel Figures</h6>
-                                        <table class="table table-sm">
-                                            <tr>
-                                                <td>Block Fuel</td>
-                                                <td class="text-end">{{ number_format($loadsheet->payload_distribution['fuel']['block']) }}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Take Off Fuel</td>
-                                                <td class="text-end">
-                                                    {{ number_format($loadsheet->payload_distribution['fuel']['take_off']) }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Trip Fuel</td>
-                                                <td class="text-end">{{ number_format($loadsheet->payload_distribution['fuel']['trip']) }}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Taxi Fuel</td>
-                                                <td class="text-end">{{ number_format($loadsheet->payload_distribution['fuel']['taxi']) }}
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <h5>Load Distribution</h5>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Count</th>
+                                    <th>Weight</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Passengers</td>
+                                    <td>{{ $loadsheet->payload_distribution['loads']['passengers']['count'] }}</td>
+                                    <td>{{ number_format($loadsheet->payload_distribution['loads']['passengers']['weight']) }} kg</td>
+                                </tr>
+                                <tr>
+                                    <td>Baggage</td>
+                                    <td>{{ $loadsheet->payload_distribution['loads']['baggage']['count'] }}</td>
+                                    <td>{{ number_format($loadsheet->payload_distribution['loads']['baggage']['weight']) }} kg</td>
+                                </tr>
+                                <tr>
+                                    <td>Cargo</td>
+                                    <td>{{ $loadsheet->payload_distribution['loads']['cargo']['count'] }}</td>
+                                    <td>{{ number_format($loadsheet->payload_distribution['loads']['cargo']['weight']) }} kg</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-
-                <!-- Balance Data Section -->
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title">Balance Data</h5>
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Condition</th>
-                                        <th class="text-end">Weight</th>
-                                        <th class="text-end">Index</th>
-                                        <th class="text-end">% MAC</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Zero Fuel</td>
-                                        <td class="text-end">{{ number_format($loadsheet->payload_distribution['weights']['zero_fuel']) }}
-                                        </td>
-                                        <td class="text-end">
-                                            {{ number_format($loadsheet->payload_distribution['balance']['indices']['zfw'], 1) }}</td>
-                                        <td class="text-end">
-                                            {{ number_format($loadsheet->payload_distribution['balance']['mac_percentages']['zfw'], 1) }}%
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Take Off</td>
-                                        <td class="text-end">{{ number_format($loadsheet->payload_distribution['weights']['take_off']) }}
-                                        </td>
-                                        <td class="text-end">
-                                            {{ number_format($loadsheet->payload_distribution['balance']['indices']['tow'], 1) }}</td>
-                                        <td class="text-end">
-                                            {{ number_format($loadsheet->payload_distribution['balance']['mac_percentages']['tow'], 1) }}%
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Landing</td>
-                                        <td class="text-end">{{ number_format($loadsheet->payload_distribution['weights']['landing']) }}
-                                        </td>
-                                        <td class="text-end">
-                                            {{ number_format($loadsheet->payload_distribution['balance']['indices']['ldw'], 1) }}</td>
-                                        <td class="text-end">
-                                            {{ number_format($loadsheet->payload_distribution['balance']['mac_percentages']['ldw'], 1) }}%
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Manage Pantry Codes Section -->
-                <div class="mt-4">
-                    <h3 class="text-lg font-medium text-gray-900">Manage Pantry Codes</h3>
-                    <div class="mt-2">
-                        <input type="text" wire:model="newPantryCode" placeholder="Enter new pantry code" class="form-control">
-                        <button wire:click="addPantryCode" class="btn btn-primary mt-2">Add</button>
-                    </div>
-                    <ul class="list-group mt-2">
-                        @foreach($pantryCodes as $code)
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>{{ $code }}</span>
-                                <button wire:click="removePantryCode('{{ $code }}')" class="btn btn-danger btn-sm">Remove</button>
-                            </li>
-                        @endforeach
-                    </ul>
                 </div>
 
                 <!-- Signatures Section -->
@@ -301,7 +126,8 @@
                                         </div>
                                         <div class="col-md-4">
                                             <p><strong>Released By:</strong> {{ $loadsheet->releaser->name ?? 'N/A' }}</p>
-                                            <p><strong>Released At:</strong> {{ $loadsheet->released_at->format('d-M-Y H:i') }}</p>
+                                            <p><strong>Released At:</strong> {{ $loadsheet->released_at?->format('d-M-Y H:i') ?? 'N/A' }}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
