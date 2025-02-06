@@ -365,50 +365,40 @@
                 <div class="modal-header">
                     <h5 class="modal-title">
                         Assign Seat - {{ $selectedPassenger?->name }}
+                        @if ($selectedPassenger?->seat)
+                            <small class="text-muted">(Current: {{ $selectedPassenger->seat->designation }})</small>
+                        @endif
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     @if ($seats && $seats->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-sm">
-                                <thead>
-                                    <tr>
-                                        @foreach ($seats->pluck('column')->unique()->sort() as $column)
-                                            <th class="text-center">{{ $column }}</th>
-                                        @endforeach
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($seats->groupBy('row') as $row => $rowSeats)
-                                        <tr>
-                                            @foreach ($seats->pluck('column')->unique()->sort() as $column)
-                                                @php
-                                                    $seat = $rowSeats->where('column', $column)->first();
-                                                @endphp
-                                                <td class="text-center p-1">
-                                                    @if ($seat)
-                                                        <button type="button"
-                                                            class="btn btn-sm w-100 {{ $seat->passenger_id ? 'btn-secondary' : ($seat->is_exit ? 'btn-warning' : 'btn-outline-primary') }} {{ $selectedSeat == $seat->id ? 'active' : '' }}"
-                                                            wire:click="selectSeat({{ $seat->id }})"
-                                                            {{ $seat->passenger_id || $seat->is_blocked ? 'disabled' : '' }}
-                                                            title="{{ $seat->is_exit ? 'Exit Row' : '' }} {{ $seat->cabinZone?->name }}"
-                                                            style="height: 35px;">
-                                                            {{ $row }}{{ $column }}
-                                                        </button>
-                                                    @endif
-                                                </td>
-                                            @endforeach
-                                        </tr>
+                        <div class="seat-map">
+                            @foreach ($seats->groupBy('row') as $row => $rowSeats)
+                                <div class="d-flex justify-content-center gap-2 mb-2">
+                                    @foreach ($rowSeats as $seat)
+                                        <div class="seat-cell 
+                                            {{ $seat->is_occupied ? 'bg-secondary' : ($seat->is_blocked ? 'bg-danger' : '') }}
+                                            {{ $selectedPassenger && $selectedPassenger->seat_id === $seat->id ? 'current-seat bg-success' : '' }}"
+                                            wire:click="{{ !$seat->is_occupied && !$seat->is_blocked ? 'selectSeat(' . $seat->id . ')' : '' }}"
+                                            style="{{ $selectedSeat == $seat->id ? 'background-color: #0d6efd; color: white;' : '' }}
+                                                   {{ $seat->is_occupied || $seat->is_blocked ? 'cursor: not-allowed;' : '' }}"
+                                            title="{{ $selectedPassenger && $selectedPassenger->seat_id === $seat->id ? 'Current Seat' : '' }}">
+                                            <small>{{ $seat->row }}{{ $seat->column }}</small>
+                                            @if ($seat->is_occupied)
+                                                <i class="bi bi-person-fill"></i>
+                                            @endif
+                                        </div>
                                     @endforeach
-                                </tbody>
-                            </table>
+                                </div>
+                            @endforeach
                         </div>
                         <div class="mt-3">
                             <div class="d-flex gap-2 align-items-center small">
                                 <span class="badge bg-warning">Exit Row</span>
                                 <span class="badge bg-secondary">Occupied</span>
                                 <span class="badge bg-outline-primary">Available</span>
+                                <span class="badge bg-success text-white">Current Seat</span>
                             </div>
                         </div>
                     @else
@@ -437,11 +427,22 @@
             cursor: pointer;
             padding: 5px;
             border-radius: 4px;
+            border: 1px solid #151414;
             transition: background-color 0.2s;
+            text-align: center;
+            min-width: 40px;
         }
 
         .seat-cell:hover:not(.bg-secondary):not(.bg-danger) {
             background-color: #e9ecef;
+        }
+
+        .seat-cell.bg-secondary {
+            color: white;
+        }
+
+        .seat-cell.current-seat {
+            border: 2px solid #0d6efd;
         }
     </style>
 
@@ -463,12 +464,6 @@
                 const modal = new bootstrap.Modal(document.getElementById('seatModal'));
                 modal.show();
             });
-            // $wire.on('$set', (property, value) => {
-            //     if (property === 'showSeatModal' && value) {
-            //         const modal = new bootstrap.Modal(document.getElementById('seatModal'));
-            //         modal.show();
-            //     }
-            // });
         </script>
     @endscript
 </div>

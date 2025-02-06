@@ -69,7 +69,14 @@ class Manager extends Component
                 ->with(['passenger', 'cabinZone'])
                 ->orderBy('row')
                 ->orderBy('column')
-                ->get();
+                ->get()
+                ->map(function ($seat) {
+                    $seat->is_occupied = $seat->passenger !== null;
+                    if ($seat->is_occupied && $this->selectedPassenger && $seat->passenger_id === $this->selectedPassenger->id) {
+                        $seat->is_occupied = false;
+                    }
+                    return $seat;
+                });
         }
         return collect();
     }
@@ -210,7 +217,7 @@ class Manager extends Component
             $this->selectedPassenger->seat_id = $this->selectedSeat;
             $this->selectedPassenger->save();
             $this->dispatch('alert', icon: 'success', message: 'Seat assigned successfully.');
-            $this->dispatch('passenger-saved');
+            $this->dispatch('seat-saved');
         }
         $this->selectedSeat = null;
         $this->selectedPassenger = null;
