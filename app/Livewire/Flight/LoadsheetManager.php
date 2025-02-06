@@ -46,10 +46,11 @@ class LoadsheetManager extends Component
     {
         // Calculate payload distribution
         $distribution = [
-            'passengers' => $this->getPassengerDistribution(),
-            'passengers_weight' => $this->getPassengerWeightDistribution(),
+            // 'passengers' => $this->getPassengerDistribution(),
+            'passengers' => $this->getPassengerWeightDistribution(),
             'baggage' => $this->getBaggageDistribution(),
             'cargo' => $this->getCargoDistribution(),
+            'total_traffic_load' => $this->calculateTotalTrafficLoad(),
             'fuel' => [
                 'block' => $this->flight->fuel->block_fuel,
                 'taxi' => $this->flight->fuel->taxi_fuel,
@@ -67,6 +68,7 @@ class LoadsheetManager extends Component
                 'landing' => $this->calculateLandingWeight(),
             ],
             'indices' => [
+                'dry_operating_weight' => $this->calculateDryOperatingWeight(),
                 'zero_fuel' => $this->calculateZeroFuelIndex(),
                 'takeoff' => $this->calculateTakeoffIndex(),
                 'landing' => $this->calculateLandingIndex(),
@@ -83,15 +85,16 @@ class LoadsheetManager extends Component
         $this->dispatch('alert', icon: 'success', message: 'Loadsheet generated successfully.');
     }
 
-    private function getPassengerWeightDistribution()
+    private function calculateDryOperatingWeight()
     {
-        return $this->flight->passengers
-            ->groupBy('type')
-            ->map(fn($group) => [
-                'count' => $group->count(),
-                'weight' => $group->count() * $this->flight->airline->getStandardPassengerWeight(),
-            ])
-            ->toArray();
+        return $this->flight->aircraft->basic_weight;
+    }
+
+    private function calculateTotalTrafficLoad()
+    {
+        return $this->flight->passengers->sum('weight') +
+            $this->flight->baggage->sum('weight') +
+            $this->flight->cargo->sum('weight');
     }
 
     private function calculateZeroFuelWeight()
@@ -130,43 +133,33 @@ class LoadsheetManager extends Component
     private function getCargoDistribution()
     {
         return [
-            'total_weight' => $this->flight->cargo->sum('weight'),
             'total_pieces' => $this->flight->cargo->sum('pieces'),
-            'by_type' => $this->flight->cargo
-                ->groupBy('status')
-                ->map(fn($group) => [
-                    'weight' => $group->sum('weight'),
-                    'pieces' => $group->sum('pieces'),
-                ])
-                ->toArray(),
+            'total_weight' => $this->flight->cargo->sum('weight'),
         ];
     }
 
     private function getBaggageDistribution()
     {
-        return $this->flight->baggage
-            ->groupBy('status')
-            ->map(fn($group) => [
-                'count' => $group->count(),
-                'weight' => $group->sum('weight'),
-            ])
-            ->toArray();
+        return [
+            'total_pieces' => $this->flight->baggage->count(),
+            'total_weight' => $this->flight->baggage->sum('weight'),
+        ];
     }
 
     private function getLoadsByHold()
     {
         $loadsByHold = [];
         foreach ($this->flight->aircraft->type->holds as $hold) {
-            foreach ($hold->positions as $position) {
-                $loadsByHold[$hold->id] = [
-                    'name' => $hold->name,
-                    'code' => $position->code,
-                    'total_weight' => $this->flight->containers
-                        ->where('position_id', $position->id)
-                        ->sum('weight'),
-                    'max_weight' => $position->max_weight,
-                ];
-            }
+            $totalWeight = $this->flight->containers
+                ->whereIn('position_id', $hold->positions->pluck('id'))
+                ->sum('weight');
+
+            $loadsByHold[$hold->code] = [
+                'name' => $hold->name,
+                'code' => $hold->code,
+                'total_weight' => $totalWeight,
+                'max_weight' => $hold->max_weight,
+            ];
         }
         return $loadsByHold;
     }
@@ -176,6 +169,17 @@ class LoadsheetManager extends Component
         return $this->flight->passengers
             ->groupBy('type')
             ->map(fn($group) => $group->count())
+            ->toArray();
+    }
+
+    private function getPassengerWeightDistribution()
+    {
+        return $this->flight->passengers
+            ->groupBy('type')
+            ->map(fn($group) => [
+                'count' => $group->count(),
+                'weight' => $group->count() * $this->flight->airline->getStandardPassengerWeight(),
+            ])
             ->toArray();
     }
 

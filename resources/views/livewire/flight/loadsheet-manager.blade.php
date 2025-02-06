@@ -18,7 +18,10 @@
                     <div class="card-body p-2">
                         @php
                             $distribution = $loadsheet->payload_distribution;
-                            $totalPax = array_sum($distribution['passengers']);
+                            $pax = array_map(function ($item) {
+                                return $item['count'];
+                            }, $distribution['passengers']);
+                            $totalPax = array_sum($pax);
                             $zfw = $flight->aircraft->type->max_zero_fuel_weight - $distribution['weights']['zero_fuel'];
                             $tow = $flight->aircraft->type->max_takeoff_weight - $distribution['weights']['takeoff'];
                             $ldw = $flight->aircraft->type->max_landing_weight - $distribution['weights']['landing'];
@@ -79,7 +82,11 @@
                                 <tr>
                                     <td>PASSENGER/CABIN BAG</td>
                                     <td>
-                                        {{ $totalPax }}/{{ $distribution['cargo']['total_weight'] ?? 'N/A' }}
+                                        @forelse ($distribution['passengers'] as $passenger => $weight)
+                                            {{ trim($weight['count'] . '/') }}
+                                        @empty
+                                            0
+                                        @endforelse
                                         <span class="ms-3">TTL {{ $totalPax }} CAB 0</span>
                                     </td>
                                 </tr>
@@ -193,7 +200,7 @@
                         @if (!$loadsheet)
                             <p class="text-muted text-center">No loadsheet generated yet.</p>
                         @else
-                            <pre>{{ json_encode($loadsheet->payload_distribution['holds'], JSON_PRETTY_PRINT) }}</pre>
+                            <pre>{{ json_encode($loadsheet->payload_distribution, JSON_PRETTY_PRINT) }}</pre>
                         @endif
                     </div>
                 </div>
