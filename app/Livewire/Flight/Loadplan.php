@@ -46,17 +46,14 @@ class Loadplan extends Component
             $compartment = $toPosition;
         }
 
-        // Find current position if fromPosition is null
-        if (! $fromPosition && isset($this->containerPositions[$containerId])) {
+        if (!$fromPosition && isset($this->containerPositions[$containerId])) {
             $fromPosition = $this->containerPositions[$containerId];
         }
 
-        // Remove from old position
         if (isset($this->containerPositions[$containerId])) {
             unset($this->containerPositions[$containerId]);
         }
 
-        // Add to new position and update container status
         if ($toPosition) {
             $this->containerPositions[$containerId] = $toPosition;
             $container->update([
@@ -64,28 +61,24 @@ class Loadplan extends Component
                 'compartment' => $compartment,
             ]);
         } else {
-            // If dropped back to unplanned, reset status and compartment
             $container->update([
                 'status' => 'unloaded',
                 'compartment' => null,
             ]);
         }
 
-        // Save changes to loadplan
         $this->loadplan->update([
             'container_positions' => $this->containerPositions,
             'last_modified_by' => auth()->id(),
         ]);
 
-        // Force a refresh of the component
         $this->dispatch('containerMoved');
     }
 
     public function releaseLoadplan()
     {
-        // Validate total weight per hold
         $overweightHolds = $this->flight->aircraft->type->holds
-            ->filter(fn ($hold) => $hold->isOverweight(
+            ->filter(fn($hold) => $hold->isOverweight(
                 $hold->getCurrentWeight($this->containerPositions, $this->flight->containers)
             ));
 

@@ -74,7 +74,6 @@ class LoadsheetManager extends Component
             'pantry' => $this->flight->fuel->pantry,
         ];
 
-        // Create new loadsheet
         $this->loadsheet = $this->flight->loadsheets()->create([
             'payload_distribution' => $distribution,
             'edition' => $this->flight->loadsheets()->count() + 1,
@@ -115,19 +114,16 @@ class LoadsheetManager extends Component
 
     private function calculateZeroFuelIndex()
     {
-        // Implement index calculation logic based on aircraft type settings
         return 0;
     }
 
     private function calculateTakeoffIndex()
     {
-        // Implement takeoff index calculation
         return 0;
     }
 
     private function calculateLandingIndex()
     {
-        // Implement landing index calculation
         return 0;
     }
 
@@ -164,20 +160,10 @@ class LoadsheetManager extends Component
             $loadsByHold[$hold->id] = [
                 'name' => $hold->name,
                 'code' => $hold->code,
-                'total_weight' => 0,
+                'total_weight' => $this->flight->containers->where('compartment', $hold->position)->sum('weight'),
                 'max_weight' => $hold->max_weight,
             ];
         }
-
-        foreach ($this->flight->containers as $container) {
-            if ($container->hold_id) {
-                $loadsByHold[$container->hold_id]['total_weight'] +=
-                    $container->cargo->sum('weight') +
-                    $container->baggage->sum('weight');
-
-            }
-        }
-
         return $loadsByHold;
     }
 
