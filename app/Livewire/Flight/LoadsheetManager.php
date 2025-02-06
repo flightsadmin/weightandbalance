@@ -157,18 +157,16 @@ class LoadsheetManager extends Component
     {
         $loadsByHold = [];
         foreach ($this->flight->aircraft->type->holds as $hold) {
-            $loadsByHold[$hold->id] = [
-                'name' => $hold->name,
-                'code' => $hold->code,
-                'total_weight' => $this->flight->containers
-                    ->where('position_id', function ($query) use ($hold) {
-                        $query->select('id')
-                            ->from('hold_positions')
-                            ->where('hold_id', $hold->id);
-                    })
-                    ->sum('weight'),
-                'max_weight' => $hold->max_weight,
-            ];
+            foreach ($hold->positions as $position) {
+                $loadsByHold[$hold->id] = [
+                    'name' => $hold->name,
+                    'code' => $position->code,
+                    'total_weight' => $this->flight->containers
+                        ->where('position_id', $position->id)
+                        ->sum('weight'),
+                    'max_weight' => $position->max_weight,
+                ];
+            }
         }
         return $loadsByHold;
     }
