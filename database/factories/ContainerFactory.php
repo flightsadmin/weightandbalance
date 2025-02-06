@@ -16,11 +16,10 @@ class ContainerFactory extends Factory
             'container_number' => null,
             'type' => $type,
             'position_id' => null,
-            'status' => null,
+            'status' => 'unloaded',
             'tare_weight' => fake()->numberBetween(60, 85),
             'weight' => 0,
             'max_weight' => 2000,
-            'notes' => fake()->optional(15)->realText(50),
         ];
     }
 
