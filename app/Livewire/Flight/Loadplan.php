@@ -34,16 +34,19 @@ class Loadplan extends Component
         // Get the container
         $container = $this->flight->containers()->find($containerId);
 
-        // Get the hold type (FH, AH, BH) for the position
-        $holdType = null;
-        $compartment = null;
+        // Get the position details if moving to a new position
+        $position = null;
         if ($toPosition) {
             $position = $this->flight->aircraft->type->holds()
                 ->whereHas('positions', function ($query) use ($toPosition) {
                     $query->where('id', $toPosition);
-                })->first();
-            $holdType = $position?->code;
-            $compartment = $toPosition;
+                })
+                ->with([
+                    'positions' => function ($query) use ($toPosition) {
+                        $query->where('id', $toPosition);
+                    }
+                ])
+                ->first()?->positions->first();
         }
 
         if (!$fromPosition && isset($this->containerPositions[$containerId])) {
@@ -54,16 +57,16 @@ class Loadplan extends Component
             unset($this->containerPositions[$containerId]);
         }
 
-        if ($toPosition) {
-            $this->containerPositions[$containerId] = $toPosition;
+        if ($position) {
+            $this->containerPositions[$containerId] = $position->id;
             $container->update([
                 'status' => 'loaded',
-                'compartment' => $compartment,
+                'position_id' => $position->id,  // Save the specific position ID
             ]);
         } else {
             $container->update([
                 'status' => 'unloaded',
-                'compartment' => null,
+                'position_id' => null,
             ]);
         }
 

@@ -15,7 +15,7 @@ class ContainerFactory extends Factory
             'flight_id' => null,
             'container_number' => null,
             'type' => $type,
-            'compartment' => null,
+            'position_id' => null,
             'status' => null,
             'tare_weight' => fake()->numberBetween(60, 85),
             'weight' => 0,
@@ -31,7 +31,7 @@ class ContainerFactory extends Factory
         return $this->state(function (array $attributes) use ($flight, $uld) {
             return [
                 'flight_id' => $flight->id,
-                'container_number' => $uld.strtoupper(fake()->bothify('#####')).$flight->airline->iata_code,
+                'container_number' => $uld . strtoupper(fake()->bothify('#####')) . $flight->airline->iata_code,
             ];
         });
     }

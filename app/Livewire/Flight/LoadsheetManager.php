@@ -160,7 +160,13 @@ class LoadsheetManager extends Component
             $loadsByHold[$hold->id] = [
                 'name' => $hold->name,
                 'code' => $hold->code,
-                'total_weight' => $this->flight->containers->where('compartment', $hold->position)->sum('weight'),
+                'total_weight' => $this->flight->containers
+                    ->where('position_id', function ($query) use ($hold) {
+                        $query->select('id')
+                            ->from('hold_positions')
+                            ->where('hold_id', $hold->id);
+                    })
+                    ->sum('weight'),
                 'max_weight' => $hold->max_weight,
             ];
         }
