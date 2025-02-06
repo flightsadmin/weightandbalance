@@ -266,7 +266,7 @@
                         @if (!$loadsheet)
                             <p class="text-muted text-center">No loadsheet generated yet.</p>
                         @else
-                            <pre>{{ json_encode($loadsheet->payload_distribution['ldm'], JSON_PRETTY_PRINT) }}</pre>
+                            <pre>{{ json_encode($loadsheet->payload_distribution, JSON_PRETTY_PRINT) }}</pre>
                         @endif
                     </div>
                 </div>

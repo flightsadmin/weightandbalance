@@ -46,7 +46,6 @@ class LoadsheetManager extends Component
     {
         // Calculate payload distribution
         $distribution = [
-            // 'passengers' => $this->getPassengerDistribution(),
             'passengers' => $this->getPassengerWeightDistribution(),
             'baggage' => $this->getBaggageDistribution(),
             'cargo' => $this->getCargoDistribution(),
@@ -165,14 +164,6 @@ class LoadsheetManager extends Component
         return $loadsByHold;
     }
 
-    private function getPassengerDistribution()
-    {
-        return $this->flight->passengers
-            ->groupBy('type')
-            ->map(fn($group) => $group->count())
-            ->toArray();
-    }
-
     private function getPassengerWeightDistribution()
     {
         return $this->flight->passengers
@@ -186,17 +177,25 @@ class LoadsheetManager extends Component
 
     private function generateLdmData()
     {
+        $passengerTypes = ['male', 'female', 'child', 'infant'];
+        $paxByType = $this->flight->passengers
+            ->groupBy('type')
+            ->map(fn($group) => $group->count());
+
+        // Ensure passenger types are in correct order
+        $orderedPaxByType = collect($passengerTypes)
+            ->mapWithKeys(fn($type) => [$type => $paxByType[$type] ?? 0])
+            ->toArray();
+
+        $orderedWeights = collect($passengerTypes)
+            ->mapWithKeys(fn($type) => [
+                $type => $this->flight->airline->getStandardPassengerWeight()
+            ])
+            ->toArray();
+
         return [
-            'pax_by_type' => $this->flight->passengers
-                ->groupBy('type')
-                ->map(fn($group) => $group->count())
-                ->toArray(),
-
-            'passenger_weights_used' => $this->flight->passengers
-                ->groupBy('type')
-                ->map(fn($group) => $this->flight->airline->getStandardPassengerWeight())
-                ->toArray(),
-
+            'pax_by_type' => $orderedPaxByType,
+            'passenger_weights_used' => $orderedWeights,
             'hold_breakdown' => $this->flight->aircraft->type->holds()
                 ->with('positions')
                 ->get()
@@ -211,11 +210,10 @@ class LoadsheetManager extends Component
                 ->filter(fn($hold) => $hold['weight'] > 0)
                 ->values()
                 ->toArray(),
-
             'deadload_by_type' => [
                 'C' => $this->flight->cargo->sum('weight'),
                 'B' => $this->flight->baggage->sum('weight'),
-                'M' => 0, // Mail weight if needed
+                'M' => 0,
             ],
         ];
     }
