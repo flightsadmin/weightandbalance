@@ -74,6 +74,7 @@ class LoadsheetManager extends Component
                 'landing' => $this->calculateLandingIndex(),
             ],
             'pantry' => $this->flight->fuel->pantry,
+            'ldm' => $this->generateLdmData(),
         ];
 
         $this->loadsheet = $this->flight->loadsheets()->create([
@@ -181,6 +182,42 @@ class LoadsheetManager extends Component
                 'weight' => $group->count() * $this->flight->airline->getStandardPassengerWeight(),
             ])
             ->toArray();
+    }
+
+    private function generateLdmData()
+    {
+        return [
+            'pax_by_type' => $this->flight->passengers
+                ->groupBy('type')
+                ->map(fn($group) => $group->count())
+                ->toArray(),
+
+            'passenger_weights_used' => $this->flight->passengers
+                ->groupBy('type')
+                ->map(fn($group) => $this->flight->airline->getStandardPassengerWeight())
+                ->toArray(),
+
+            'hold_breakdown' => $this->flight->aircraft->type->holds()
+                ->with('positions')
+                ->get()
+                ->map(function ($hold) {
+                    return [
+                        'hold_no' => $hold->code,
+                        'weight' => $this->flight->containers
+                            ->whereIn('position_id', $hold->positions->pluck('id'))
+                            ->sum('weight')
+                    ];
+                })
+                ->filter(fn($hold) => $hold['weight'] > 0)
+                ->values()
+                ->toArray(),
+
+            'deadload_by_type' => [
+                'C' => $this->flight->cargo->sum('weight'),
+                'B' => $this->flight->baggage->sum('weight'),
+                'M' => 0, // Mail weight if needed
+            ],
+        ];
     }
 
     public function render()

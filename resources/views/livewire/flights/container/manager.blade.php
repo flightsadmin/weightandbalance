@@ -56,17 +56,6 @@
                                      <span class="text-danger">{{ $message }}</span>
                                  @enderror
                              </div>
-
-                             <div class="col-md-12">
-                                 <label class="form-label">Notes</label>
-                                 <textarea class="form-control form-control-sm"
-                                     wire:model="form.notes"
-                                     rows="2"
-                                     placeholder="Optional notes"></textarea>
-                                 @error('form.notes')
-                                     <span class="text-danger">{{ $message }}</span>
-                                 @enderror
-                             </div>
                          </div>
                      </div>
                      <div class="modal-footer">

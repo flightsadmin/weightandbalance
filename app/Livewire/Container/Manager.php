@@ -20,7 +20,6 @@ class Manager extends Component
         'tare_weight' => 0,
         'weight' => 0,
         'max_weight' => 0,
-        'notes' => '',
     ];
 
     protected $rules = [
@@ -29,7 +28,6 @@ class Manager extends Component
         'form.tare_weight' => 'required|integer|min:0',
         'form.weight' => 'required|integer|min:0',
         'form.max_weight' => 'required|integer|min:0',
-        'form.notes' => 'nullable|string',
     ];
 
     public function mount(Flight $flight)
@@ -46,7 +44,6 @@ class Manager extends Component
             'tare_weight',
             'weight',
             'max_weight',
-            'notes',
         ]);
         $this->showForm = true;
     }
@@ -65,7 +62,6 @@ class Manager extends Component
                 'tare_weight' => $this->form['tare_weight'],
                 'weight' => $this->form['weight'],
                 'max_weight' => $this->form['max_weight'],
-                'notes' => $this->form['notes'],
             ]
         );
 

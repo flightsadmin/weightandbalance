@@ -20,7 +20,6 @@ class Container extends Model
         'tare_weight',
         'weight',
         'max_weight',
-        'notes',
     ];
 
     public function flight(): BelongsTo

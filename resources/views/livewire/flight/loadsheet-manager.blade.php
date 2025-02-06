@@ -166,9 +166,75 @@
                             <hr class="my-0">
                             <div>LOADMESSAGE AND CAPTAIN'S INFORMATION BEFORE LMC</div>
                             <div>TAXI FUEL: {{ $distribution['fuel']['taxi'] }}</div>
+                            {{-- LDM --}}
+                            <div style="font-family: monospace;">
+                                @php
+                                    $ldm = $loadsheet->payload_distribution['ldm'];
+                                    $totalPax = array_sum(
+                                        array_filter($ldm['pax_by_type'], fn($count, $type) => $type !== 'infant', ARRAY_FILTER_USE_BOTH),
+                                    );
+                                    $totalDeadload = array_sum(array_column($ldm['hold_breakdown'], 'weight'));
+                                @endphp
+
+                                <div class="mt-3">LDM</div>
+                                <div>
+                                    {{ $flight->flight_number }}/{{ $flight->scheduled_departure_time->format('d') }}.
+                                    {{ $flight->aircraft->registration_number }}.
+                                    {{ $flight->aircraft->type->code }}.
+                                    {{ $distribution['crew']['flight_deck'] + $distribution['crew']['cabin'] }}
+                                </div>
+                                <div>
+                                    -{{ $flight->arrival_airport }}.
+                                    @forelse ($ldm['pax_by_type'] as $type => $count)
+                                        {{ $count . '/' }}
+                                    @empty
+                                        NIL
+                                    @endforelse
+                                    T{{ $totalDeadload }}.PAX/{{ $totalPax }}.PAD/0
+                                </div>
+                                <div>
+                                    SI PAX WEIGHTS USED
+                                    @foreach ($ldm['passenger_weights_used'] as $type => $weight)
+                                        {{ strtoupper($type[0]) }}{{ $weight }}
+                                    @endforeach
+                                    &nbsp; BAG WGT: ACTUAL
+                                </div>
+                                <div>
+                                    {{ $flight->arrival_airport }}
+                                    @forelse ($ldm['deadload_by_type'] as $type => $weight)
+                                        {{ $type }} {{ $weight }}
+                                    @empty
+                                        C 0 M 0 B 0/0
+                                    @endforelse
+                                    O 0 &nbsp; T {{ $totalDeadload }}
+                                </div>
+                                <div>PANTRY CODE {{ $distribution['pantry'] }}</div>
+                                <div>ACTUAL LOADING OF AIRCRAFT</div>
+                                <div>
+                                    @forelse ($ldm['hold_breakdown'] as $hold)
+                                        <div>CPT{{ $hold['hold_no'] }}/{{ $hold['weight'] }}</div>
+                                    @empty
+                                        NIL
+                                    @endforelse
+                                </div>
+                                <br>
+                                <div>AIRCRAFT TYPE: {{ $flight->aircraft->type->name }}</div>
+                                <div>NOTOC: NO</div>
+                                <br>
+                                <div>
+                                    {{ $flight->arrival_airport }} &nbsp;&nbsp;
+                                    @forelse ($ldm['deadload_by_type'] as $type => $weight)
+                                        {{ $type }} {{ $weight }} &nbsp;&nbsp;
+                                    @empty
+                                        C 0 M 0 B 0/0
+                                    @endforelse
+                                    TRA 0
+                                </div>
+                            </div>
                             <div>END LOADSHEET EDNO {{ $loadsheet->edition }} -
                                 {{ $flight->flight_number }}/{{ $flight->scheduled_departure_time->format('d') }}
-                                {{ $flight->scheduled_departure_time->format('Hi') }}</div>
+                                {{ $flight->scheduled_departure_time->format('Hi') }}
+                            </div>
                         </div>
                     </div>
                 @else
@@ -200,7 +266,7 @@
                         @if (!$loadsheet)
                             <p class="text-muted text-center">No loadsheet generated yet.</p>
                         @else
-                            <pre>{{ json_encode($loadsheet->payload_distribution, JSON_PRETTY_PRINT) }}</pre>
+                            <pre>{{ json_encode($loadsheet->payload_distribution['ldm'], JSON_PRETTY_PRINT) }}</pre>
                         @endif
                     </div>
                 </div>
