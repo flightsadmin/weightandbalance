@@ -60,7 +60,7 @@ class AircraftType extends Model
     {
         return $this->holds
             ->where('is_active', true)
-            ->flatMap(fn ($hold) => $hold->getPositions())
+            ->flatMap(fn($hold) => $hold->getPositions())
             ->values();
     }
 

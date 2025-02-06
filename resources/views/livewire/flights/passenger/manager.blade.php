@@ -60,7 +60,17 @@
                             </td>
                         @endunless
                         <td>{{ $passenger->ticket_number }}</td>
-                        <td>{{ $passenger->seat_number }}</td>
+                        <td>
+                            <button class="btn btn-sm {{ $passenger->seat ? 'btn-success' : 'btn-outline-primary' }}"
+                                wire:click="assignSeat({{ $passenger->id }})" data-bs-toggle="modal"
+                                data-bs-target="#seatModal">
+                                @if ($passenger->seat)
+                                    <i class="bi bi-person-check"></i> {{ $passenger->seat->designation }}
+                                @else
+                                    <i class="bi bi-person-plus"></i> Assign Seat
+                                @endif
+                            </button>
+                        </td>
                         <td>
                             <button class="btn btn-sm btn-link text-decoration-none text-reset"
                                 wire:click="editBaggage({{ $passenger->id }})" data-bs-toggle="modal"
@@ -348,6 +358,120 @@
         </div>
     </div>
 
+    <!-- Seat Assignment Modal -->
+    <div class="modal fade" id="seatModal" tabindex="-1" wire:ignore.self>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Assign Seat - {{ $selectedPassenger?->name }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card">
+                        <div class="card-body p-2">
+                            @php
+                                $seats = $flight?->aircraft->type->seats()
+                                    ->with(['cabinZone', 'passenger'])
+                                    ->orderBy('row')
+                                    ->orderBy('column')
+                                    ->get();
+                                $rows = $seats?->groupBy('row');
+                                $columns = $seats?->pluck('column')->unique()->sort();
+                            @endphp
+                            
+                            @if ($seats && $rows && $columns)
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered m-0">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                @foreach ($columns as $column)
+                                                    <th class="text-center">{{ $column }}</th>
+                                                @endforeach
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($rows as $row => $rowSeats)
+                                                <tr>
+                                                    <td class="text-center fw-bold">{{ $row }}</td>
+                                                    @foreach ($columns as $column)
+                                                        @php
+                                                            $seat = $rowSeats->firstWhere('column', $column);
+                                                        @endphp
+                                                        <td class="text-center p-0">
+                                                            @if ($seat)
+                                                                <div class="seat-cell p-2
+                                                                    {{ $seat->is_blocked ? 'bg-danger text-white' : '' }}
+                                                                    {{ $seat->is_exit ? 'bg-warning' : '' }}
+                                                                    {{ $seat->passenger ? 'bg-secondary text-white' : '' }}
+                                                                    {{ $seat->id === $selectedSeat ? 'bg-primary text-white' : '' }}"
+                                                                    @if (!$seat->is_blocked && !$seat->passenger && $seat->id !== $selectedPassenger?->seat_id)
+                                                                        wire:click="$set('selectedSeat', {{ $seat->id }})"
+                                                                    @endif
+                                                                    title="{{ $seat->cabinZone->name }}">
+                                                                    {{ $seat->designation }}
+                                                                    @if ($seat->passenger)
+                                                                        <i class="bi bi-person-fill"></i>
+                                                                    @endif
+                                                                    @if ($seat->is_exit)
+                                                                        <i class="bi bi-door-open-fill"></i>
+                                                                    @endif
+                                                                </div>
+                                                            @endif
+                                                        </td>
+                                                    @endforeach
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="mt-3">
+                                    <div class="d-flex gap-3">
+                                        <div><i class="bi bi-square-fill text-secondary"></i> Occupied</div>
+                                        <div><i class="bi bi-square-fill text-warning"></i> Exit Row</div>
+                                        <div><i class="bi bi-square-fill text-danger"></i> Blocked</div>
+                                        <div><i class="bi bi-square-fill text-primary"></i> Selected</div>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="text-center py-3">
+                                    <p class="text-muted m-0">No seats configured for this aircraft</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-danger" 
+                        wire:click="$set('selectedSeat', null)"
+                        @if (!$selectedSeat) disabled @endif>
+                        Remove Seat
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" 
+                        data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-primary"
+                        wire:click="saveSeatAssignment">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .seat-cell {
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .seat-cell:hover:not(.bg-secondary):not(.bg-danger) {
+            background-color: #e9ecef;
+        }
+    </style>
+
     @script
         <script>
             $wire.on('passenger-saved', () => {
@@ -361,6 +485,12 @@
             $wire.on('show-passenger-modal', () => {
                 const modal = new bootstrap.Modal(document.getElementById('passengerDetailsModal'));
                 modal.show();
+            });
+            $wire.on('$set', (property, value) => {
+                if (property === 'showSeatModal' && value) {
+                    const modal = new bootstrap.Modal(document.getElementById('seatModal'));
+                    modal.show();
+                }
             });
         </script>
     @endscript

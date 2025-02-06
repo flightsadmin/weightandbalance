@@ -33,4 +33,9 @@ class Passenger extends Model
     {
         return $this->hasMany(Baggage::class);
     }
+
+    public function seat(): BelongsTo
+    {
+        return $this->belongsTo(Seat::class);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Seat extends Model
 {
@@ -12,8 +13,8 @@ class Seat extends Model
         'cabin_zone_id',
         'row',
         'column',
-        'designation', // A, B, C, etc.
-        'type', // economy, business, first
+        'designation',
+        'type',
         'is_exit',
         'is_blocked',
         'notes',
@@ -32,5 +33,16 @@ class Seat extends Model
     public function cabinZone(): BelongsTo
     {
         return $this->belongsTo(CabinZone::class);
+    }
+
+    public function passenger(): HasOne
+    {
+        return $this->hasOne(Passenger::class);
+    }
+
+    public function scopeAvailable($query)
+    {
+        return $query->whereDoesntHave('passenger')
+            ->where('is_blocked', false);
     }
 }

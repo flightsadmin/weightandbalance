@@ -5,6 +5,7 @@ namespace App\Livewire\Passenger;
 use App\Models\Baggage;
 use App\Models\Flight;
 use App\Models\Passenger;
+use App\Models\Seat;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -41,6 +42,10 @@ class Manager extends Component
 
     public $showPassengerModal = false;
 
+    public $showSeatModal = false;
+    public $selectedSeat = null;
+    public $seatsByZone = [];
+
     protected $rules = [
         'form.name' => 'required|string|max:255',
         'form.seat_number' => 'required|string|max:4',
@@ -52,6 +57,19 @@ class Manager extends Component
     public function mount(?Flight $flight = null)
     {
         $this->flight = $flight;
+        if ($this->flight) {
+            $this->loadSeats();
+        }
+    }
+
+    protected function loadSeats()
+    {
+        $this->seatsByZone = $this->flight->aircraft->type->seats()
+            ->with(['cabinZone', 'passenger'])
+            ->orderBy('row')
+            ->orderBy('column')
+            ->get()
+            ->groupBy('cabin_zone_id');
     }
 
     public function edit(Passenger $passenger)
@@ -110,7 +128,7 @@ class Manager extends Component
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: ucfirst($status).' passenger successfully.'
+            message: ucfirst($status) . ' passenger successfully.'
         );
     }
 
@@ -124,7 +142,7 @@ class Manager extends Component
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: ucfirst($status).' passenger successfully.'
+            message: ucfirst($status) . ' passenger successfully.'
         );
     }
 
@@ -134,7 +152,7 @@ class Manager extends Component
         for ($i = 0; $i < $this->pieces; $i++) {
             $this->editingPassenger->baggage()->create([
                 'flight_id' => $this->editingPassenger->flight->id,
-                'tag_number' => $this->editingPassenger->flight->airline->iata_code.str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
+                'tag_number' => $this->editingPassenger->flight->airline->iata_code . str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
                 'weight' => $this->weight / $this->pieces,
             ]);
         }
@@ -162,18 +180,51 @@ class Manager extends Component
         $this->dispatch('show-passenger-modal');
     }
 
+    public function assignSeat(Passenger $passenger)
+    {
+        $this->selectedPassenger = $passenger;
+        $this->selectedSeat = $passenger->seat_id;
+        $this->showSeatModal = true;
+    }
+
+    public function saveSeatAssignment()
+    {
+        if ($this->selectedPassenger) {
+            // If there was a previous seat, update its status
+            if ($this->selectedPassenger->seat_id) {
+                Seat::find($this->selectedPassenger->seat_id)
+                    ->update(['status' => 'available']);
+            }
+
+            // Update passenger's seat
+            $this->selectedPassenger->update([
+                'seat_id' => $this->selectedSeat
+            ]);
+
+            if ($this->selectedSeat) {
+                Seat::find($this->selectedSeat)
+                    ->update(['status' => 'occupied']);
+            }
+
+            $this->dispatch('alert', icon: 'success', message: 'Seat assigned successfully.');
+            $this->loadSeats();
+        }
+
+        $this->reset(['showSeatModal', 'selectedPassenger', 'selectedSeat']);
+    }
+
     #[On('passenger-saved')]
     public function render()
     {
         $query = Passenger::query()
-            ->with(['flight', 'baggage'])
+            ->with(['flight', 'baggage', 'seat'])
             ->withCount('baggage');
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('ticket_number', 'like', '%'.$this->search.'%')
-                    ->orWhere('seat_number', 'like', '%'.$this->search.'%');
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('ticket_number', 'like', '%' . $this->search . '%')
+                    ->orWhere('seat_number', 'like', '%' . $this->search . '%');
             });
         }
 
@@ -187,6 +238,7 @@ class Manager extends Component
 
         return view('livewire.flights.passenger.manager', [
             'passengers' => $query->paginate(10),
+            'cabinZones' => $this->flight?->aircraft->type->cabinZones ?? collect(),
         ]);
     }
 }
