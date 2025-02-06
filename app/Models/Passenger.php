@@ -17,7 +17,7 @@ class Passenger extends Model
         'flight_id',
         'name',
         'type',
-        'seat_number',
+        'seat_id',
         'ticket_number',
         'acceptance_status',
         'boarding_status',

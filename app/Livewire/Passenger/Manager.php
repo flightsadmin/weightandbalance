@@ -62,14 +62,16 @@ class Manager extends Component
         }
     }
 
-    protected function loadSeats()
+    public function loadSeats()
     {
-        $this->seatsByZone = $this->flight->aircraft->type->seats()
-            ->with(['cabinZone', 'passenger'])
-            ->orderBy('row')
-            ->orderBy('column')
-            ->get()
-            ->groupBy('cabin_zone_id');
+        if ($this->flight) {
+            return $this->flight->aircraft->type->seats()
+                ->with(['passenger', 'cabinZone'])
+                ->orderBy('row')
+                ->orderBy('column')
+                ->get();
+        }
+        return collect();
     }
 
     public function edit(Passenger $passenger)
@@ -187,30 +189,31 @@ class Manager extends Component
         $this->showSeatModal = true;
     }
 
-    public function saveSeatAssignment()
+    public function selectSeat($seatId)
+    {
+        $this->selectedSeat = $seatId;
+    }
+
+    public function removeSeatAssignment()
     {
         if ($this->selectedPassenger) {
-            // If there was a previous seat, update its status
-            if ($this->selectedPassenger->seat_id) {
-                Seat::find($this->selectedPassenger->seat_id)
-                    ->update(['status' => 'available']);
-            }
-
-            // Update passenger's seat
-            $this->selectedPassenger->update([
-                'seat_id' => $this->selectedSeat
-            ]);
-
-            if ($this->selectedSeat) {
-                Seat::find($this->selectedSeat)
-                    ->update(['status' => 'occupied']);
-            }
-
-            $this->dispatch('alert', icon: 'success', message: 'Seat assigned successfully.');
-            $this->loadSeats();
+            $this->selectedPassenger->seat_id = null;
+            $this->selectedPassenger->save();
+            $this->selectedSeat = null;
+            $this->dispatch('alert', icon: 'success', message: 'Seat assignment removed.');
         }
+    }
 
-        $this->reset(['showSeatModal', 'selectedPassenger', 'selectedSeat']);
+    public function saveSeatAssignment()
+    {
+        if ($this->selectedPassenger && $this->selectedSeat) {
+            $this->selectedPassenger->seat_id = $this->selectedSeat;
+            $this->selectedPassenger->save();
+            $this->dispatch('alert', icon: 'success', message: 'Seat assigned successfully.');
+            $this->dispatch('passenger-saved');
+        }
+        $this->selectedSeat = null;
+        $this->selectedPassenger = null;
     }
 
     #[On('passenger-saved')]
@@ -224,21 +227,22 @@ class Manager extends Component
             $query->where(function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
                     ->orWhere('ticket_number', 'like', '%' . $this->search . '%')
-                    ->orWhere('seat_number', 'like', '%' . $this->search . '%');
+                    ->whereHas('seat', function ($q) {
+                        $q->where('row', 'like', '%' . $this->search . '%')
+                            ->orWhere('column', 'like', '%' . $this->search . '%');
+                    });
             });
         }
 
         if ($this->flight) {
-            $query->whereHas('flight', function ($q) {
-                $q->where('flight_id', $this->flight->id);
-            });
+            $query->where('flight_id', $this->flight->id);
         }
 
-        $query->orderByDesc('created_at');
+        $query->orderByDesc('updated_at');
 
         return view('livewire.flights.passenger.manager', [
             'passengers' => $query->paginate(10),
-            'cabinZones' => $this->flight?->aircraft->type->cabinZones ?? collect(),
+            'seats' => $this->loadSeats(),
         ]);
     }
 }

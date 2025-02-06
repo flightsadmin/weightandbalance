@@ -20,17 +20,11 @@ class PassengerFactory extends Factory
      */
     public function definition(): array
     {
-        static $seatNumber = 1;
-        $row = ceil($seatNumber / 6); // 6 seats per row (A-F)
-        $letter = chr(65 + (($seatNumber - 1) % 6)); // A through F
-        $currentSeat = $row.$letter;
-        $seatNumber++;
-
         return [
             'flight_id' => null,
+            'seat_id' => null,
             'name' => fake()->name(),
             'type' => fake()->randomElement(['male', 'female', 'child', 'infant']),
-            'seat_number' => $currentSeat,
             'ticket_number' => strtoupper(fake()->bothify('#############')),
             'acceptance_status' => fake()->randomElement(['booked', 'accepted', 'standby', 'offloaded']),
             'boarding_status' => fake()->randomElement(['boarding', 'boarding', 'unboarded']),

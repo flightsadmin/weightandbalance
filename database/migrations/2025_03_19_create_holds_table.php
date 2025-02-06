@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('holds', function (Blueprint $table) {
@@ -29,16 +28,6 @@ return new class extends Migration
             $table->integer('max_weight')->nullable();
             $table->decimal('index', 8, 5)->nullable();
             $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
-
-        Schema::create('cabin_zones', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('aircraft_type_id')->constrained()->onDelete('cascade');
-            $table->string('name')->nullable();
-            $table->float('max_capacity')->nullable();
-            $table->decimal('index', 8, 5)->nullable();
-            $table->decimal('arm', 8, 5)->nullable();
             $table->timestamps();
         });
     }
