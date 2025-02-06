@@ -45,7 +45,8 @@
                     <tr wire:key="{{ $passenger->id }}">
                         <td>
                             <a href="#" wire:click.prevent="showPassengerDetails({{ $passenger->id }})"
-                                class="text-decoration-none text-reset">
+                                class="text-decoration-none text-reset" data-bs-toggle="modal"
+                                data-bs-target="#passengerDetailsModal">
                                 {{ $passenger->name }}
                             </a>
                         </td>
@@ -373,26 +374,46 @@
                 </div>
                 <div class="modal-body">
                     @if ($seats && $seats->count() > 0)
-                        <div class="seat-map">
-                            @foreach ($seats->groupBy('row') as $row => $rowSeats)
-                                <div class="d-flex justify-content-center gap-2 mb-2">
-                                    @foreach ($rowSeats as $seat)
-                                        <div class="seat-cell 
-                                            {{ $seat->is_occupied ? 'bg-secondary' : ($seat->is_blocked ? 'bg-danger' : '') }}
-                                            {{ $selectedPassenger && $selectedPassenger->seat_id === $seat->id ? 'current-seat bg-success' : '' }}"
-                                            wire:click="{{ !$seat->is_occupied && !$seat->is_blocked ? 'selectSeat(' . $seat->id . ')' : '' }}"
-                                            style="{{ $selectedSeat == $seat->id ? 'background-color: #0d6efd; color: white;' : '' }}
-                                                   {{ $seat->is_occupied || $seat->is_blocked ? 'cursor: not-allowed;' : '' }}"
-                                            title="{{ $selectedPassenger && $selectedPassenger->seat_id === $seat->id ? 'Current Seat' : '' }}">
-                                            <small>{{ $seat->row }}{{ $seat->column }}</small>
-                                            @if ($seat->is_occupied)
-                                                <i class="bi bi-person-fill"></i>
-                                            @endif
-                                        </div>
+                        <div class="seat-map border">
+                            @php
+                                $columns = $seats->pluck('column')->unique()->sort();
+                                $rows = $seats->pluck('row')->unique()->sort();
+                            @endphp
+
+                            <div class="seat-table">
+                                <!-- Column Headers -->
+                                <div class="seat-row header">
+                                    @foreach ($columns as $column)
+                                        <div class="seat-cell header">{{ $column }}</div>
                                     @endforeach
                                 </div>
-                            @endforeach
+
+                                <!-- Seat Rows -->
+                                @foreach ($rows as $row)
+                                    <div class="seat-row">
+                                        @foreach ($columns as $column)
+                                            @php
+                                                $seat = $seats->where('row', $row)->where('column', $column)->first();
+                                            @endphp
+                                            <div class="seat-cell {{ !$seat ? 'empty' : '' }} 
+                                                {{ $seat && $seat->is_occupied ? 'bg-secondary bi bi-person-fill' : '' }}
+                                                {{ $seat && $seat->is_blocked ? 'bg-danger' : '' }}
+                                                {{ $seat && $selectedPassenger && $selectedPassenger->seat_id === $seat->id ? 'current-seat bg-success' : '' }}"
+                                                @if ($seat && !$seat->is_occupied && !$seat->is_blocked) wire:click="selectSeat({{ $seat->id }})"
+                                                    style="{{ $selectedSeat == $seat->id ? 'background-color: #0d6efd; color: white;' : '' }}" @endif
+                                                {{ $seat && ($seat->is_occupied || $seat->is_blocked) ? 'style=cursor:not-allowed' : '' }}>
+                                                @if ($seat)
+                                                    <small>{{ $seat->designation }}</small>
+                                                @else
+                                                    <small>-</small>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
+
                         <div class="mt-3">
                             <div class="d-flex gap-2 align-items-center small">
                                 <span class="badge bg-warning">Exit Row</span>
@@ -423,17 +444,48 @@
     </div>
 
     <style>
+        .seat-table {
+            display: table;
+            margin: 0 auto;
+            border-spacing: 2px;
+            border-collapse: separate;
+        }
+
+        .seat-row {
+            display: table-row;
+        }
+
+        .seat-row.header {
+            font-weight: bold;
+        }
+
         .seat-cell {
+            display: table-cell;
             cursor: pointer;
-            padding: 5px;
+            padding: 8px;
             border-radius: 4px;
-            border: 1px solid #151414;
+            border: 1px solid #dee2e6;
             transition: background-color 0.2s;
             text-align: center;
             min-width: 40px;
+            height: 40px;
+            vertical-align: middle;
+            position: relative;
         }
 
-        .seat-cell:hover:not(.bg-secondary):not(.bg-danger) {
+        .seat-cell.header {
+            border: none;
+            font-weight: bold;
+            cursor: default;
+            background-color: #f8f9fa;
+        }
+
+        .seat-cell.empty {
+            border: none;
+            cursor: default;
+        }
+
+        .seat-cell:not(.header):not(.empty):hover:not(.bg-secondary):not(.bg-danger) {
             background-color: #e9ecef;
         }
 
@@ -443,6 +495,17 @@
 
         .seat-cell.current-seat {
             border: 2px solid #0d6efd;
+        }
+
+        .seat-cell i {
+            font-size: 0.875rem;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+        }
+
+        .seat-cell small {
+            font-size: 0.75rem;
         }
     </style>
 
@@ -456,13 +519,9 @@
                 const modal = bootstrap.Modal.getInstance(document.getElementById('baggageModal'));
                 modal.hide();
             });
-            $wire.on('show-passenger-modal', () => {
-                const modal = new bootstrap.Modal(document.getElementById('passengerDetailsModal'));
-                modal.show();
-            });
             $wire.on('seat-saved', () => {
                 const modal = new bootstrap.Modal(document.getElementById('seatModal'));
-                modal.show();
+                modal.hide();
             });
         </script>
     @endscript

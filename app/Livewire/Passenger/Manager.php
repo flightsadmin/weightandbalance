@@ -183,10 +183,7 @@ class Manager extends Component
                 'baggage' => function ($query) {
                     $query->with('container')->latest();
                 },
-            ])
-            ->find($passengerId);
-
-        $this->dispatch('show-passenger-modal');
+            ])->find($passengerId);
     }
 
     public function assignSeat(Passenger $passenger)
@@ -217,7 +214,6 @@ class Manager extends Component
             $this->selectedPassenger->seat_id = $this->selectedSeat;
             $this->selectedPassenger->save();
             $this->dispatch('alert', icon: 'success', message: 'Seat assigned successfully.');
-            $this->dispatch('seat-saved');
         }
         $this->selectedSeat = null;
         $this->selectedPassenger = null;
