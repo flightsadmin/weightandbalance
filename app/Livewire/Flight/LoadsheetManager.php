@@ -3,7 +3,6 @@
 namespace App\Livewire\Flight;
 
 use App\Models\Flight;
-use App\Models\Loadsheet;
 use Livewire\Component;
 
 class LoadsheetManager extends Component
@@ -26,7 +25,6 @@ class LoadsheetManager extends Component
             'crew',
             'fuel',
             'loadplans',
-            'weightBalance',
         ]);
 
         $this->loadsheet = $this->flight->loadsheets()->latest()->first();
@@ -49,6 +47,8 @@ class LoadsheetManager extends Component
         // Calculate payload distribution
         $distribution = [
             'passengers' => $this->getPassengerDistribution(),
+            'passengers_weight' => $this->getPassengerWeightDistribution(),
+            'baggage' => $this->getBaggageDistribution(),
             'cargo' => $this->getCargoDistribution(),
             'fuel' => [
                 'block' => $this->flight->fuel->block_fuel,
@@ -82,6 +82,17 @@ class LoadsheetManager extends Component
         ]);
 
         $this->dispatch('alert', icon: 'success', message: 'Loadsheet generated successfully.');
+    }
+
+    private function getPassengerWeightDistribution()
+    {
+        return $this->flight->passengers
+            ->groupBy('type')
+            ->map(fn($group) => [
+                'count' => $group->count(),
+                'weight' => $group->count() * $this->flight->airline->getStandardPassengerWeight(),
+            ])
+            ->toArray();
     }
 
     private function calculateZeroFuelWeight()
@@ -126,13 +137,24 @@ class LoadsheetManager extends Component
             'total_weight' => $this->flight->cargo->sum('weight'),
             'total_pieces' => $this->flight->cargo->sum('pieces'),
             'by_type' => $this->flight->cargo
-                ->groupBy('type')
-                ->map(fn ($group) => [
+                ->groupBy('status')
+                ->map(fn($group) => [
                     'weight' => $group->sum('weight'),
                     'pieces' => $group->sum('pieces'),
                 ])
                 ->toArray(),
         ];
+    }
+
+    private function getBaggageDistribution()
+    {
+        return $this->flight->baggage
+            ->groupBy('status')
+            ->map(fn($group) => [
+                'count' => $group->count(),
+                'weight' => $group->sum('weight'),
+            ])
+            ->toArray();
     }
 
     private function getLoadsByHold()
@@ -163,7 +185,7 @@ class LoadsheetManager extends Component
     {
         return $this->flight->passengers
             ->groupBy('type')
-            ->map(fn ($group) => $group->count())
+            ->map(fn($group) => $group->count())
             ->toArray();
     }
 

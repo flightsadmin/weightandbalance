@@ -78,11 +78,6 @@ class Flight extends Model
         return $this->hasMany(Loadsheet::class);
     }
 
-    public function weightBalance()
-    {
-        return $this->hasOne(WeightBalance::class);
-    }
-
     public function getTotalPassengerWeight(): float
     {
         return $this->passengers()->count() * $this->airline->getStandardPassengerWeight();
