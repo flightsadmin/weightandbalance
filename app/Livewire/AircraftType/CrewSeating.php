@@ -170,7 +170,7 @@ class CrewSeating extends Component
 
     public function toggleEdit()
     {
-        $this->isEditable = ! $this->isEditable;
+        $this->isEditable = !$this->isEditable;
     }
 
     public function addCrew()
@@ -244,6 +244,6 @@ class CrewSeating extends Component
 
     public function render()
     {
-        return view('livewire.aircraft-type.crew-seating');
+        return view('livewire.aircraft_type.crew-seating');
     }
 }

@@ -34,31 +34,9 @@
                                         <span class="badge bg-secondary">{{ $type->category }}</span>
                                     </div>
                                     <small class="text-{{ $selectedAircraft === $type->id ? 'white' : 'muted' }}">
-                                        {{ $type->name }}
-                                    </small>
-                                    <small class="small mt-1 text-start">
-                                        <div class="row text-{{ $selectedAircraft === $type->id ? 'white' : 'muted' }}">
-                                            <div class="col">
-                                                <i class="bi bi-person"></i> {{ $type->max_passengers }}pax
-                                            </div>
-                                        </div>
+                                        {{ $type->name }} (<i class="bi bi-person"></i> {{ $type->max_passengers }}pax)
                                     </small>
                                 </button>
-                                <div class="d-flex">
-                                    <button
-                                        class="btn btn-sm btn-link {{ $selectedAircraft === $type->id ? 'text-white' : '' }}"
-                                        wire:click="edit({{ $type->id }})"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#aircraftTypeFormModal">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button
-                                        class="btn btn-sm btn-link {{ $selectedAircraft === $type->id ? 'text-white' : 'text-danger' }}"
-                                        wire:click="delete({{ $type->id }})"
-                                        wire:confirm="Are you sure you want to remove this aircraft type?">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     @empty
@@ -285,12 +263,6 @@
             </div>
         </div>
     </div>
-    <!-- Add to modal form -->
-    @if ($showForm && $selectedAirlineId)
-        <div class="card-body alert alert-info alert-sm text-center" style="border-radius: 0">
-            New aircraft type will be automatically associated with {{ $selectedAirline->name }}.
-        </div>
-    @endif
 
     @script
         <script>
