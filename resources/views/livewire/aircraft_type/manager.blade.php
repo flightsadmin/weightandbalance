@@ -26,14 +26,14 @@
                 <div class="list-group">
                     @forelse ($aircraftTypes as $type)
                         <div class="list-group-item {{ $selectedAircraft === $type->id ? 'active' : '' }}">
-                            <div class="d-flex justify-content-between align-items-start">
+                            <div class="d-flex justify-content-between align-items-center">
                                 <button wire:click="selectType({{ $type->id }})"
                                     class="btn btn-link text-decoration-none p-0 {{ $selectedAircraft === $type->id ? 'text-white' : 'text-dark' }}">
                                     <div class="d-flex align-items-center gap-2">
                                         <strong>{{ $type->code }}</strong>
                                         <span class="badge bg-secondary">{{ $type->category }}</span>
                                     </div>
-                                    <small class="text-{{ $selectedAircraft === $type->id ? 'white' : 'muted' }}">
+                                    <small class="text-start text-{{ $selectedAircraft === $type->id ? 'white' : 'muted' }}">
                                         {{ $type->name }} (<i class="bi bi-person"></i> {{ $type->max_passengers }}pax)
                                     </small>
                                 </button>
