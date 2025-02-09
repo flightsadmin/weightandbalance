@@ -67,27 +67,27 @@ class Airline extends Model
 
     public function getStandardPassengerWeight($type)
     {
-        match ($type) {
-            'male' => (float) ($this->settings()->where('key', self::STANDARD_MALE_PASSENGER_WEIGHT)->first()->value ?? 88),
-            'female' => (float) ($this->settings()->where('key', self::STANDARD_FEMALE_PASSENGER_WEIGHT)->first()->value ?? 70),
-            'child' => (float) ($this->settings()->where('key', self::STANDARD_CHILD_PASSENGER_WEIGHT)->first()->value ?? 35),
-            'infant' => (float) ($this->settings()->where('key', self::STANDARD_INFANT_PASSENGER_WEIGHT)->first()->value ?? 10),
-            default => (float) ($this->settings()->where('key', self::STANDARD_PASSENGER_WEIGHT)->first()->value ?? 84),
+        return match ($type) {
+            'male' => (int) ($this->settings()->where('key', self::STANDARD_MALE_PASSENGER_WEIGHT)->first()->value ?? 88),
+            'female' => (int) ($this->settings()->where('key', self::STANDARD_FEMALE_PASSENGER_WEIGHT)->first()->value ?? 70),
+            'child' => (int) ($this->settings()->where('key', self::STANDARD_CHILD_PASSENGER_WEIGHT)->first()->value ?? 35),
+            'infant' => (int) ($this->settings()->where('key', self::STANDARD_INFANT_PASSENGER_WEIGHT)->first()->value ?? 10),
+            default => (int) ($this->settings()->where('key', self::STANDARD_PASSENGER_WEIGHT)->first()->value ?? 84),
         };
     }
 
-    public function getStandardCockpitCrewWeight(): float
+    public function getStandardCockpitCrewWeight(): int
     {
-        return (float) ($this->settings()->where('key', self::STANDARD_COCKPIT_CREW_WEIGHT)->first()->value ?? 85);
+        return (int) ($this->settings()->where('key', self::STANDARD_COCKPIT_CREW_WEIGHT)->first()->value ?? 85);
     }
 
-    public function getStandardCabinCrewWeight(): float
+    public function getStandardCabinCrewWeight(): int
     {
-        return (float) ($this->settings()->where('key', self::STANDARD_CABIN_CREW_WEIGHT)->first()->value ?? 75);
+        return (int) ($this->settings()->where('key', self::STANDARD_CABIN_CREW_WEIGHT)->first()->value ?? 75);
     }
 
-    public function getStandardPantryWeight(): float
+    public function getStandardPantryWeight(): int
     {
-        return (float) ($this->settings()->where('key', self::STANDARD_PANTRY_WEIGHT)->first()->value ?? 250);
+        return (int) ($this->settings()->where('key', self::STANDARD_PANTRY_WEIGHT)->first()->value ?? 250);
     }
 }

@@ -64,7 +64,6 @@ class LoadsheetManager extends Component
             ],
             'indices' => $this->calculateIndices(),
             'others' => [
-                'total_traffic_load' => $this->calculateTotalTrafficLoad(),
                 'pantry' => $this->flight->fuel->pantry,
                 'passenger_weights' => $this->calculatePassengerWeights(),
             ],
@@ -82,13 +81,6 @@ class LoadsheetManager extends Component
     private function calculateDryOperatingWeight()
     {
         return $this->flight->aircraft->basic_weight;
-    }
-
-    private function calculateTotalTrafficLoad()
-    {
-        return $this->flight->passengers->sum('weight') +
-            $this->flight->baggage->sum('weight') +
-            $this->flight->cargo->sum('weight');
     }
 
     private function calculateZeroFuelWeight()
@@ -183,7 +175,6 @@ class LoadsheetManager extends Component
             ->groupBy('type')
             ->map(fn($group) => $group->count());
 
-        // Ensure passenger types are in correct order
         $orderedPaxByType = collect($passengerTypes)
             ->mapWithKeys(fn($type) => [$type => $paxByType[$type] ?? 0])
             ->toArray();
@@ -245,7 +236,7 @@ class LoadsheetManager extends Component
             'child' => $airline->getStandardPassengerWeight('child'),
             'infant' => $airline->getStandardPassengerWeight('infant'),
         ];
-        // dd($weights);
+
         $orderedWeights = [];
 
         foreach ($this->flight->aircraft->type->cabinZones as $zone) {

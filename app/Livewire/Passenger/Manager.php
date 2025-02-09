@@ -32,10 +32,8 @@ class Manager extends Component
 
     public $form = [
         'name' => '',
-        'seat_number' => '',
         'ticket_number' => '',
         'type' => '',
-        'notes' => '',
     ];
 
     public $selectedPassenger = null;
@@ -48,10 +46,8 @@ class Manager extends Component
 
     protected $rules = [
         'form.name' => 'required|string|max:255',
-        'form.seat_number' => 'required|string|max:4',
         'form.ticket_number' => 'nullable|string|max:255',
         'form.type' => 'required|in:male,female,child,infant',
-        'form.notes' => 'nullable|string',
     ];
 
     public function mount(?Flight $flight = null)
@@ -86,10 +82,8 @@ class Manager extends Component
         $this->editingPassenger = $passenger;
         $this->form = $passenger->only([
             'name',
-            'seat_number',
             'ticket_number',
             'type',
-            'notes',
         ]);
         $this->showForm = true;
     }

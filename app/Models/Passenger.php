@@ -15,13 +15,12 @@ class Passenger extends Model
 
     protected $fillable = [
         'flight_id',
+        'seat_id',
         'name',
         'type',
-        'seat_id',
         'ticket_number',
         'acceptance_status',
         'boarding_status',
-        'notes',
     ];
 
     public function flight(): BelongsTo

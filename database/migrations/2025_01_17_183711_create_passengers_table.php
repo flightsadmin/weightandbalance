@@ -45,7 +45,6 @@ return new class extends Migration {
             $table->string('ticket_number')->nullable();
             $table->string('acceptance_status')->default('booked');
             $table->string('boarding_status')->default('boarding');
-            $table->text('notes')->nullable();
             $table->timestamps();
 
             $table->unique(['flight_id', 'seat_id']);

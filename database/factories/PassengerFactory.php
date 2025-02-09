@@ -28,44 +28,7 @@ class PassengerFactory extends Factory
             'ticket_number' => strtoupper(fake()->bothify('#############')),
             'acceptance_status' => fake()->randomElement(['booked', 'accepted', 'standby', 'offloaded']),
             'boarding_status' => fake()->randomElement(['boarding', 'boarding', 'unboarded']),
-            'notes' => fake()->optional(0.2)->sentence(),
         ];
-    }
-
-    public function booked()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'acceptance_status' => 'booked',
-            ];
-        });
-    }
-
-    public function accepted()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'acceptance_status' => 'accepted',
-            ];
-        });
-    }
-
-    public function standby()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'acceptance_status' => 'standby',
-            ];
-        });
-    }
-
-    public function offloaded()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'acceptance_status' => 'offloaded',
-            ];
-        });
     }
 
     public function forFlight(Flight $flight)

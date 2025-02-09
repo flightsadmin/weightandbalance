@@ -180,13 +180,6 @@
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Seat Number</label>
-                                <input type="text" class="form-control form-control-sm" wire:model="form.seat_number">
-                                @error('form.seat_number')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6">
                                 <label class="form-label">Passenger Type</label>
                                 <select class="form-select form-select-sm" wire:model="form.type">
                                     <option value="">Select Type</option>
@@ -203,13 +196,6 @@
                                 <label class="form-label">Ticket Number</label>
                                 <input type="text" class="form-control form-control-sm" wire:model="form.ticket_number">
                                 @error('form.ticket_number')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Notes</label>
-                                <textarea class="form-control form-control-sm" wire:model="form.notes" rows="2"></textarea>
-                                @error('form.notes')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>
