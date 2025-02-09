@@ -11,11 +11,11 @@
                 <div class="me-2">
                     <livewire:container.manager :flight="$flight" />
                 </div>
-                <button wire:click="releaseLoadplan" class="btn btn-sm btn-primary">
+                <button wire:click="releaseLoadplan" class="btn btn-sm btn-{{ $loadplan->status === 'released' ? 'warning' : 'primary' }}">
                     @if ($loadplan->status === 'released')
-                        <i class="bi bi-check2-circle"></i> Release Loadplan v{{ $loadplan->version + 1 }}
+                        <i class="bi bi-arrow-repeat"></i> Release Loadplan v{{ $loadplan->version + 1 }}
                     @else
-                        <i class="bi bi-check2-circle"></i> Release Loadplan v{{ $loadplan->version }}
+                        <i class="bi bi-check2-circle"></i> Release Loadplan
                     @endif
                 </button>
             </div>
