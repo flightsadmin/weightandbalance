@@ -125,13 +125,9 @@ class LoadsheetManager extends Component
                 'seats.passenger' => function ($query) {
                     $query->where('flight_id', $this->flight->id);
                 },
-            ])
-            ->get()
-            ->map(function ($zone) {
-                $passengerCount = $zone->seats
-                    ->filter(fn($seat) => $seat->passenger)
-                    ->count();
-                $weight = $passengerCount * $this->flight->airline->getStandardPassengerWeight('male');
+            ])->get()->map(function ($zone) {
+                $passengerCount = $zone->seats->filter(fn($seat) => $seat->passenger)->count();
+                $weight = $passengerCount * $this->flight->airline->getStandardPassengerWeight('ah');
 
                 return [
                     'zone_name' => $zone->name,
