@@ -66,11 +66,6 @@
                     <i class="bi bi-people-fill"></i> Crew
                 </a>
             </li>
-            <li class="dropdown-item">
-                <a class="nav-link" wire:navigate href="{{ route('containers.index') }}">
-                    <i class="bi bi-box-fill"></i> Containers
-                </a>
-            </li>
         </ul>
     </div>
 </div>
