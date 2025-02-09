@@ -7,13 +7,19 @@ use App\Models\Airline;
 use App\Models\CabinZone;
 use App\Models\Envelope;
 use App\Models\Hold;
+use App\Models\Passenger;
+use App\Models\Seat;
 use Illuminate\Database\Seeder;
 
 class AircraftConfigurationSeeder extends Seeder
 {
     public function run(): void
     {
-        $aircraftType = AircraftType::inRandomOrder()->first();
+        $aircraftType = AircraftType::with([
+            'aircraft.flights.passengers',
+            'cabinZones',
+            'seats'
+        ])->inRandomOrder()->first();
         $airline = Airline::inRandomOrder()->first();
 
         $settings = [
@@ -65,14 +71,67 @@ class AircraftConfigurationSeeder extends Seeder
             ['name' => 'C', 'max_capacity' => 30, 'index' => 1.15, 'arm' => 21.2],
         ];
 
-        foreach ($zones as $zoneData) {
-            CabinZone::updateOrCreate(
+        // Keep track of the last row number used
+        $lastRowNumber = 0;
+
+        foreach ($zones as $key => $zoneData) {
+            $zone = CabinZone::updateOrCreate(
                 [
                     'aircraft_type_id' => $aircraftType->id,
                     'name' => $zoneData['name'],
                 ],
                 $zoneData
             );
+
+            $zone->seats()->delete();
+            $rows = ceil($zone->max_capacity / 6);
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+            $seats = [];
+            for ($row = 1; $row <= $rows; $row++) {
+                $actualRow = $lastRowNumber + $row; // Use incremental row numbers
+                foreach ($columns as $column) {
+                    $seats[] = [
+                        'aircraft_type_id' => $aircraftType->id,
+                        'cabin_zone_id' => $zone->id,
+                        'row' => $actualRow,
+                        'column' => $column,
+                        'designation' => $actualRow . $column,
+                        'type' => 'economy',
+                        'is_exit' => in_array($actualRow, [12, 13]), // Example exit rows
+                        'is_blocked' => false,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+            }
+            $zone->seats()->createMany($seats);
+            $lastRowNumber += $rows;
+        }
+
+        foreach ($aircraftType->aircraft as $aircraft) {
+            foreach ($aircraft->flights as $flight) {
+                $availableSeats = $aircraftType->seats()
+                    ->whereDoesntHave('passenger', function ($query) use ($flight) {
+                        $query->where('flight_id', $flight->id);
+                    })
+                    ->where('is_blocked', false)
+                    ->get()
+                    ->pluck('id')
+                    ->toArray();
+
+                $flight->passengers()->whereNull('seat_id')->each(function ($passenger) use (&$availableSeats) {
+                    if (empty($availableSeats)) {
+                        return false;
+                    }
+
+                    $randomIndex = array_rand($availableSeats);
+                    $seatId = $availableSeats[$randomIndex];
+                    unset($availableSeats[$randomIndex]);
+
+                    $passenger->update(['seat_id' => $seatId]);
+                });
+            }
         }
 
         $holds = [
