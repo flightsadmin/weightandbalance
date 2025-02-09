@@ -112,10 +112,11 @@ class Manager extends Component
             ->orderBy('scheduled_departure_time')
             ->paginate(10);
 
-        return view('livewire.flight.manager', [
+        return view('livewire.flights.manager', [
             'flights' => $flights,
             'airlines' => Airline::orderBy('name')->get(),
             'aircraft' => Aircraft::with('airline')->orderBy('registration_number')->get(),
         ]);
+
     }
 }

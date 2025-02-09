@@ -202,7 +202,7 @@ class LoadsheetManager extends Component
 
     public function render()
     {
-        return view('livewire.flight.loadsheet-manager', [
+        return view('livewire.flights.loadsheet-manager', [
             'loadsheets' => $this->flight->loadsheets()->latest()->get(),
         ]);
     }

@@ -14,11 +14,6 @@ class Overview extends Component
         $this->flight = $flight->load(['airline', 'aircraft', 'crew', 'passengers', 'baggage', 'cargo']);
     }
 
-    public function render()
-    {
-        return view('livewire.flight.overview')->layout('components.layouts.app');
-    }
-
     public function updateStatus($status)
     {
         $this->flight->update(['status' => $status]);
@@ -27,5 +22,10 @@ class Overview extends Component
     public function updateRegistration($reg)
     {
         $this->flight->update(['aircraft_id' => $reg]);
+    }
+
+    public function render()
+    {
+        return view('livewire.flights.overview')->layout('components.layouts.app');
     }
 }

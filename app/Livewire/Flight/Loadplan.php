@@ -49,7 +49,7 @@ class Loadplan extends Component
                 ->first()?->positions->first();
         }
 
-        if (! $fromPosition && isset($this->containerPositions[$containerId])) {
+        if (!$fromPosition && isset($this->containerPositions[$containerId])) {
             $fromPosition = $this->containerPositions[$containerId];
         }
 
@@ -81,7 +81,7 @@ class Loadplan extends Component
     public function releaseLoadplan()
     {
         $overweightHolds = $this->flight->aircraft->type->holds
-            ->filter(fn ($hold) => $hold->isOverweight(
+            ->filter(fn($hold) => $hold->isOverweight(
                 $hold->getCurrentWeight($this->containerPositions, $this->flight->containers)
             ));
 
@@ -122,7 +122,7 @@ class Loadplan extends Component
             ->orderBy('position')
             ->get();
 
-        return view('livewire.flight.loadplan', [
+        return view('livewire.flights.loadplan', [
             'containers' => $containers,
             'availableContainers' => $availableContainers,
             'holds' => $holds,

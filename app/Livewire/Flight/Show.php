@@ -25,7 +25,7 @@ class Show extends Component
 
     public function render()
     {
-        return view('livewire.flight.show', [
+        return view('livewire.flights.show', [
             'baggage_count' => $this->flight->baggage->count(),
             'cargo_count' => $this->flight->cargo->count(),
             'passengers_count' => $this->flight->passengers->count(),
