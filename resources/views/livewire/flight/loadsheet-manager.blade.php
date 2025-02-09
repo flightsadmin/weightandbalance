@@ -20,8 +20,12 @@
                             $distribution = $loadsheet->payload_distribution;
                             $pax = $loadsheet->payload_distribution['load_data'];
                             $totalPax = array_sum(
-                                array_filter($pax['pax_by_type'], fn($count, $type) => $type !== 'infant', ARRAY_FILTER_USE_BOTH),
+                                array_column(
+                                    array_filter($pax['pax_by_type'], fn($data, $type) => $type !== 'infant', ARRAY_FILTER_USE_BOTH),
+                                    'count',
+                                ),
                             );
+
                             $totalDeadload = array_sum(array_column($pax['hold_breakdown'], 'weight'));
                             $zfw = $flight->aircraft->type->max_zero_fuel_weight - $distribution['weights']['zero_fuel'];
                             $tow = $flight->aircraft->type->max_takeoff_weight - $distribution['weights']['takeoff'];
@@ -84,7 +88,7 @@
                                     <td>PASSENGER/CABIN BAG</td>
                                     <td>
                                         @forelse ($pax['pax_by_type'] as $type => $count)
-                                            {{ $count . '/' }}
+                                            {{ $count['count'] . '/' }}
                                         @empty
                                             NIL
                                         @endforelse
@@ -179,7 +183,7 @@
                                 <div>
                                     -{{ $flight->arrival_airport }}.
                                     @forelse ($pax['pax_by_type'] as $type => $count)
-                                        {{ $count . '/' }}
+                                        {{ $count['count'] . '/' }}
                                     @empty
                                         NIL
                                     @endforelse
@@ -260,7 +264,7 @@
                             <p class="text-muted text-center">No loadsheet generated yet.</p>
                         @else
                             {{-- <p>Loadsheet generated successfully.</p> --}}
-                            <pre>{{ json_encode($loadsheet->payload_distribution, JSON_PRETTY_PRINT) }}</pre>
+                            <pre>{{ json_encode($loadsheet->payload_distribution, JSON_PRETTY_PRINT, JSON_UNESCAPED_UNICODE) }}</pre>
                         @endif
                     </div>
                 </div>
