@@ -139,18 +139,18 @@
                             <div>BALANCE / SEATING CONDITIONS</div>
                             <table class="table table-sm table-borderless m-0">
                                 <tr>
-                                    <td>DOI: N/A</td>
-                                    <td>DLI: N/A</td>
+                                    <td>DOI: {{ $distribution['indices']['doi'] ?? 'N/A' }}</td>
+                                    <td>DLI: {{ $distribution['indices']['dli'] ?? 'N/A' }}</td>
                                     <td>LAST MINUTE CHANGES</td>
                                 </tr>
                                 <tr>
-                                    <td>LIZFW: N/A</td>
-                                    <td>LITOW: N/A</td>
+                                    <td>LIZFW: {{ $distribution['indices']['zfw'] ?? 'N/A' }}</td>
+                                    <td>LITOW: {{ $distribution['indices']['tow'] ?? 'N/A' }}</td>
                                     <td></td>
                                 </tr>
                                 <tr>
-                                    <td>MACZFW: N/A</td>
-                                    <td>MACTOW: N/A</td>
+                                    <td>MACZFW: {{ $distribution['indices']['zfw'] ?? 'N/A' }}</td>
+                                    <td>MACTOW: {{ $distribution['indices']['tow'] ?? 'N/A' }}</td>
                                     <td></td>
                                 </tr>
                             </table>
@@ -260,7 +260,7 @@
                             <p class="text-muted text-center">No loadsheet generated yet.</p>
                         @else
                             {{-- <p>Loadsheet generated successfully.</p> --}}
-                            <pre>{{ json_encode($loadsheet->payload_distribution['others'], JSON_PRETTY_PRINT) }}</pre>
+                            <pre>{{ json_encode($loadsheet->payload_distribution, JSON_PRETTY_PRINT) }}</pre>
                         @endif
                     </div>
                 </div>

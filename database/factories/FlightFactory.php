@@ -77,49 +77,4 @@ class FlightFactory extends Factory
             ];
         });
     }
-
-    public function scheduled()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => 'scheduled',
-            ];
-        });
-    }
-
-    public function boarding()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => 'boarding',
-            ];
-        });
-    }
-
-    public function departed()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => 'departed',
-            ];
-        });
-    }
-
-    public function arrived()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => 'arrived',
-            ];
-        });
-    }
-
-    public function cancelled()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => 'cancelled',
-            ];
-        });
-    }
 }

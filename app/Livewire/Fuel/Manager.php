@@ -70,6 +70,7 @@ class Manager extends Component
                 return [
                     $pantry['code'] => [
                         'name' => $pantry['name'],
+                        'code' => $pantry['code'],
                         'weight' => $pantry['weight'],
                         'index' => $pantry['index'],
                     ],

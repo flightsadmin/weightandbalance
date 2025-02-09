@@ -107,7 +107,13 @@ class LoadsheetManager extends Component
             'cargo_holds' => $this->calculateCargoHoldIndices(),
             'passengers' => $this->calculatePassengerIndices(),
             'pantry' => $this->calculatePantryIndex(),
+            'basic_index' => round($this->flight->aircraft->basic_index, 2),
+            'pax_index' => round(array_sum(array_column($this->calculatePassengerIndices(), 'index')), 2),
+            'cargo_index' => round(array_sum(array_column($this->calculateCargoHoldIndices(), 'index')), 2),
+            'pantry_index' => $this->calculatePantryIndex()['index'] ?? 0,
         ];
+        $indices['doi'] = round($indices['basic_index'] + $indices['pantry_index'], 2);
+        $indices['dli'] = round($indices['doi'] + $indices['cargo_index'], 2);
 
         return $indices;
     }
@@ -127,10 +133,10 @@ class LoadsheetManager extends Component
                 return [
                     'hold_code' => $hold->code,
                     'weight' => $totalWeight,
-                    'index' => $totalWeight * $hold->index,
+                    'index' => round($totalWeight * $hold->index, 2),
                 ];
             })
-            ->filter(fn($hold) => $hold['weight'] > 0)->values();
+            ->filter(fn($hold) => $hold['weight'] > 0)->toArray();
     }
 
     private function calculatePassengerIndices()
@@ -152,11 +158,11 @@ class LoadsheetManager extends Component
                     'zone_name' => $zone->name,
                     'passenger_count' => $passengerCount,
                     'weight' => $weight,
-                    'index' => $weight * $zone->index,
+                    'index' => round($weight * $zone->index, 2),
                 ];
             })
             ->filter(fn($zone) => $zone['passenger_count'] > 0)
-            ->values();
+            ->toArray();
     }
 
     private function calculatePantryIndex()
@@ -171,43 +177,32 @@ class LoadsheetManager extends Component
     private function generateLoadData()
     {
         $passengerTypes = ['male', 'female', 'child', 'infant'];
-        $paxByType = $this->flight->passengers
-            ->groupBy('type')
-            ->map(fn($group) => $group->count());
 
-        $orderedPaxByType = collect($passengerTypes)
-            ->mapWithKeys(fn($type) => [$type => $paxByType[$type] ?? 0])
-            ->toArray();
+        $paxByType = $this->flight->passengers->groupBy('type')->map(fn($group) => $group->count());
 
-        $orderedWeights = collect($passengerTypes)
-            ->mapWithKeys(fn($type) => [
-                $type => $paxByType[$type] * $this->flight->airline->getStandardPassengerWeight($type)
-            ])
-            ->toArray();
+        $orderedPaxByType = collect($passengerTypes)->mapWithKeys(fn($type) => [
+            $type => $paxByType[$type] ?? 0
+        ])->toArray();
 
-        $orderedWeightsUsed = collect($passengerTypes)
-            ->mapWithKeys(fn($type) => [
-                $type => $this->flight->airline->getStandardPassengerWeight($type)
-            ])
-            ->toArray();
+        $orderedWeights = collect($passengerTypes)->mapWithKeys(fn($type) => [
+            $type => $paxByType[$type] * $this->flight->airline->getStandardPassengerWeight($type)
+        ])->toArray();
+
+        $orderedWeightsUsed = collect($passengerTypes)->mapWithKeys(fn($type) => [
+            $type => $this->flight->airline->getStandardPassengerWeight($type)
+        ])->toArray();
+
         return [
             'pax_by_type' => $orderedPaxByType,
             'passenger_weights' => $orderedWeights,
             'passenger_weights_used' => $orderedWeightsUsed,
-            'hold_breakdown' => $this->flight->aircraft->type->holds()
-                ->with('positions')
-                ->get()
-                ->map(function ($hold) {
-                    return [
-                        'hold_no' => $hold->code,
-                        'weight' => $this->flight->containers
-                            ->whereIn('position_id', $hold->positions->pluck('id'))
-                            ->sum('weight')
-                    ];
-                })
-                ->filter(fn($hold) => $hold['weight'] > 0)
-                ->values()
-                ->toArray(),
+            'hold_breakdown' => $this->flight->aircraft->type->holds()->with('positions')->get()->map(function ($hold) {
+                return [
+                    'hold_no' => $hold->code,
+                    'weight' => $this->flight->containers->whereIn('position_id', $hold->positions->pluck('id'))->sum('weight')
+                ];
+            })->filter(fn($hold) => $hold['weight'] > 0)->values()->toArray(),
+
             'deadload_by_type' => [
                 'C' => [
                     'pieces' => $this->flight->cargo->sum('pieces'),

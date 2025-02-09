@@ -113,6 +113,7 @@ class AircraftType extends Model
 
         return [
             'name' => $this->getSetting("pantry_{$pantryCode}_name", ''),
+            'code' => strtoupper($pantryCode),
             'weight' => $this->getSetting("pantry_{$pantryCode}_weight", 0),
             'index' => $this->getSetting("pantry_{$pantryCode}_index", 0),
         ];

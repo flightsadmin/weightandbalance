@@ -25,28 +25,10 @@ class AircraftFactory extends Factory
             'aircraft_type_id' => null,
             'registration_number' => strtoupper(fake()->unique()->lexify('??-????')),
             'basic_weight' => fake()->numberBetween(40000, 100000),
-            'basic_index' => fake()->randomFloat(4, 0.0001, 0.9999),
-            'active' => fake()->boolean(90), // 90% chance of being active
+            'basic_index' => fake()->randomFloat(4, 45.0001, 50.9999),
+            'active' => fake()->boolean(90),
             'remarks' => fake()->sentence(),
         ];
-    }
-
-    public function active()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'active' => true,
-            ];
-        });
-    }
-
-    public function inactive()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'active' => false,
-            ];
-        });
     }
 
     public function forAirline(Airline $airline)
