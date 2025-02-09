@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class HoldPosition extends Model
 {
@@ -25,13 +27,18 @@ class HoldPosition extends Model
         'is_active' => 'boolean',
     ];
 
-    public function hold()
+    public function hold(): BelongsTo
     {
         return $this->belongsTo(Hold::class);
     }
 
+    public function containers(): HasMany
+    {
+        return $this->hasMany(Container::class, 'position_id');
+    }
+
     public function getFullCode()
     {
-        return $this->hold->code.$this->code;
+        return $this->hold->code . $this->code;
     }
 }

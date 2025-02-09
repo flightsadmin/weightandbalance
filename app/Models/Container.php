@@ -37,6 +37,11 @@ class Container extends Model
         return $this->hasMany(Cargo::class);
     }
 
+    public function position(): BelongsTo
+    {
+        return $this->belongsTo(HoldPosition::class, 'position_id');
+    }
+
     public function getTotalWeightAttribute()
     {
         return $this->baggage->sum('weight') + $this->cargo->sum('weight');

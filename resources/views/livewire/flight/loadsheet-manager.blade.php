@@ -259,8 +259,8 @@
                         @if (!$loadsheet)
                             <p class="text-muted text-center">No loadsheet generated yet.</p>
                         @else
-                            <p>Loadsheet generated successfully.</p>
-                            {{-- <pre>{{ json_encode($loadsheet->payload_distribution, JSON_PRETTY_PRINT) }}</pre> --}}
+                            {{-- <p>Loadsheet generated successfully.</p> --}}
+                            <pre>{{ json_encode($loadsheet->payload_distribution['indices'], JSON_PRETTY_PRINT) }}</pre>
                         @endif
                     </div>
                 </div>

@@ -63,11 +63,7 @@ class LoadsheetManager extends Component
                 'takeoff' => $this->calculateTakeoffWeight(),
                 'landing' => $this->calculateLandingWeight(),
             ],
-            'indices' => [
-                'zero_fuel' => $this->calculateZeroFuelIndex(),
-                'takeoff' => $this->calculateTakeoffIndex(),
-                'landing' => $this->calculateLandingIndex(),
-            ],
+            'indices' => $this->calculateIndices(),
             'others' => [
                 'total_traffic_load' => $this->calculateTotalTrafficLoad(),
                 'pantry' => $this->flight->fuel->pantry,
@@ -113,19 +109,74 @@ class LoadsheetManager extends Component
         return $this->calculateTakeoffWeight() - $this->flight->fuel->trip_fuel;
     }
 
-    private function calculateZeroFuelIndex()
+    private function calculateIndices()
     {
-        return 0;
+        $indices = [
+            'cargo_holds' => $this->calculateCargoHoldIndices(),
+            'passengers' => $this->calculatePassengerIndices(),
+            'pantry' => $this->calculatePantryIndex(),
+        ];
+
+        return $indices;
     }
 
-    private function calculateTakeoffIndex()
+    private function calculateCargoHoldIndices()
     {
-        return 0;
+        return $this->flight->aircraft->type->holds()
+            ->with([
+                'positions.containers' => function ($query) {
+                    $query->where('flight_id', $this->flight->id);
+                }
+            ])
+            ->get()
+            ->map(function ($hold) {
+                $totalWeight = $hold->positions->sum(function ($position) {
+                    return $position->containers->sum('weight');
+                });
+
+                return [
+                    'hold_code' => $hold->code,
+                    'weight' => $totalWeight,
+                    'index' => $totalWeight * $hold->index,
+                ];
+            })
+            ->filter(fn($hold) => $hold['weight'] > 0)
+            ->values();
     }
 
-    private function calculateLandingIndex()
+    private function calculatePassengerIndices()
     {
-        return 0;
+        return $this->flight->aircraft->type->cabinZones()
+            ->with([
+                'seats.passenger' => function ($query) {
+                    $query->where('flight_id', $this->flight->id);
+                }
+            ])
+            ->get()
+            ->map(function ($zone) {
+                $passengerCount = $zone->seats
+                    ->filter(fn($seat) => $seat->passenger)
+                    ->count();
+                $weight = $passengerCount * $this->flight->airline->getStandardPassengerWeight();
+
+                return [
+                    'zone_name' => $zone->name,
+                    'passenger_count' => $passengerCount,
+                    'weight' => $weight,
+                    'index' => $weight * $zone->index,
+                ];
+            })
+            ->filter(fn($zone) => $zone['passenger_count'] > 0)
+            ->values();
+    }
+
+    private function calculatePantryIndex()
+    {
+        if (!$this->flight->fuel) {
+            return;
+        }
+
+        return $this->flight->aircraft->type->getPantryDetails($this->flight->fuel->pantry);
     }
 
     private function generateLoadData()
