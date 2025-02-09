@@ -72,7 +72,6 @@
                             <tr>
                                 <th><input type="checkbox" wire:model.live="selectAll"></th>
                                 <th>AWB Number</th>
-                                <th>Flight</th>
                                 <th>Type</th>
                                 <th>Pieces</th>
                                 <th>Weight</th>
@@ -89,15 +88,6 @@
                                     </td>
                                     <td>
                                         {{ $item->awb_number }}
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('flights.show', $item->flight) }}" wire:navigate
-                                            class="text-decoration-none">
-                                            {{ $item->flight->flight_number }}
-                                        </a>
-                                        <span class="small text-muted">
-                                            ({{ $item->flight->departure_airport }} → {{ $item->flight->arrival_airport }})
-                                        </span>
                                     </td>
                                     <td>{{ ucwords(str_replace('_', ' ', $item->type)) }}</td>
                                     <td>{{ $item->pieces }}</td>
