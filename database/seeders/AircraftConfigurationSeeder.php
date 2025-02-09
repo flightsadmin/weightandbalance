@@ -33,6 +33,10 @@ class AircraftConfigurationSeeder extends Seeder
             'standard_passenger_weight' => ['value' => 84, 'type' => 'integer', 'description' => 'Standard passenger weight'],
             'standard_pantry_weight' => ['value' => 250, 'type' => 'integer', 'description' => 'Standard pantry weight'],
             'standard_baggage_weight' => ['value' => 20, 'type' => 'integer', 'description' => 'Standard baggage weight'],
+            'standard_male_passenger_weight' => ['value' => 88, 'type' => 'integer', 'description' => 'Standard male passenger weight'],
+            'standard_female_passenger_weight' => ['value' => 70, 'type' => 'integer', 'description' => 'Standard female passenger weight'],
+            'standard_child_passenger_weight' => ['value' => 35, 'type' => 'integer', 'description' => 'Standard child passenger weight'],
+            'standard_infant_passenger_weight' => ['value' => 10, 'type' => 'integer', 'description' => 'Standard infant passenger weight'],
         ];
 
         foreach ($settings as $key => $data) {

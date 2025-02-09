@@ -44,7 +44,6 @@ class LoadsheetManager extends Component
 
     public function generateLoadsheet()
     {
-        // Calculate payload distribution
         $distribution = [
             'load_data' => $this->generateLoadData(),
             'fuel' => [
@@ -67,6 +66,7 @@ class LoadsheetManager extends Component
             'others' => [
                 'total_traffic_load' => $this->calculateTotalTrafficLoad(),
                 'pantry' => $this->flight->fuel->pantry,
+                'passenger_weights' => $this->calculatePassengerWeights(),
             ],
         ];
 
@@ -127,9 +127,7 @@ class LoadsheetManager extends Component
                 'positions.containers' => function ($query) {
                     $query->where('flight_id', $this->flight->id);
                 }
-            ])
-            ->get()
-            ->map(function ($hold) {
+            ])->get()->map(function ($hold) {
                 $totalWeight = $hold->positions->sum(function ($position) {
                     return $position->containers->sum('weight');
                 });
@@ -140,8 +138,7 @@ class LoadsheetManager extends Component
                     'index' => $totalWeight * $hold->index,
                 ];
             })
-            ->filter(fn($hold) => $hold['weight'] > 0)
-            ->values();
+            ->filter(fn($hold) => $hold['weight'] > 0)->values();
     }
 
     private function calculatePassengerIndices()
@@ -157,7 +154,7 @@ class LoadsheetManager extends Component
                 $passengerCount = $zone->seats
                     ->filter(fn($seat) => $seat->passenger)
                     ->count();
-                $weight = $passengerCount * $this->flight->airline->getStandardPassengerWeight();
+                $weight = $passengerCount * $this->flight->airline->getStandardPassengerWeight('male');
 
                 return [
                     'zone_name' => $zone->name,
@@ -193,13 +190,13 @@ class LoadsheetManager extends Component
 
         $orderedWeights = collect($passengerTypes)
             ->mapWithKeys(fn($type) => [
-                $type => $paxByType[$type] * $this->flight->airline->getStandardPassengerWeight()
+                $type => $paxByType[$type] * $this->flight->airline->getStandardPassengerWeight($type)
             ])
             ->toArray();
 
         $orderedWeightsUsed = collect($passengerTypes)
             ->mapWithKeys(fn($type) => [
-                $type => $this->flight->airline->getStandardPassengerWeight()
+                $type => $this->flight->airline->getStandardPassengerWeight($type)
             ])
             ->toArray();
         return [
@@ -235,6 +232,34 @@ class LoadsheetManager extends Component
                 ],
             ],
         ];
+    }
+
+    protected function calculatePassengerWeights()
+    {
+        $airline = $this->flight->airline;
+        $passengers = $this->flight->passengers;
+
+        $weights = [
+            'male' => $airline->getStandardPassengerWeight('male'),
+            'female' => $airline->getStandardPassengerWeight('female'),
+            'child' => $airline->getStandardPassengerWeight('child'),
+            'infant' => $airline->getStandardPassengerWeight('infant'),
+        ];
+        // dd($weights);
+        $orderedWeights = [];
+
+        foreach ($this->flight->aircraft->type->cabinZones as $zone) {
+            $zonePassengers = $passengers->where('seat.cabin_zone_id', $zone->id);
+
+            $orderedWeights[$zone->name] = [
+                'male' => $zonePassengers->where('type', 'male')->count() * $weights['male'],
+                'female' => $zonePassengers->where('type', 'female')->count() * $weights['female'],
+                'child' => $zonePassengers->where('type', 'child')->count() * $weights['child'],
+                'infant' => $zonePassengers->where('type', 'infant')->count() * $weights['infant'],
+            ];
+        }
+
+        return [$orderedWeights, $weights];
     }
 
     public function render()
