@@ -118,15 +118,6 @@ class AircraftType extends Model
         ];
     }
 
-    public function getPassengerData()
-    {
-        return $this->cabinZones()->with([
-            'seats.passenger' => function ($query) {
-                $query->where('flight_id', $this->flight->id);
-            }
-        ])->get();
-    }
-
     public function getAllPantries()
     {
         return collect($this->settings()
