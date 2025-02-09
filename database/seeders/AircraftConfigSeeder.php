@@ -21,11 +21,11 @@ class AircraftConfigSeeder extends Seeder
         $airline = Airline::inRandomOrder()->first();
 
         $settings = [
-            'ref_sta_at' => ['value' => '0.0', 'type' => 'float', 'description' => 'Reference station (meters)'],
-            'k_constant' => ['value' => '100.0', 'type' => 'float', 'description' => 'K constant for index calculation'],
-            'c_constant' => ['value' => '500.0', 'type' => 'float', 'description' => 'C constant for index calculation'],
-            'length_of_mac' => ['value' => '4.194', 'type' => 'float', 'description' => 'Length of MAC (meters)'],
-            'lemac_at' => ['value' => '16.86', 'type' => 'float', 'description' => 'Leading Edge MAC (meters)'],
+            'ref_sta_at' => ['value' => 18.850, 'type' => 'float', 'description' => 'Reference station (meters)'],
+            'k_constant' => ['value' => 50, 'type' => 'integer', 'description' => 'K constant for index calculation'],
+            'c_constant' => ['value' => 1000, 'type' => 'integer', 'description' => 'C constant for index calculation'],
+            'length_of_mac' => ['value' => 4.194, 'type' => 'float', 'description' => 'Length of MAC (meters)'],
+            'lemac_at' => ['value' => 17.8015, 'type' => 'float', 'description' => 'Leading Edge MAC (meters)'],
             'standard_cockpit_crew_weight' => ['value' => 85, 'type' => 'integer', 'description' => 'Standard crew weight'],
             'standard_cabin_crew_weight' => ['value' => 75, 'type' => 'integer', 'description' => 'Standard cabin crew weight'],
             'standard_passenger_weight' => ['value' => 84, 'type' => 'integer', 'description' => 'Standard passenger weight'],
@@ -35,6 +35,7 @@ class AircraftConfigSeeder extends Seeder
             'standard_female_passenger_weight' => ['value' => 70, 'type' => 'integer', 'description' => 'Standard female passenger weight'],
             'standard_child_passenger_weight' => ['value' => 35, 'type' => 'integer', 'description' => 'Standard child passenger weight'],
             'standard_infant_passenger_weight' => ['value' => 10, 'type' => 'integer', 'description' => 'Standard infant passenger weight'],
+            'standard_fuel_density' => ['value' => 0.89, 'type' => 'float', 'description' => 'Standard fuel density'],
         ];
 
         foreach ($settings as $key => $data) {

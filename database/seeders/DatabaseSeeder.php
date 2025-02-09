@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
                     'airline_id' => $airline->id,
                     'aircraft_type_id' => $aircraftType->id,
                 ])->each(function ($aircraft) use ($airline) {
-                    Flight::factory(rand(10, 15))->forAirline($airline)->create([
+                    Flight::factory(rand(7, 10))->forAirline($airline)->create([
                         'aircraft_id' => $aircraft->id,
                     ])->each(function ($flight) {
                         $captain = Crew::factory()->captain()->create();
