@@ -162,7 +162,7 @@
                                         <div class="mb-3">
                                             <label class="form-label">Pantry</label>
                                             <select wire:model="pantry" class="form-select form-select-sm" required>
-                                                <option value="" disabled selected>Select Pantry</option>
+                                                <option value="" selected>Select Pantry</option>
                                                 @foreach ($pantryOptions as $key => $pantry)
                                                     <option value="{{ $key }}">
                                                         {{ $pantry['name'] }} ({{ number_format($pantry['weight']) }} kg)

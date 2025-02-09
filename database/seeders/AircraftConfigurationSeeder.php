@@ -43,37 +43,35 @@ class AircraftConfigurationSeeder extends Seeder
         }
 
         $pantries = [
-            'a' => ['name' => 'Forward Galley', 'weight' => 250, 'index' => 0.8],
-            'b' => ['name' => 'Mid Galley', 'weight' => 200, 'index' => 1.0],
-            'c' => ['name' => 'Aft Galley', 'weight' => 250, 'index' => 1.2],
+            'a' => ['name' => 'Pantry A', 'weight' => 497, 'index' => +1.59],
+            'e' => ['name' => 'Pantry E', 'weight' => 45, 'index' => +0.18],
+            'empty' => ['name' => 'Empty', 'weight' => 0, 'index' => 0],
         ];
 
         foreach ($pantries as $code => $data) {
             $aircraftType->settings()->updateOrCreate(
                 ['key' => "pantry_{$code}_name", 'airline_id' => $airline->id],
-                ['value' => $data['name'], 'type' => 'string']
+                ['value' => $data['name'], 'type' => 'string', 'description' => 'Name for ' . $data['name']]
             );
 
             $aircraftType->settings()->updateOrCreate(
                 ['key' => "pantry_{$code}_weight", 'airline_id' => $airline->id],
-                ['value' => $data['weight'], 'type' => 'integer']
+                ['value' => $data['weight'], 'type' => 'integer', 'description' => 'Weight for ' . $data['name']]
             );
 
             $aircraftType->settings()->updateOrCreate(
                 ['key' => "pantry_{$code}_index", 'airline_id' => $airline->id],
-                ['value' => $data['index'], 'type' => 'float']
+                ['value' => $data['index'], 'type' => 'float', 'description' => 'Index for ' . $data['name']]
             );
         }
 
         $zones = [
-            ['name' => 'A', 'max_capacity' => 60, 'index' => 0.85, 'arm' => 12.5],
-            ['name' => 'B', 'max_capacity' => 90, 'index' => 1.0, 'arm' => 16.8],
-            ['name' => 'C', 'max_capacity' => 30, 'index' => 1.15, 'arm' => 21.2],
+            ['name' => 'A', 'max_capacity' => 54, 'index' => -6.971, 'arm' => -0.00697],
+            ['name' => 'B', 'max_capacity' => 60, 'index' => +0.281, 'arm' => +0.00028],
+            ['name' => 'C', 'max_capacity' => 66, 'index' => +8.271, 'arm' => +0.00827],
         ];
 
-        // Keep track of the last row number used
         $lastRowNumber = 0;
-
         foreach ($zones as $key => $zoneData) {
             $zone = CabinZone::updateOrCreate(
                 [
@@ -84,24 +82,26 @@ class AircraftConfigurationSeeder extends Seeder
             );
 
             $zone->seats()->delete();
-            $rows = ceil($zone->max_capacity / 6);
-            $columns = ['A', 'B', 'C', 'D', 'E', 'F'];
+            $rows = ceil($zone->max_capacity / 10);
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 
             $seats = [];
             for ($row = 1; $row <= $rows; $row++) {
-                $actualRow = $lastRowNumber + $row; // Use incremental row numbers
+                $actualRow = $lastRowNumber + $row;
                 foreach ($columns as $column) {
                     $seats[] = [
                         'aircraft_type_id' => $aircraftType->id,
+
                         'cabin_zone_id' => $zone->id,
                         'row' => $actualRow,
                         'column' => $column,
                         'designation' => $actualRow . $column,
                         'type' => 'economy',
-                        'is_exit' => in_array($actualRow, [12, 13]), // Example exit rows
+                        'is_exit' => in_array($actualRow, [12, 13]),
                         'is_blocked' => false,
                         'created_at' => now(),
                         'updated_at' => now(),
+
                     ];
                 }
             }
