@@ -13,7 +13,6 @@
                     <option value="scheduled">Scheduled</option>
                     <option value="boarding">Boarding</option>
                     <option value="departed">Departed</option>
-
                     <option value="arrived">Arrived</option>
                     <option value="cancelled">Cancelled</option>
                 </select>
@@ -58,7 +57,38 @@
                                 <td> {{ $flight->scheduled_departure_time->format('d M Y H:i') }}</td>
                                 <td> {{ $flight->scheduled_arrival_time->format('d M Y H:i') }}</td>
                                 <td>{{ $flight->aircraft->registration_number }}</td>
-                                <td>{{ ucfirst($flight->status) }}</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button
+                                            class="btn btn-sm btn-{{ $flight->status === 'cancelled' ? 'danger' : ($flight->status === 'arrived' ? 'success' : 'warning') }} dropdown-toggle"
+                                            type="button" data-bs-toggle="dropdown">
+                                            {{ ucfirst($flight->status) }}
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <button wire:click="updateStatus({{ $flight->id }}, 'scheduled')"
+                                                    class="dropdown-item">Scheduled</button>
+                                            </li>
+                                            <li>
+                                                <button wire:click="updateStatus({{ $flight->id }}, 'boarding')"
+                                                    class="dropdown-item">Boarding</button>
+                                            </li>
+                                            <li>
+                                                <button wire:click="updateStatus({{ $flight->id }}, 'departed')"
+                                                    class="dropdown-item">Departed</button>
+                                            </li>
+                                            <li>
+                                                <button wire:click="updateStatus({{ $flight->id }}, 'arrived')"
+                                                    class="dropdown-item">Arrived</button>
+                                            </li>
+                                            <li>
+                                                <button wire:click="updateStatus({{ $flight->id }}, 'cancelled')"
+                                                    class="dropdown-item">Cancelled</button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+
                                 <td>
                                     <button class="btn btn-sm btn-outline-primary"
                                         wire:click="editFlight({{ $flight->id }})" data-bs-toggle="modal"

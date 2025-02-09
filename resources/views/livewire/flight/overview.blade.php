@@ -2,9 +2,6 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <h2 class="card-title m-0">Flight Details</h2>
         <div>
-            <a wire:navigate href="{{ route('flights.edit', $flight) }}" class="btn btn-sm btn-primary">
-                <i class="bi bi-pencil"></i> Edit
-            </a>
             <a wire:navigate href="{{ route('flights.index') }}" class="btn btn-sm btn-secondary">
                 <i class="bi bi-arrow-left"></i> Back to flights
             </a>

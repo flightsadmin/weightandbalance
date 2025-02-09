@@ -12,6 +12,7 @@ class Manager extends Component
 {
     use WithPagination;
 
+    public $paginationTheme = 'bootstrap';
     public $showModal = false;
     public $editMode = false;
     public $search = '';
@@ -86,26 +87,30 @@ class Manager extends Component
             'scheduled_arrival_time',
         ]);
     }
+    public function updateStatus(Flight $flight, $status)
+    {
+        if (in_array($status, ['scheduled', 'boarding', 'departed', 'arrived', 'cancelled'])) {
+            $flight->update(['status' => $status]);
+            $this->dispatch(
+                'alert',
+                icon: 'success',
+                message: 'Flight status updated successfully.'
+            );
+        }
+    }
 
     public function render()
     {
         $flights = Flight::query()
             ->with(['aircraft.airline', 'aircraft.type'])
             ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->whereAny(['flight_number', 'departure_airport', 'arrival_airport'], function ($q) {
-
-                        $q->where('like', "%{$this->search}%");
-                    });
-                });
+                $query->whereAny(['flight_number', 'departure_airport', 'arrival_airport'], 'like', '%' . $this->search . '%');
             })
             ->when($this->status, fn($query) => $query->where('status', $this->status))
-
             ->when($this->airline_id, fn($query) => $query->where('airline_id', $this->airline_id))
             ->when($this->date, fn($query) => $query->whereDate('scheduled_departure_time', $this->date))
             ->orderBy('scheduled_departure_time')
             ->paginate(10);
-
 
         return view('livewire.flight.manager', [
             'flights' => $flights,

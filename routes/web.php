@@ -29,8 +29,6 @@ Route::get('airlines/{airline}', App\Livewire\Airline\Show::class)->name('airlin
 // Routes requiring selected airline
 Route::get('aircraft_types/{aircraft_type}', App\Livewire\AircraftType\Show::class)->name('aircraft_types.show');
 Route::get('flights', App\Livewire\Flight\Manager::class)->name('flights.index');
-Route::get('flights/create', App\Livewire\Flight\Form::class)->name('flights.create');
-Route::get('flights/{flight}/edit', App\Livewire\Flight\Form::class)->name('flights.edit');
 Route::get('flights/{flight}', App\Livewire\Flight\Show::class)->name('flights.show');
 
 Route::get('cargo', App\Livewire\Cargo\Manager::class)->name('cargo.index');

@@ -256,15 +256,15 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title m-0">Load Sheet</h3>
+                    <h3 class="card-title m-0">Trim Sheet</h3>
                 </div>
                 <div class="card-body">
                     <div class="py-4">
                         @if (!$loadsheet)
                             <p class="text-muted text-center">No loadsheet generated yet.</p>
                         @else
-                            {{-- <p>Loadsheet generated successfully.</p> --}}
-                            <pre>{{ json_encode($loadsheet->payload_distribution, JSON_PRETTY_PRINT, JSON_UNESCAPED_UNICODE) }}</pre>
+                            <p>Loadsheet generated successfully.</p>
+                            {{-- <pre>{{ json_encode($loadsheet->payload_distribution, JSON_PRETTY_PRINT, JSON_UNESCAPED_UNICODE) }}</pre> --}}
                         @endif
                     </div>
                 </div>
