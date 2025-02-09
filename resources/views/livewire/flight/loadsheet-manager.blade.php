@@ -139,18 +139,18 @@
                             <div>BALANCE / SEATING CONDITIONS</div>
                             <table class="table table-sm table-borderless m-0">
                                 <tr>
-                                    <td>DOI: {{ $distribution['indices']['doi'] ?? 'N/A' }}</td>
-                                    <td>DLI: {{ $distribution['indices']['dli'] ?? 'N/A' }}</td>
+                                    <td>DOI: {{ number_format($distribution['indices']['doi'], 2) ?? 'N/A' }}</td>
+                                    <td>DLI: {{ number_format($distribution['indices']['dli'], 2) ?? 'N/A' }}</td>
                                     <td>LAST MINUTE CHANGES</td>
                                 </tr>
                                 <tr>
-                                    <td>LIZFW: {{ $distribution['indices']['zfw'] ?? 'N/A' }}</td>
-                                    <td>LITOW: {{ $distribution['indices']['tow'] ?? 'N/A' }}</td>
+                                    <td>LIZFW: {{ number_format($distribution['indices']['lizfw'], 2) ?? 'N/A' }}</td>
+                                    <td>LITOW: {{ number_format($distribution['indices']['litow'], 2) ?? 'N/A' }}</td>
                                     <td></td>
                                 </tr>
                                 <tr>
-                                    <td>MACZFW: {{ $distribution['indices']['zfw'] ?? 'N/A' }}</td>
-                                    <td>MACTOW: {{ $distribution['indices']['tow'] ?? 'N/A' }}</td>
+                                    <td>MACZFW: {{ number_format($distribution['indices']['maczfw'], 2) ?? 'N/A' }}</td>
+                                    <td>MACTOW: {{ number_format($distribution['indices']['mactow'], 2) ?? 'N/A' }}</td>
                                     <td></td>
                                 </tr>
                             </table>
@@ -201,7 +201,7 @@
                                     @endforelse
                                     O 0 &nbsp; T {{ $totalDeadload }}
                                 </div>
-                                <div>PANTRY CODE {{ $distribution['others']['pantry'] }}</div>
+                                <div>PANTRY CODE {{ $distribution['indices']['pantry']['code'] }}</div>
                                 <div>ACTUAL LOADING OF AIRCRAFT</div>
                                 <div>
                                     @forelse ($pax['hold_breakdown'] as $hold)
