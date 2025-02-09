@@ -1,0 +1,43 @@
+name: 🚀 Lint and Deploy Website
+on:
+    push:
+      branches:
+        - main
+jobs:
+  web-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [8.3]
+
+    steps:
+    - name: 🚚 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: ⚙️ Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
+        extensions: json, dom, curl, libxml, mbstring
+        coverage: none
+
+    - name: 🪜 Install Pint
+      run: composer global require laravel/pint
+
+    - name: Run Pint
+      run: pint
+
+    - name: 🗃️ Commit linted files
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: "Initial Commit"
+
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@4.3.0
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USER }}
+        password: ${{ secrets.FTP_PASS }}
+        local-dir: ./
+        server-dir: /flightadmin.info/
