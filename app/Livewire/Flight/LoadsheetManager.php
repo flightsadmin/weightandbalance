@@ -160,9 +160,7 @@ class LoadsheetManager extends Component
                     'weight' => $weight,
                     'index' => round($weight * $zone->index, 2),
                 ];
-            })
-            ->filter(fn($zone) => $zone['passenger_count'] > 0)
-            ->toArray();
+            })->filter(fn($zone) => $zone['passenger_count'] > 0)->toArray();
     }
 
     private function calculatePantryIndex()
