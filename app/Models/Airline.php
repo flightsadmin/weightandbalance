@@ -29,9 +29,13 @@ class Airline extends Model
     ];
 
     public const STANDARD_PASSENGER_WEIGHT = 'standard_passenger_weight';
+
     public const STANDARD_MALE_PASSENGER_WEIGHT = 'standard_male_passenger_weight';
+
     public const STANDARD_FEMALE_PASSENGER_WEIGHT = 'standard_female_passenger_weight';
+
     public const STANDARD_CHILD_PASSENGER_WEIGHT = 'standard_child_passenger_weight';
+
     public const STANDARD_INFANT_PASSENGER_WEIGHT = 'standard_infant_passenger_weight';
 
     public const STANDARD_COCKPIT_CREW_WEIGHT = 'standard_cockpit_crew_weight';

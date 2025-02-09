@@ -124,7 +124,7 @@ class LoadsheetManager extends Component
             ->with([
                 'positions.containers' => function ($query) {
                     $query->where('flight_id', $this->flight->id);
-                }
+                },
             ])->get()->map(function ($hold) {
                 $totalWeight = $hold->positions->sum(function ($position) {
                     return $position->containers->sum('weight');
@@ -136,7 +136,7 @@ class LoadsheetManager extends Component
                     'index' => round($totalWeight * $hold->index, 2),
                 ];
             })
-            ->filter(fn($hold) => $hold['weight'] > 0)->toArray();
+            ->filter(fn ($hold) => $hold['weight'] > 0)->toArray();
     }
 
     private function calculatePassengerIndices()
@@ -145,12 +145,12 @@ class LoadsheetManager extends Component
             ->with([
                 'seats.passenger' => function ($query) {
                     $query->where('flight_id', $this->flight->id);
-                }
+                },
             ])
             ->get()
             ->map(function ($zone) {
                 $passengerCount = $zone->seats
-                    ->filter(fn($seat) => $seat->passenger)
+                    ->filter(fn ($seat) => $seat->passenger)
                     ->count();
                 $weight = $passengerCount * $this->flight->airline->getStandardPassengerWeight('male');
 
@@ -160,12 +160,12 @@ class LoadsheetManager extends Component
                     'weight' => $weight,
                     'index' => round($weight * $zone->index, 2),
                 ];
-            })->filter(fn($zone) => $zone['passenger_count'] > 0)->toArray();
+            })->filter(fn ($zone) => $zone['passenger_count'] > 0)->toArray();
     }
 
     private function calculatePantryIndex()
     {
-        if (!$this->flight->fuel) {
+        if (! $this->flight->fuel) {
             return;
         }
 
@@ -176,18 +176,18 @@ class LoadsheetManager extends Component
     {
         $passengerTypes = ['male', 'female', 'child', 'infant'];
 
-        $paxByType = $this->flight->passengers->groupBy('type')->map(fn($group) => $group->count());
+        $paxByType = $this->flight->passengers->groupBy('type')->map(fn ($group) => $group->count());
 
-        $orderedPaxByType = collect($passengerTypes)->mapWithKeys(fn($type) => [
-            $type => $paxByType[$type] ?? 0
+        $orderedPaxByType = collect($passengerTypes)->mapWithKeys(fn ($type) => [
+            $type => $paxByType[$type] ?? 0,
         ])->toArray();
 
-        $orderedWeights = collect($passengerTypes)->mapWithKeys(fn($type) => [
-            $type => $paxByType[$type] * $this->flight->airline->getStandardPassengerWeight($type)
+        $orderedWeights = collect($passengerTypes)->mapWithKeys(fn ($type) => [
+            $type => $paxByType[$type] * $this->flight->airline->getStandardPassengerWeight($type),
         ])->toArray();
 
-        $orderedWeightsUsed = collect($passengerTypes)->mapWithKeys(fn($type) => [
-            $type => $this->flight->airline->getStandardPassengerWeight($type)
+        $orderedWeightsUsed = collect($passengerTypes)->mapWithKeys(fn ($type) => [
+            $type => $this->flight->airline->getStandardPassengerWeight($type),
         ])->toArray();
 
         return [
@@ -197,9 +197,9 @@ class LoadsheetManager extends Component
             'hold_breakdown' => $this->flight->aircraft->type->holds()->with('positions')->get()->map(function ($hold) {
                 return [
                     'hold_no' => $hold->code,
-                    'weight' => $this->flight->containers->whereIn('position_id', $hold->positions->pluck('id'))->sum('weight')
+                    'weight' => $this->flight->containers->whereIn('position_id', $hold->positions->pluck('id'))->sum('weight'),
                 ];
-            })->filter(fn($hold) => $hold['weight'] > 0)->values()->toArray(),
+            })->filter(fn ($hold) => $hold['weight'] > 0)->values()->toArray(),
 
             'deadload_by_type' => [
                 'C' => [

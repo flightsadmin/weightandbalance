@@ -39,6 +39,6 @@ class HoldPosition extends Model
 
     public function getFullCode()
     {
-        return $this->hold->code . $this->code;
+        return $this->hold->code.$this->code;
     }
 }

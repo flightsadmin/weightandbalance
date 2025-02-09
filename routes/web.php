@@ -38,4 +38,4 @@ Route::get('fuel', App\Livewire\Fuel\Manager::class)->name('fuel.index');
 Route::get('containers', App\Livewire\Container\Manager::class)->name('containers.index');
 Route::get('passengers', App\Livewire\Passenger\Manager::class)->name('passengers.index');
 Route::get('crews', App\Livewire\Crew\Manager::class)->name('crews.index');
-Route::middleware('selected.airline')->group(function () { });
+Route::middleware('selected.airline')->group(function () {});

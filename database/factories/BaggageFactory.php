@@ -29,7 +29,7 @@ class BaggageFactory extends Factory
             'tag_number' => function (array $attributes) use (&$tagNumber) {
                 $flight = Flight::find($attributes['flight_id']);
                 if ($flight) {
-                    return strtoupper($flight->airline->iata_code . sprintf('%06d', $tagNumber++));
+                    return strtoupper($flight->airline->iata_code.sprintf('%06d', $tagNumber++));
                 }
 
                 return sprintf('TT%06d', $tagNumber++);

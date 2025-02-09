@@ -44,12 +44,12 @@ class Loadplan extends Component
                 ->with([
                     'positions' => function ($query) use ($toPosition) {
                         $query->where('id', $toPosition);
-                    }
+                    },
                 ])
                 ->first()?->positions->first();
         }
 
-        if (!$fromPosition && isset($this->containerPositions[$containerId])) {
+        if (! $fromPosition && isset($this->containerPositions[$containerId])) {
             $fromPosition = $this->containerPositions[$containerId];
         }
 
@@ -81,7 +81,7 @@ class Loadplan extends Component
     public function releaseLoadplan()
     {
         $overweightHolds = $this->flight->aircraft->type->holds
-            ->filter(fn($hold) => $hold->isOverweight(
+            ->filter(fn ($hold) => $hold->isOverweight(
                 $hold->getCurrentWeight($this->containerPositions, $this->flight->containers)
             ));
 

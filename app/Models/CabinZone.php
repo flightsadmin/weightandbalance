@@ -16,7 +16,7 @@ class CabinZone extends Model
         'name',
         'max_capacity',
         'index',
-        'arm'
+        'arm',
     ];
 
     protected $casts = [

@@ -30,7 +30,7 @@ class ContainerFactory extends Factory
         return $this->state(function (array $attributes) use ($flight, $uld) {
             return [
                 'flight_id' => $flight->id,
-                'container_number' => $uld . strtoupper(fake()->bothify('#####')) . $flight->airline->iata_code,
+                'container_number' => $uld.strtoupper(fake()->bothify('#####')).$flight->airline->iata_code,
             ];
         });
     }

@@ -80,8 +80,8 @@ class Manager extends Component
         return view('livewire.aircraft_type.manager', [
             'airlines' => Airline::orderBy('name')->get(),
             'aircraftTypes' => AircraftType::query()
-                ->when($this->selectedAirlineId, fn($q) => $q->where('airline_id', $this->selectedAirlineId))
-                ->when($this->search, fn($q) => $q->whereAny(['name', 'code'], 'like', "%{$this->search}%"))
+                ->when($this->selectedAirlineId, fn ($q) => $q->where('airline_id', $this->selectedAirlineId))
+                ->when($this->search, fn ($q) => $q->whereAny(['name', 'code'], 'like', "%{$this->search}%"))
                 ->orderBy('code')
                 ->paginate(10),
         ]);
@@ -113,7 +113,7 @@ class Manager extends Component
             ? tap($this->editingAircraftType)->update($this->form)
             : AircraftType::create($this->form);
 
-        if ($this->selectedAirlineId && !$this->editingAircraftType) {
+        if ($this->selectedAirlineId && ! $this->editingAircraftType) {
             $airline = Airline::find($this->selectedAirlineId);
             $airline->aircraftTypes()->syncWithoutDetaching([$aircraftType->id]);
         }

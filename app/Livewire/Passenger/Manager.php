@@ -5,7 +5,6 @@ namespace App\Livewire\Passenger;
 use App\Models\Baggage;
 use App\Models\Flight;
 use App\Models\Passenger;
-use App\Models\Seat;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -41,7 +40,9 @@ class Manager extends Component
     public $showPassengerModal = false;
 
     public $showSeatModal = false;
+
     public $selectedSeat = null;
+
     public $seatsByZone = [];
 
     protected $rules = [
@@ -71,9 +72,11 @@ class Manager extends Component
                     if ($seat->is_occupied && $this->selectedPassenger && $seat->passenger_id === $this->selectedPassenger->id) {
                         $seat->is_occupied = false;
                     }
+
                     return $seat;
                 });
         }
+
         return collect();
     }
 
@@ -131,7 +134,7 @@ class Manager extends Component
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: ucfirst($status) . ' passenger successfully.'
+            message: ucfirst($status).' passenger successfully.'
         );
     }
 
@@ -145,7 +148,7 @@ class Manager extends Component
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: ucfirst($status) . ' passenger successfully.'
+            message: ucfirst($status).' passenger successfully.'
         );
     }
 
@@ -155,7 +158,7 @@ class Manager extends Component
         for ($i = 0; $i < $this->pieces; $i++) {
             $this->editingPassenger->baggage()->create([
                 'flight_id' => $this->editingPassenger->flight->id,
-                'tag_number' => $this->editingPassenger->flight->airline->iata_code . str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
+                'tag_number' => $this->editingPassenger->flight->airline->iata_code.str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
                 'weight' => $this->weight / $this->pieces,
             ]);
         }
@@ -222,11 +225,11 @@ class Manager extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('ticket_number', 'like', '%' . $this->search . '%')
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('ticket_number', 'like', '%'.$this->search.'%')
                     ->whereHas('seat', function ($q) {
-                        $q->where('row', 'like', '%' . $this->search . '%')
-                            ->orWhere('column', 'like', '%' . $this->search . '%');
+                        $q->where('row', 'like', '%'.$this->search.'%')
+                            ->orWhere('column', 'like', '%'.$this->search.'%');
                     });
             });
         }

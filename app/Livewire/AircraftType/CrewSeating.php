@@ -170,7 +170,7 @@ class CrewSeating extends Component
 
     public function toggleEdit()
     {
-        $this->isEditable = !$this->isEditable;
+        $this->isEditable = ! $this->isEditable;
     }
 
     public function addCrew()
