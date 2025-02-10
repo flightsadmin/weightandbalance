@@ -37,7 +37,7 @@ class HoldPosition extends Model
         return $this->hasMany(Container::class, 'position_id');
     }
 
-    public function getFullCode()
+    public function getFullCode(): string
     {
         return $this->code;
     }

@@ -45,6 +45,19 @@ class Container extends Model
         return $this->belongsTo(HoldPosition::class, 'position_id');
     }
 
+    public function getCurrentFlight()
+    {
+        return $this->flights()->where('flight_id', $this->pivot->flight_id)->first();
+    }
+
+    public function getPositionAttribute()
+    {
+        if ($currentFlight = $this->getCurrentFlight()) {
+            return HoldPosition::find($currentFlight->pivot->position_id);
+        }
+        return null;
+    }
+
     public function updatePosition($positionId, $flightId)
     {
         $this->flights()->updateExistingPivot($flightId, [

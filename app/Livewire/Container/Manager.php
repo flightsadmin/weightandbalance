@@ -56,7 +56,7 @@ class Manager extends Component
     public function render()
     {
         $assignedContainers = $this->flight->containers()
-            ->with('position')
+            ->with(['position.hold'])
             ->when($this->search, function ($query) {
                 $query->where('container_number', 'like', "%{$this->search}%");
             })

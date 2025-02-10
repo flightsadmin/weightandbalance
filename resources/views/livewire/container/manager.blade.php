@@ -33,13 +33,15 @@
                     @forelse($assignedContainers as $container)
                         <tr>
                             <td>{{ $container->container_number }}</td>
-                            <td>{{ ucfirst($container->pivot->container_flight) }}</td>
+                            <td>{{ ucfirst($container->pivot->type) }}</td>
                             <td>
-
-                                {{ $container->pivot->position_id ?? 'Not positioned' }}
+                                @if ($container->pivot->position_id)
+                                    {{ optional($container->position)->getFullCode() }}
+                                @else
+                                    <span class="text-muted">Not positioned</span>
+                                @endif
                             </td>
                             <td>
-
                                 <span class="badge bg-{{ $container->pivot->status === 'loaded' ? 'success' : 'warning' }}">
                                     {{ ucfirst($container->pivot->status) }}
                                 </span>
@@ -86,11 +88,8 @@
                         <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th>
-                                        <input type="checkbox" wire:model.live="selectAll">
-                                    </th>
+                                    <th> </th>
                                     <th>ULD Number</th>
-                                    <th>Type</th>
                                     <th>Tare Weight</th>
                                     <th>Max Weight</th>
                                 </tr>
@@ -104,7 +103,6 @@
                                                 value="{{ $container->id }}">
                                         </td>
                                         <td>{{ $container->container_number }}</td>
-                                        <td>{{ ucfirst($container->type) }}</td>
                                         <td>{{ number_format($container->tare_weight) }} kg</td>
                                         <td>{{ number_format($container->max_weight) }} kg</td>
                                     </tr>
