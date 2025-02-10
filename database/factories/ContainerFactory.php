@@ -2,35 +2,32 @@
 
 namespace Database\Factories;
 
-use App\Models\Flight;
+use App\Models\Airline;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ContainerFactory extends Factory
 {
     public function definition(): array
     {
-        $type = fake()->randomElement(['baggage', 'cargo']);
+        $uld = fake()->randomElement(['AKE', 'PMC', 'PLA']);
 
         return [
-            'flight_id' => null,
-            'container_number' => null,
-            'type' => $type,
-            'position_id' => null,
-            'status' => 'unloaded',
+            'airline_id' => null,
+            'container_number' => $uld . strtoupper(fake()->bothify('#####')),
             'tare_weight' => fake()->numberBetween(60, 85),
             'weight' => 0,
             'max_weight' => 2000,
         ];
     }
 
-    public function forFlight(Flight $flight)
+    public function forAirline(Airline $airline)
     {
         $uld = fake()->randomElement(['AKE', 'PMC', 'PLA']);
 
-        return $this->state(function (array $attributes) use ($flight, $uld) {
+        return $this->state(function (array $attributes) use ($airline, $uld) {
             return [
-                'flight_id' => $flight->id,
-                'container_number' => $uld.strtoupper(fake()->bothify('#####')).$flight->airline->iata_code,
+                'airline_id' => $airline->id,
+                'container_number' => $uld . strtoupper(fake()->bothify('#####')) . $airline->iata_code,
             ];
         });
     }

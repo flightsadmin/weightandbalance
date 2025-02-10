@@ -9,7 +9,6 @@
             @endif
             <div class="d-flex justify-content-between align-items-center">
                 <div class="me-2">
-                    <livewire:container.manager :flight="$flight" />
                 </div>
                 <button wire:click="releaseLoadplan" class="btn btn-sm btn-{{ $loadplan->status === 'released' ? 'warning' : 'primary' }}">
                     @if ($loadplan->status === 'released')
@@ -127,19 +126,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title text-center">Summary</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6>Total Weight</h6>
-                                    <p>{{ number_format($aircraft->max_weight) }} kg</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <livewire:container.manager :flight="$flight" />
                 </div>
             </div>
         </div>

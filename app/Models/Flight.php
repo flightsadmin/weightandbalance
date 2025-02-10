@@ -45,7 +45,9 @@ class Flight extends Model
 
     public function containers()
     {
-        return $this->hasMany(Container::class);
+        return $this->belongsToMany(Container::class)
+            ->withTimestamps()
+            ->withPivot(['position_id', 'status']);
     }
 
     public function airline()

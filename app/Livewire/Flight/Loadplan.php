@@ -31,10 +31,10 @@ class Loadplan extends Component
 
     public function updateContainerPosition($containerId, $fromPosition, $toPosition)
     {
-        // Get the container
         $container = $this->flight->containers()->find($containerId);
+        if (!$container)
+            return;
 
-        // Get the position details if moving to a new position
         $position = null;
         if ($toPosition) {
             $position = $this->flight->aircraft->type->holds()
@@ -59,15 +59,11 @@ class Loadplan extends Component
 
         if ($position) {
             $this->containerPositions[$containerId] = $position->id;
-            $container->update([
-                'status' => 'loaded',
-                'position_id' => $position->id,  // Save the specific position ID
-            ]);
+            $container->updatePosition($position->id, $this->flight->id);
+            $this->dispatch('container_position_updated');
         } else {
-            $container->update([
-                'status' => 'unloaded',
-                'position_id' => null,
-            ]);
+            $container->updatePosition(null, $this->flight->id);
+            $this->dispatch('container_position_updated');
         }
 
         $this->loadplan->update([

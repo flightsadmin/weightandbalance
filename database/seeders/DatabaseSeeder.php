@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
                 ])->each(function ($aircraft) use ($airline) {
                     Flight::factory(rand(7, 10))->forAirline($airline)->create([
                         'aircraft_id' => $aircraft->id,
-                    ])->each(function ($flight) {
+                    ])->each(function ($flight) use ($airline) {
                         $captain = Crew::factory()->captain()->create();
                         $captain->flights()->attach($flight);
 
@@ -52,7 +52,12 @@ class DatabaseSeeder extends Seeder
                             'flight_id' => $flight->id,
                         ]);
 
-                        Container::factory(rand(1, 3))->forFlight($flight)->create();
+                        Container::factory(rand(1, 3))->forAirline($airline)->create()->each(function ($container) use ($flight) {
+                            $flight->containers()->attach($container->id, [
+                                'type' => fake()->randomElement(['baggage', 'cargo']),
+                                'status' => 'unloaded'
+                            ]);
+                        });
                     });
                 });
             });

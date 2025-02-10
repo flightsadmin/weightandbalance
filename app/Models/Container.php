@@ -12,19 +12,22 @@ class Container extends Model
     use HasFactory;
 
     protected $fillable = [
+        'airline_id',
         'container_number',
-        'flight_id',
-        'position_id',
-        'type',
-        'status',
         'tare_weight',
         'weight',
         'max_weight',
     ];
 
-    public function flight(): BelongsTo
+    public function airline(): BelongsTo
     {
-        return $this->belongsTo(Flight::class);
+        return $this->belongsTo(Airline::class);
+    }
+
+    public function flights()
+    {
+        return $this->belongsToMany(Flight::class)
+            ->withTimestamps()->withPivot(['position_id', 'status']);
     }
 
     public function baggage(): HasMany
@@ -40,6 +43,14 @@ class Container extends Model
     public function position(): BelongsTo
     {
         return $this->belongsTo(HoldPosition::class, 'position_id');
+    }
+
+    public function updatePosition($positionId, $flightId)
+    {
+        $this->flights()->updateExistingPivot($flightId, [
+            'position_id' => $positionId,
+            'status' => $positionId ? 'loaded' : 'unloaded'
+        ]);
     }
 
     public function getTotalWeightAttribute()
