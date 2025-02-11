@@ -28,15 +28,16 @@
                 </thead>
                 <tbody>
                     @forelse($assignedContainers as $container)
-                        <tr>
+                        <tr class="{{ $container->pivot->type }}">
                             <td>{{ $container->container_number }}</td>
-                            <td>{{ ucfirst($container->pivot->type) }}</td>
                             <td>
-                                @if ($container->pivot->position_id)
-                                    {{ optional($container->position)->getFullCode() }}
-                                @else
-                                    <span class="text-muted">Not positioned</span>
-                                @endif
+                                <span class="badge bg-{{ $container->pivot->type === 'baggage' ? 'primary' : 'warning' }}">
+                                    {{ ucfirst($container->pivot->type) }}
+                                    <i class="bi bi-{{ $container->pivot->type === 'baggage' ? 'luggage' : 'box' }}"></i>
+                                </span>
+                            </td>
+                            <td>
+                                {{ $container->pivot->position_id ? optional($container->position)->getFullCode() : '-' }}
                             </td>
                             <td>
                                 <span class="badge bg-{{ $container->pivot->status === 'loaded' ? 'success' : 'warning' }}">

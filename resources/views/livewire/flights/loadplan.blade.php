@@ -95,19 +95,18 @@
                             :class="{ 'unplanned-area': true, 'highlight': selectedContainer || selectedPosition }">
                             <div class="container-list row g-2" x-on:click.stop>
                                 @forelse ($availableContainers as $container)
-                                    <div class="container-item col-md-4"
+                                    <div class="container-item col-md-4 {{ $container->pivot->type }}"
                                         x-on:click.stop="selectContainer({{ $container->id }})"
                                         :class="{ 'selected': selectedContainer === {{ $container->id }} }">
                                         <div class="card">
                                             <div class="card-body">
-                                                <div class="text-center fw-bold">{{ $container->container_number }}
-                                                </div>
+                                                <div class="text-center fw-bold">{{ $container->container_number }}</div>
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <span
-                                                        class="badge bg-{{ $container->pivot->type == 'baggage' ? 'primary' : ($container->pivot->type == 'cargo' ? 'warning' : 'success') }}">
-                                                        {{ $container->pivot->type }}
+                                                        class="badge bg-{{ $container->pivot->type === 'baggage' ? 'primary' : 'warning' }}">
+                                                        {{ ucfirst($container->pivot->type) }}
                                                         <i
-                                                            class="bi bi-{{ $container->pivot->type == 'baggage' ? 'luggage' : ($container->pivot->type == 'cargo' ? 'box' : 'truck') }}"></i>
+                                                            class="bi bi-{{ $container->pivot->type === 'baggage' ? 'luggage' : 'box' }}"></i>
                                                     </span>
                                                     <div class="fw-bold">{{ number_format($container->weight) }} kg</div>
                                                 </div>
