@@ -14,13 +14,15 @@
 
             @if ($bulkContainers->isNotEmpty())
                 @foreach ($bulkContainers as $container)
-                    <div class="bulk-container-item"
+                    <div class="bulk-container-item {{ $container->pivot->type }}"
                         x-on:click.stop="selectContainer({{ $container->id }})"
                         :class="{ 'selected': selectedContainer === {{ $container->id }} }"
                         data-container-id="{{ $container->id }}">
                         <div class="bulk-container-details">
                             <span class="container-number">{{ $container->container_number }}</span>
-                            <span class="container-weight">{{ number_format($container->weight) }} kg</span>
+                            <small class="fw-bold d-block bi bi-{{ $container->pivot->type === 'baggage' ? 'luggage' : 'box-seam' }}">
+                                {{ number_format($container->weight) }} kg
+                            </small>
                         </div>
                     </div>
                 @endforeach
@@ -42,10 +44,12 @@
             <div class="position-card"
                 x-on:click.stop="selectContainer({{ $container->id }})"
                 :class="{ 'selected': selectedContainer === {{ $container->id }} }">
-                <div class="card h-100">
+                <div class="card h-100 {{ $container->pivot->type }}">
                     <div class="card-body text-center">
-                        <h6 class="mb-1">{{ $container->container_number }}</h6>
-                        <small class="fw-bold">{{ number_format($container->weight) }} kg</small>
+                        <span>{{ $container->container_number }}</span>
+                        <small class="fw-bold d-block bi bi-{{ $container->pivot->type === 'baggage' ? 'luggage' : 'box-seam' }}">
+                            {{ number_format($container->weight) }} kg
+                        </small>
                     </div>
                 </div>
             </div>
