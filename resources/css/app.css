@@ -346,3 +346,24 @@
     border-left: 4px solid #ffc107;  /* Bootstrap warning color for cargo */
     background-color: rgba(255, 193, 7, 0.05);
 }
+
+/* Add styles for positioned containers */
+.position-card.baggage .card {
+    border-left: 4px solid #0d6efd;
+    background-color: rgba(13, 110, 253, 0.9);
+}
+
+.position-card.cargo .card {
+    border-left: 4px solid #ffc107;
+    background-color: rgba(255, 193, 7, 0.9);
+}
+
+.bulk-container-item.baggage {
+    border-left: 4px solid #0d6efd;
+    background-color: rgba(13, 110, 253, 0.9);
+}
+
+.bulk-container-item.cargo {
+    border-left: 4px solid #ffc107;
+    background-color: rgba(255, 193, 7, 0.9);
+}

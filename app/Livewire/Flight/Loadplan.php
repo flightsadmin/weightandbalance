@@ -110,7 +110,10 @@ class Loadplan extends Component
     #[On('containerSaved')]
     public function render()
     {
-        $containers = $this->flight->containers()->get();
+        $containers = $this->flight->containers()
+            ->withPivot(['type', 'status', 'position_id'])
+            ->get();
+
         $availableContainers = $containers->whereNotIn('id', array_keys($this->containerPositions));
         $holds = $this->flight->aircraft->type->holds()
             ->with('positions')
