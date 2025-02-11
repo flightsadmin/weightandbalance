@@ -51,10 +51,7 @@ class LoadsheetManager extends Component
                 'taxi' => $this->flight->fuel->taxi_fuel,
                 'trip' => $this->flight->fuel->trip_fuel,
                 'takeoff' => $this->flight->fuel->take_off_fuel,
-            ],
-            'crew' => [
-                'flight_deck' => $this->flight->crew->whereIn('position', ['captain', 'first_officer'])->count(),
-                'cabin' => $this->flight->crew->whereIn('position', ['cabin_crew', 'purser'])->count(),
+                'crew' => $this->flight->fuel->crew,
             ],
             'weights' => [
                 'dry_operating_weight' => $this->calculateDryOperatingWeight(),

@@ -64,9 +64,9 @@
                                     <td>{{ $flight->flight_number }}</td>
                                     <td>{{ $flight->aircraft->registration_number }}</td>
                                     <td>{{ $flight->aircraft->type->code }}</td>
-                                    <td>{{ $flight->fuel->crew ?? 'N/A' }}</td>
+                                    <td>{{ $distribution['fuel']['crew'] ?? 'N/A' }}</td>
                                     <td>{{ strtoupper($flight->scheduled_departure_time->format('dMY')) }}</td>
-                                    <td>{{ now()->format('Hi') }}</td>
+                                    <td>{{ $loadsheet->released_at?->format('Hi') ?? now()->format('Hi') }}</td>
                                 </tr>
                             </table>
                             <table class="table table-sm table-borderless m-0">
@@ -178,7 +178,7 @@
                                     {{ $flight->flight_number }}/{{ $flight->scheduled_departure_time->format('d') }}.
                                     {{ $flight->aircraft->registration_number }}.
                                     {{ $flight->aircraft->type->code }}.
-                                    {{ $distribution['crew']['flight_deck'] + $distribution['crew']['cabin'] }}
+                                    {{ $distribution['fuel']['crew'] ?? 'N/A' }}
                                 </div>
                                 <div>
                                     -{{ $flight->arrival_airport }}.
@@ -264,7 +264,7 @@
                             <p class="text-muted text-center">No loadsheet generated yet.</p>
                         @else
                             <p>Loadsheet generated successfully.</p>
-                            {{-- <pre>{{ json_encode($loadsheet->payload_distribution, JSON_PRETTY_PRINT, JSON_UNESCAPED_UNICODE) }}</pre> --}}
+                            <pre>{{ json_encode($loadsheet->payload_distribution, JSON_PRETTY_PRINT, JSON_UNESCAPED_UNICODE) }}</pre>
                         @endif
                     </div>
                 </div>

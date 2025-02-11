@@ -104,10 +104,10 @@
                                                 </div>
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <span
-                                                        class="badge bg-{{ $container->type == 'baggage' ? 'primary' : ($container->type == 'cargo' ? 'warning' : 'success') }}">
-                                                        {{ $container->type }}
+                                                        class="badge bg-{{ $container->pivot->type == 'baggage' ? 'primary' : ($container->pivot->type == 'cargo' ? 'warning' : 'success') }}">
+                                                        {{ $container->pivot->type }}
                                                         <i
-                                                            class="bi bi-{{ $container->type == 'baggage' ? 'luggage' : ($container->type == 'cargo' ? 'box' : 'truck') }}"></i>
+                                                            class="bi bi-{{ $container->pivot->type == 'baggage' ? 'luggage' : ($container->pivot->type == 'cargo' ? 'box' : 'truck') }}"></i>
                                                     </span>
                                                     <div class="fw-bold">{{ number_format($container->weight) }} kg</div>
                                                 </div>

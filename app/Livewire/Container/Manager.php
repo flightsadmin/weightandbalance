@@ -56,6 +56,7 @@ class Manager extends Component
     public function render()
     {
         $assignedContainers = $this->flight->containers()
+            ->withPivot('type', 'position_id', 'status')
             ->with(['position.hold'])
             ->when($this->search, function ($query) {
                 $query->where('container_number', 'like', "%{$this->search}%");

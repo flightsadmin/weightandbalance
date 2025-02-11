@@ -27,7 +27,8 @@ class Container extends Model
     public function flights()
     {
         return $this->belongsToMany(Flight::class)
-            ->withTimestamps()->withPivot(['position_id', 'status']);
+            ->withTimestamps()
+            ->withPivot(['position_id', 'status', 'type']);
     }
 
     public function baggage(): HasMany

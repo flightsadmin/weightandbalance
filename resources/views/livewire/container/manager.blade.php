@@ -1,22 +1,19 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h2 class="card-title m-0">Containers</h2>
-        <div class="d-flex align-items-center gap-3">
+        <div>
             <select wire:model.live="type" class="form-select form-select-sm">
                 <option value="">All Types</option>
                 <option value="baggage">Baggage</option>
                 <option value="cargo">Cargo</option>
+
             </select>
-            <div>
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#assignContainerModal">
-                    <i class="bi bi-plus-lg"></i> Assign Containers
-                </button>
-            </div>
         </div>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#assignContainerModal">
+            <i class="bi bi-plus-lg"></i> Assign Containers
+        </button>
     </div>
 
     <div class="card-body">
-        <h5>Assigned Containers</h5>
         <div class="table-responsive">
             <table class="table table-sm table-hover">
                 <thead>
@@ -67,7 +64,7 @@
 
     <!-- Assignment Modal -->
     <div class="modal fade" id="assignContainerModal" tabindex="-1" wire:ignore.self>
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Assign Containers</h5>
