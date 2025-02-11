@@ -141,9 +141,22 @@ class AircraftType extends Model
 
     public function getFuelIndex($weight)
     {
-        return $this->envelopes()
-            ->where('name', 'fuel')
-            ->first()?->points ?? 0;
+        $envelope = $this->envelopes()->where('name', 'FUEL')->first();
+
+        if (!$envelope || !$envelope->points) {
+            return 0;
+        }
+
+        $points = collect($envelope->points);
+
+        $exactMatch = $points->firstWhere('weight', $weight);
+        if ($exactMatch) {
+            return $exactMatch['index'];
+        }
+
+        return $points->sortBy(function ($point) use ($weight) {
+            return abs($point['weight'] - $weight);
+        })->first()['index'];
     }
 
     public function getFuelIndexes($takeoffFuel, $landingFuel)
