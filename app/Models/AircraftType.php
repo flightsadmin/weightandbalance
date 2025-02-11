@@ -166,4 +166,33 @@ class AircraftType extends Model
             'landing' => $this->getFuelIndex($landingFuel),
         ];
     }
+
+    public function calculateMac($weight, $index)
+    {
+        $K = $this->getSetting('k_constant', 50);
+        $C = $this->getSetting('c_constant', 1000);
+        $MAC = $this->getSetting('length_of_mac', 4.194);
+        $LEMAC = $this->getSetting('lemac_at', 17.8015);
+        $REF_STA = $this->getSetting('ref_sta_at', 18.850);
+
+        // Formula: %MAC = ((C * (I-K))/W + Ref.Sta - LEMAC) / (MAC/100)
+        return (
+            ((($C * ($index - $K)) / $weight + $REF_STA - $LEMAC) / ($MAC / 100))
+        );
+    }
+
+    public function getZfwMac($weight, $index)
+    {
+        return $this->calculateMac($weight, $index);
+    }
+
+    public function getTowMac($weight, $index)
+    {
+        return $this->calculateMac($weight, $index);
+    }
+
+    public function getLdwMac($weight, $index)
+    {
+        return $this->calculateMac($weight, $index);
+    }
 }

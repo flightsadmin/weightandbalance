@@ -125,8 +125,9 @@ class LoadsheetManager extends Component
         $indices['lizfw'] = number_format($indices['dli'] + $indices['pax_index'], 2);
         $indices['litow'] = number_format($indices['lizfw'] + $fuelIndexes['takeoff'], 2);
         $indices['lildw'] = number_format($indices['litow'] + $fuelIndexes['landing'], 2);
-        $indices['maczfw'] = number_format($indices['lizfw'] + $indices['pantry_index'], 2); //TODO: correct this
-        $indices['mactow'] = number_format($indices['litow'] + $indices['pantry_index'], 2); //TODO: correct this
+        $indices['maczfw'] = number_format($type->getZfwMac($this->calculateZeroFuelWeight(), $indices['lizfw']), 2);
+        $indices['mactow'] = number_format($type->getTowMac($this->calculateTakeoffWeight(), $indices['litow']), 2);
+        $indices['macldw'] = number_format($type->getLdwMac($this->calculateLandingWeight(), $indices['lildw']), 2);
 
         return ['flight' => $flight, 'indices' => $indices];
     }
