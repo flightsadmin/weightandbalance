@@ -65,6 +65,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             AircraftConfigSeeder::class,
+            EnvelopeSeeder::class,
         ]);
     }
 }

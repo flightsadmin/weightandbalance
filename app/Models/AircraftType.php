@@ -60,7 +60,7 @@ class AircraftType extends Model
     {
         return $this->holds
             ->where('is_active', true)
-            ->flatMap(fn ($hold) => $hold->getPositions())
+            ->flatMap(fn($hold) => $hold->getPositions())
             ->values();
     }
 
@@ -137,5 +137,20 @@ class AircraftType extends Model
     public function seats(): HasMany
     {
         return $this->hasMany(Seat::class);
+    }
+
+    public function getFuelIndex($weight)
+    {
+        return $this->envelopes()
+            ->where('name', 'fuel')
+            ->first()?->points ?? 0;
+    }
+
+    public function getFuelIndexes($takeoffFuel, $landingFuel)
+    {
+        return [
+            'takeoff' => $this->getFuelIndex($takeoffFuel),
+            'landing' => $this->getFuelIndex($landingFuel),
+        ];
     }
 }

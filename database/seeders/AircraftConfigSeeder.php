@@ -200,23 +200,5 @@ class AircraftConfigSeeder extends Seeder
             $hold->positions()->delete();
             $hold->positions()->createMany($positions);
         }
-
-        Envelope::updateOrCreate(
-            [
-                'aircraft_type_id' => $aircraftType->id,
-                'name' => 'ZFW',
-            ],
-            [
-                'points' => [
-                    ['weight' => 42600, 'index' => 0.7],
-                    ['weight' => 61000, 'index' => 0.8],
-                    ['weight' => 77000, 'index' => 0.9],
-                    ['weight' => 66000, 'index' => 1.0],
-                    ['weight' => 42600, 'index' => 1.1],
-
-                ],
-                'is_active' => true,
-            ]
-        );
     }
 }
