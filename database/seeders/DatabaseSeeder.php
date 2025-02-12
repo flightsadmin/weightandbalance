@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         Airline::factory()->create()->each(function ($airline) {
-            AircraftType::factory(1)->forAirline($airline)->create()->each(function ($aircraftType) use ($airline) {
+            AircraftType::factory()->forAirline($airline)->create()->each(function ($aircraftType) use ($airline) {
                 Aircraft::factory(3)->create([
                     'airline_id' => $airline->id,
                     'aircraft_type_id' => $aircraftType->id,
@@ -52,12 +52,14 @@ class DatabaseSeeder extends Seeder
                             'flight_id' => $flight->id,
                         ]);
 
-                        Container::factory(rand(1, 3))->forAirline($airline)->create()->each(function ($container) use ($flight) {
-                            $flight->containers()->attach($container->id, [
-                                'type' => fake()->randomElement(['baggage', 'cargo']),
-                                'status' => 'unloaded'
-                            ]);
-                        });
+                        foreach (['baggage', 'cargo'] as $type) {
+                            Container::factory(rand(1, 2))->forAirline($airline)->create()->each(function ($container) use ($flight, $type) {
+                                $flight->containers()->attach($container->id, [
+                                    'type' => $type,
+                                    'status' => 'unloaded'
+                                ]);
+                            });
+                        }
                     });
                 });
             });

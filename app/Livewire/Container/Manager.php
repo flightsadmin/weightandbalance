@@ -42,14 +42,17 @@ class Manager extends Component
 
         $this->dispatch('alert', icon: 'success', message: 'Containers assigned successfully.');
         $this->dispatch('containerSaved');
-        $this->selected = [];
+        $this->reset('selected', 'assignmentType');
     }
 
     public function unassignContainer($containerId)
     {
+        $d = $this->flight->containers()->findOrFail($containerId)->pivot->container_id;
+        dd($d);
         $this->flight->containers()->detach($containerId);
         $this->dispatch('alert', icon: 'success', message: 'Container unassigned successfully.');
         $this->dispatch('containerSaved');
+
     }
 
     #[On('container_position_updated')]

@@ -210,8 +210,7 @@ class LoadsheetManager extends Component
                 ->get()
                 ->map(function ($hold) {
                     $containers = $this->flight->containers()
-                        ->whereIn('position_id', $hold->positions->pluck('id'))
-                        ->get();
+                        ->whereIn('position_id', $hold->positions->pluck('id'))->get();
 
                     $weight = $containers->sum('weight');
 
@@ -220,10 +219,7 @@ class LoadsheetManager extends Component
                         'weight' => $weight,
                         'index' => round($weight * $hold->index, 2),
                     ];
-                })
-                ->filter(fn($hold) => $hold['weight'] > 0)
-                ->values()
-                ->toArray(),
+                })->filter(fn($hold) => $hold['weight'] > 0)->values()->toArray(),
             'deadload_by_type' => [
                 'C' => [
                     'pieces' => $this->flight->cargo->sum('pieces'),

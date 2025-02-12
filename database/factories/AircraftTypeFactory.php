@@ -17,55 +17,21 @@ class AircraftTypeFactory extends Factory
      */
     public function definition(): array
     {
-        $types = [
-            [
-                'code' => 'A320',
-                'name' => 'Airbus A320',
-                'manufacturer' => 'Airbus',
-                'max_passengers' => 180,
-                'max_deck_crew' => 4,
-                'max_cabin_crew' => 8,
-                'mtow' => 78000,
-                'mzfw' => 68000,
-                'mlw' => 72000,
-                'empty' => 42600,
-                'cargo' => 16600,
-                'fuel' => 24210,
-                'category' => 'Narrow-body'
-            ],
-            [
-                'code' => 'A321',
-                'name' => 'Airbus A321',
-                'manufacturer' => 'Airbus',
-                'max_passengers' => 220,
-                'max_deck_crew' => 4,
-                'max_cabin_crew' => 8,
-                'mtow' => 93500,
-                'mzfw' => 83500,
-                'mlw' => 87500,
-                'empty' => 48500,
-                'cargo' => 23430,
-                'fuel' => 30030,
-                'category' => 'Narrow-body'
-            ],
-            [
-                'code' => 'B77W',
-                'name' => 'Boeing 777-300ER',
-                'manufacturer' => 'Boeing',
-                'max_passengers' => 396,
-                'max_deck_crew' => 4,
-                'max_cabin_crew' => 15,
-                'mtow' => 351533,
-                'mzfw' => 301533,
-                'mlw' => 339500,
-                'empty' => 167829,
-                'cargo' => 76918,
-                'fuel' => 181283,
-                'category' => 'Wide-body'
-            ],
+        $type = [
+            'code' => 'A320',
+            'name' => 'Airbus A320',
+            'manufacturer' => 'Airbus',
+            'max_passengers' => 180,
+            'max_deck_crew' => 4,
+            'max_cabin_crew' => 8,
+            'mtow' => 79000,
+            'mzfw' => 64300,
+            'mlw' => 67400,
+            'empty' => 42600,
+            'cargo' => 16600,
+            'fuel' => 24210,
+            'category' => 'Narrow-body'
         ];
-
-        $type = fake()->unique()->randomElement($types);
 
         return [
             'airline_id' => null,

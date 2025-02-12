@@ -20,12 +20,26 @@ class AircraftFactory extends Factory
      */
     public function definition(): array
     {
+        $registrationNumbers = [
+            [
+                'registration_number' => strtoupper(fake()->unique()->lexify('??-????')),
+                'basic_weight' => 42782,
+                'basic_index' => 50.41,
+            ],
+            [
+                'registration_number' => strtoupper(fake()->unique()->lexify('??-????')),
+                'basic_weight' => 43523,
+                'basic_index' => 51.51,
+            ],
+        ];
+        $registrationNumber = fake()->randomElement($registrationNumbers);
+
         return [
             'airline_id' => null,
             'aircraft_type_id' => null,
-            'registration_number' => strtoupper(fake()->unique()->lexify('??-????')),
-            'basic_weight' => fake()->numberBetween(40000, 100000),
-            'basic_index' => fake()->randomFloat(4, 45.0001, 50.9999),
+            'registration_number' => $registrationNumber['registration_number'],
+            'basic_weight' => $registrationNumber['basic_weight'],
+            'basic_index' => $registrationNumber['basic_index'],
             'active' => fake()->boolean(90),
             'remarks' => fake()->sentence(),
         ];
