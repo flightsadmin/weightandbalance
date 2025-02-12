@@ -60,13 +60,13 @@
                                     <td>TIME</td>
                                 </tr>
                                 <tr>
-                                    <td>{{ $flight->departure_airport }}/{{ $flight->arrival_airport }}</td>
-                                    <td>{{ $flight->flight_number }}</td>
-                                    <td>{{ $flight->aircraft->registration_number }}</td>
-                                    <td>{{ $flight->aircraft->type->code }}</td>
+                                    <td>{{ $distribution['flight']['sector'] ?? 'N/A' }}</td>
+                                    <td>{{ $distribution['flight']['flight_number'] ?? 'N/A' }}</td>
+                                    <td>{{ $distribution['flight']['registration'] ?? 'N/A' }}</td>
+                                    <td>{{ $distribution['flight']['version'] ?? 'N/A' }}</td>
                                     <td>{{ $distribution['fuel']['crew'] ?? 'N/A' }}</td>
-                                    <td>{{ strtoupper($flight->scheduled_departure_time->format('dMY')) }}</td>
-                                    <td>{{ $loadsheet->released_at?->format('Hi') ?? now()->format('Hi') }}</td>
+                                    <td>{{ $distribution['flight']['flight_date'] ?? 'N/A' }}</td>
+                                    <td>{{ $distribution['flight']['release_time'] ?? now('Asia/Qatar')->format('Hi') }}</td>
                                 </tr>
                             </table>
                             <table class="table table-sm table-borderless m-0">
@@ -175,13 +175,13 @@
                             <div style="font-family: monospace;">
                                 <div class="mt-3">LDM</div>
                                 <div>
-                                    {{ $flight->flight_number }}/{{ $flight->scheduled_departure_time->format('d') }}.
-                                    {{ $flight->aircraft->registration_number }}.
-                                    {{ $flight->aircraft->type->code }}.
+                                    {{ $distribution['flight']['flight_number'] }}/{{ $distribution['flight']['flight_date'] }}.
+                                    {{ $distribution['flight']['registration'] }}.
+                                    {{ $distribution['flight']['version'] }}.
                                     {{ $distribution['fuel']['crew'] ?? 'N/A' }}
                                 </div>
                                 <div>
-                                    -{{ $flight->arrival_airport }}.
+                                    -{{ $distribution['flight']['destination'] }}.
                                     @forelse ($pax['pax_by_type'] as $type => $count)
                                         {{ $count['count'] . '/' }}
                                     @empty
@@ -197,7 +197,7 @@
                                     &nbsp; BAG WGT: ACTUAL
                                 </div>
                                 <div>
-                                    {{ $flight->arrival_airport }}
+                                    {{ $distribution['flight']['destination'] }}
                                     @forelse ($pax['deadload_by_type'] as $type => $weight)
                                         {{ $type }} {{ $weight['weight'] }}
                                     @empty
@@ -219,7 +219,7 @@
                                 <div>NOTOC: NO</div>
                                 <br>
                                 <div>
-                                    {{ $flight->arrival_airport }} &nbsp;&nbsp;
+                                    {{ $distribution['flight']['destination'] }} &nbsp;&nbsp;
                                     @forelse ($pax['deadload_by_type'] as $type => $weight)
                                         {{ $type }} {{ $weight['weight'] }} &nbsp;&nbsp;
                                     @empty

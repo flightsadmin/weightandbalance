@@ -6,7 +6,7 @@ use App\Models\Flight;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-class Loadplan extends Component
+class LoadplanManager extends Component
 {
     public $flight;
 
@@ -121,7 +121,7 @@ class Loadplan extends Component
             ->orderBy('position')
             ->get();
 
-        return view('livewire.flights.loadplan', [
+        return view('livewire.flights.loadplan-manager', [
             'containers' => $containers,
             'availableContainers' => $availableContainers,
             'holds' => $holds,

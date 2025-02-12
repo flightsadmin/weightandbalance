@@ -112,9 +112,14 @@ class LoadsheetManager extends Component
             $fuel->take_off_fuel - $fuel->trip_fuel
         );
         $flight = [
-            'number' => $this->flight->flight_number,
-            'date' => strtoupper($this->flight->scheduled_departure_time?->format('dMY')),
+            'flight_number' => $this->flight->flight_number,
+            'flight_date' => strtoupper($this->flight->scheduled_departure_time?->format('dMY')),
+            'short_flight_date' => $this->flight->scheduled_departure_time?->format('d'),
             'registration' => $aircraft->registration_number,
+            'destination' => $this->flight->arrival_airport,
+            'sector' => $this->flight->departure_airport . '/' . $this->flight->arrival_airport,
+            'version' => $this->flight->aircraft->type->code,
+            'release_time' => now('Asia/Qatar')->format('H:i'),
         ];
 
         $indices = [

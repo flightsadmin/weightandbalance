@@ -56,8 +56,8 @@ class CrewSeatingSeeder extends Seeder
                 CrewSeating::updateOrCreate(
                     [
                         'aircraft_type_id' => $type->id,
-                        'location' => $location['name'],
                         'position' => $location['position'],
+                        'location' => $location['name'],
                     ],
                     [
                         'max_number' => $location['max_seats'],

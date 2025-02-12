@@ -80,7 +80,7 @@
         @elseif ($activeTab === 'crew')
             <livewire:crew.manager :flight="$flight" />
         @elseif ($activeTab === 'loadplan')
-            <livewire:flight.loadplan :flight="$flight" />
+            <livewire:flight.loadplan-manager :flight="$flight" />
         @elseif ($activeTab === 'loadsheet')
             <livewire:flight.loadsheet-manager :flight="$flight" />
         @endif

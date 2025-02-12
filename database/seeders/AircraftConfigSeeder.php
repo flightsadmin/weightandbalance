@@ -117,11 +117,7 @@ class AircraftConfigSeeder extends Seeder
                 $availableSeats = $aircraftType->seats()
                     ->whereDoesntHave('passenger', function ($query) use ($flight) {
                         $query->where('flight_id', $flight->id);
-                    })
-                    ->where('is_blocked', false)
-                    ->get()
-                    ->pluck('id')
-                    ->toArray();
+                    })->where('is_blocked', false)->get()->pluck('id')->toArray();
 
                 $flight->passengers()->whereNull('seat_id')->each(function ($passenger) use (&$availableSeats) {
                     if (empty($availableSeats)) {
