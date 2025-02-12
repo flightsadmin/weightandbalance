@@ -83,7 +83,7 @@
                                     </td>
                                 @endunless
                                 <td>{{ $bag->passenger->name }}</td>
-                                <td>{{ $bag->passenger->seat_number }}</td>
+                                <td>{{ $bag->passenger->seat->designation }}</td>
                                 <td>{{ number_format($bag->weight) }} kg</td>
                                 <td>
                                     <div class="dropdown d-inline">

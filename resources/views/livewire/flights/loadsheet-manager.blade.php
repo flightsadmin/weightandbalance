@@ -33,6 +33,11 @@
                             $underload = min($zfw, $tow, $ldw);
                         @endphp
                         <div style="font-family: monospace;">
+                            <p class="mb-0 ms-1">
+                                @if (!$loadsheet->final)
+                                    <span>PRELIMINARY LOADSHEET</span>
+                                @endif
+                            </p>
                             <table class="table table-sm table-borderless m-0">
                                 <tbody>
                                     <tr>

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Hold extends Model
 {
@@ -37,10 +38,22 @@ class Hold extends Model
         return $this->hasMany(HoldPosition::class)->orderBy('row')->orderBy('side');
     }
 
+    public function containers(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Container::class,
+            HoldPosition::class,
+            'hold_id', // Foreign key on hold_positions table
+            'position_id', // Foreign key on containers table
+            'id', // Local key on holds table
+            'id'  // Local key on hold_positions table
+        );
+    }
+
     public function getCurrentWeight($containerPositions, $containers)
     {
         return $containers->whereIn('id', array_keys($containerPositions))
-            ->filter(fn ($container) => str_starts_with($containerPositions[$container->id], $this->code))
+            ->filter(fn($container) => str_starts_with($containerPositions[$container->id], $this->code))
             ->sum('weight');
     }
 

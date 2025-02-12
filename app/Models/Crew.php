@@ -19,10 +19,6 @@ class Crew extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'weight' => 'integer',
-    ];
-
     public function flights()
     {
         return $this->belongsToMany(Flight::class, 'crew_flight')->withTimestamps();

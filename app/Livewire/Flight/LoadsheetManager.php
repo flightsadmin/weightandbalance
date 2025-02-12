@@ -202,14 +202,25 @@ class LoadsheetManager extends Component
         return [
             'pax_by_type' => $orderedPaxByType,
             'passenger_weights_used' => $orderedWeightsUsed,
-            'hold_breakdown' => $this->flight->aircraft->type->holds()->with('positions')->get()->map(function ($hold) {
-                $weight = $this->flight->containers->whereIn('position_id', $hold->positions->pluck('id'))->sum('weight');
-                return [
-                    'hold_no' => $hold->code,
-                    'weight' => $weight,
-                    'index' => round($weight * $hold->index, 2),
-                ];
-            })->filter(fn($hold) => $hold['weight'] > 0)->values()->toArray(),
+            'hold_breakdown' => $this->flight->aircraft->type->holds()
+                ->with('positions')
+                ->get()
+                ->map(function ($hold) {
+                    $containers = $this->flight->containers()
+                        ->whereIn('position_id', $hold->positions->pluck('id'))
+                        ->get();
+
+                    $weight = $containers->sum('weight');
+
+                    return [
+                        'hold_no' => $hold->code,
+                        'weight' => $weight,
+                        'index' => round($weight * $hold->index, 2),
+                    ];
+                })
+                ->filter(fn($hold) => $hold['weight'] > 0)
+                ->values()
+                ->toArray(),
             'deadload_by_type' => [
                 'C' => [
                     'pieces' => $this->flight->cargo->sum('pieces'),
