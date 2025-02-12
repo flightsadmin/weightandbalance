@@ -245,7 +245,6 @@ class LoadsheetManager extends Component
     {
         $envelopes = $this->flight->aircraft->type->envelopes()
             ->where('is_active', true)
-            // ->where('name', '!=', 'FUEL')
             ->get()->mapWithKeys(function ($envelope) {
                 $points = collect($envelope->points)->map(function ($point) {
                     return [
