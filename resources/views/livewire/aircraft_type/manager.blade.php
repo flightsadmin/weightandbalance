@@ -130,7 +130,7 @@
                             @elseif ($activeTab === 'envelopes')
                                 <livewire:aircraft-type.envelope-manager :key="'envelopes-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @elseif ($activeTab === 'seats')
-                                <livewire:aircraft-type.seat-manager :aircraftType="$this->selectedType" />
+                                <livewire:aircraft-type.seat-manager :key="'seats-' . $selectedAircraft" :aircraftType="$this->selectedType" />
                             @endif
                         </div>
                     </div>
