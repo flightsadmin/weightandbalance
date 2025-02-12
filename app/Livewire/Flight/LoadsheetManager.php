@@ -100,6 +100,9 @@ class LoadsheetManager extends Component
         $aircraft = $this->flight->aircraft;
         $type = $aircraft->type;
         $fuel = $this->flight->fuel;
+        $crew = $this->flight->fuel->crew;
+        // Get crew indexes
+        $crewIndexes = $type->getCrewIndexes($crew);
 
         $fuelIndexes = $type->getFuelIndexes(
             $fuel->take_off_fuel,
@@ -113,14 +116,20 @@ class LoadsheetManager extends Component
 
         $indices = [
             'pantry' => $this->calculatePantryIndex(),
-            'basic_index' => number_format($this->flight->aircraft->basic_index, 2),
+            'basic_index' => number_format($aircraft->basic_index, 2),
+            'crew_index' => number_format($crewIndexes['index'], 2),
             'pax_index' => number_format(array_sum(array_column($this->generateLoadData()['pax_by_type'], 'index')), 2),
             'cargo_index' => number_format(array_sum(array_column($this->generateLoadData()['hold_breakdown'], 'index')), 2),
             'pantry_index' => $this->calculatePantryIndex()['index'] ?? 0,
             'litof' => $fuelIndexes['takeoff'],
             'lildf' => $fuelIndexes['landing'],
         ];
-        $indices['doi'] = number_format($indices['basic_index'] + $indices['pantry_index'], 2); //TODO: Add crew index
+        $indices['doi'] = number_format(
+            $indices['basic_index'] +
+            $indices['pantry_index'] +
+            $indices['crew_index'],
+            2
+        );
         $indices['dli'] = number_format($indices['doi'] + $indices['cargo_index'], 2);
         $indices['lizfw'] = number_format($indices['dli'] + $indices['pax_index'], 2);
         $indices['litow'] = number_format($indices['lizfw'] + $fuelIndexes['takeoff'], 2);

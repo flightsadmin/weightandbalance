@@ -16,24 +16,35 @@ class CrewSeatingSeeder extends Seeder
         foreach ($aircraftTypes as $type) {
             $seatingLocations = [
                 [
+                    'position' => 'deck_crew',
+                    'name' => 'Cockpit',
+                    'max_seats' => 4,
+                    'arm_length' => -13.410,
+                    'index_per_kg' => -0.01341,
+                ],
+                [
+                    'position' => 'cabin_crew',
                     'name' => 'FWD of FWD door',
                     'max_seats' => 2,
                     'arm_length' => -11.520,
                     'index_per_kg' => -0.01152,
                 ],
                 [
+                    'position' => 'cabin_crew',
                     'name' => 'FWD of aft door RH',
                     'max_seats' => 1,
                     'arm_length' => 12.991,
                     'index_per_kg' => 0.01299,
                 ],
                 [
+                    'position' => 'cabin_crew',
                     'name' => 'FWD of aft door LH',
                     'max_seats' => 1,
                     'arm_length' => 12.991,
                     'index_per_kg' => 0.01299,
                 ],
                 [
+                    'position' => 'cabin_crew',
                     'name' => 'Aft of aft door',
                     'max_seats' => 1,
                     'arm_length' => 13.665,
@@ -46,6 +57,7 @@ class CrewSeatingSeeder extends Seeder
                     [
                         'aircraft_type_id' => $type->id,
                         'location' => $location['name'],
+                        'position' => $location['position'],
                     ],
                     [
                         'max_number' => $location['max_seats'],
