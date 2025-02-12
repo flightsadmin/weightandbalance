@@ -78,11 +78,26 @@ class Manager extends Component
             });
     }
 
+    public function getCrewOptions()
+    {
+        $maxDeckCrew = $this->flight->aircraft->type->max_deck_crew;
+        $maxCabinCrew = $this->flight->aircraft->type->max_cabin_crew;
+
+        $crewOptions = [];
+        for ($deck = 2; $deck <= $maxDeckCrew; $deck++) {
+            for ($cabin = 1; $cabin <= $maxCabinCrew; $cabin++) {
+                $crewOptions[] = $deck . '/' . $cabin;
+            }
+        }
+        return $crewOptions;
+    }
+
     public function render()
     {
         return view('livewire.flights.fuel.manager', [
             'fuel' => $this->flight->fuel,
             'pantryOptions' => $this->getPantryOptions(),
+            'crewOptions' => $this->getCrewOptions(),
         ]);
     }
 }

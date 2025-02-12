@@ -148,10 +148,12 @@
                                         <div class="mb-3">
                                             <label class="form-label">Crew</label>
                                             <select wire:model="crew" class="form-select form-select-sm" required>
-                                                <option value="" disabled selected>Select Crew</option>
-                                                <option value="2/4">2/4</option>
-                                                <option value="3/5">3/5</option>
-                                                <option value="4/6">4/6</option>
+                                                <option value="" selected>Select Crew</option>
+                                                @foreach ($crewOptions as $crew)
+                                                    <option value="{{ $crew }}">
+                                                        {{ $crew }}
+                                                    </option>
+                                                @endforeach
                                             </select>
                                             @error('crew')
                                                 <span class="text-danger small">{{ $message }}</span>
