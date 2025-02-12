@@ -196,62 +196,41 @@ class AircraftType extends Model
         return $this->calculateMac($weight, $index);
     }
 
-    public function getCrewIndex($crewMembers)
+    public function getCrewIndex($deckCrewCount, $cabinCrewCount, $deckCrewWeight, $cabinCrewWeight)
     {
-        $deckCrewCount = $crewMembers[0];
-        $cabinCrewCount = $crewMembers[1];
+        $deckCrewSeating = $this->crewSeating()->where('position', 'deck_crew')->first();
+
+        $deckCrewIndex = $deckCrewCount * $deckCrewWeight * $deckCrewSeating->index_per_kg;
 
         $distribution = $this->crewDistributions()->where('crew_count', $cabinCrewCount)->first();
+
         if (!$distribution) {
-            return 0;
+            return $deckCrewIndex;
         }
 
-        $seatingLocations = $this->crewSeating()->where('position', '=', 'cabin_crew')->orderBy('location')->get();
-        $deckCrewWeight = $this->getSetting('standard_cockpit_crew_weight', 85);
-        $cabinCrewWeight = $this->getSetting('standard_cabin_crew_weight', 75);
-
-        $totalIndex = 0;
-        $remainingDeckCrew = $deckCrewCount;
-        $remainingCabinCrew = $cabinCrewCount;
-
+        $cabinCrewIndex = 0;
+        $cabinSeating = $this->crewSeating()->where('position', 'cabin_crew')->get();
         foreach ($distribution->distribution as $index => $crewCount) {
-            if ($crewCount > 0 && isset($seatingLocations[$index])) {
-                $seating = $seatingLocations[$index];
-                dd($seating);
-
-                // Assign deck crew first (usually in cockpit positions)
-                if ($remainingDeckCrew > 0) {
-                    $deckCrewAtLocation = min($remainingDeckCrew, $crewCount);
-                    $locationIndex = $deckCrewAtLocation * $deckCrewWeight * $seating->index_per_kg;
-                    $totalIndex += $locationIndex;
-                    $remainingDeckCrew -= $deckCrewAtLocation;
-                    $crewCount -= $deckCrewAtLocation;
-                }
-
-                // Then assign remaining cabin crew
-                if ($crewCount > 0 && $remainingCabinCrew > 0) {
-                    $cabinCrewAtLocation = min($remainingCabinCrew, $crewCount);
-                    $locationIndex = $cabinCrewAtLocation * $cabinCrewWeight * $seating->index_per_kg;
-                    $totalIndex += $locationIndex;
-                    $remainingCabinCrew -= $cabinCrewAtLocation;
-                }
+            if ($crewCount > 0 && isset($cabinSeating[$index])) {
+                $seating = $cabinSeating[$index];
+                $locationIndex = $crewCount * $cabinCrewWeight * $seating->index_per_kg;
+                $cabinCrewIndex += $locationIndex;
             }
         }
-
-        return $totalIndex;
+        return $deckCrewIndex + $cabinCrewIndex;
     }
 
     public function getCrewIndexes($crewMembers)
     {
         $crewMembers = explode('/', $crewMembers);
-        $deckCrewCount = $crewMembers[0];
-        $cabinCrewCount = $crewMembers[1];
+        $deckCrewCount = (int) $crewMembers[0];
+        $cabinCrewCount = (int) $crewMembers[1];
 
         $deckCrewWeight = $this->getSetting('standard_cockpit_crew_weight', 85);
         $cabinCrewWeight = $this->getSetting('standard_cabin_crew_weight', 75);
 
         return [
-            'index' => $this->getCrewIndex($crewMembers),
+            'index' => $this->getCrewIndex($deckCrewCount, $cabinCrewCount, $deckCrewWeight, $cabinCrewWeight),
             'weight' => ($deckCrewCount * $deckCrewWeight) + ($cabinCrewCount * $cabinCrewWeight),
         ];
     }

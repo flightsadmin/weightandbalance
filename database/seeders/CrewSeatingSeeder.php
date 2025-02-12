@@ -34,7 +34,7 @@ class CrewSeatingSeeder extends Seeder
                     'name' => 'FWD of aft door RH',
                     'max_seats' => 1,
                     'arm_length' => 12.991,
-                    'index_per_kg' => 0.01299,
+                    'index_per_kg' => -0.01299,
                 ],
                 [
                     'position' => 'cabin_crew',
@@ -68,9 +68,9 @@ class CrewSeatingSeeder extends Seeder
             }
             $distributions = [
                 1 => [1, 0, 0, 0],
-                2 => [1, 0, 0, 1],
-                3 => [2, 0, 0, 1],
-                4 => [2, 0, 1, 1],
+                2 => [1, 1, 0, 0],
+                3 => [2, 1, 0, 0],
+                4 => [2, 1, 1, 0],
                 5 => [2, 1, 1, 1],
             ];
 

@@ -72,9 +72,14 @@ class LoadsheetManager extends Component
         $this->dispatch('alert', icon: 'success', message: 'Loadsheet generated successfully.');
     }
 
+    private function calculateCrewWeight()
+    {
+        return $this->flight->aircraft->type->getCrewIndexes($this->flight->fuel->crew)['weight'];
+    }
+
     private function calculateDryOperatingWeight()
     {
-        return $this->flight->aircraft->basic_weight;
+        return $this->flight->aircraft->basic_weight + $this->calculateCrewWeight();
     }
 
     private function calculateZeroFuelWeight()
@@ -100,9 +105,7 @@ class LoadsheetManager extends Component
         $aircraft = $this->flight->aircraft;
         $type = $aircraft->type;
         $fuel = $this->flight->fuel;
-        $crew = $this->flight->fuel->crew;
-        // Get crew indexes
-        $crewIndexes = $type->getCrewIndexes($crew);
+        $crewIndexes = $type->getCrewIndexes($this->flight->fuel->crew);
 
         $fuelIndexes = $type->getFuelIndexes(
             $fuel->take_off_fuel,
@@ -124,12 +127,7 @@ class LoadsheetManager extends Component
             'litof' => $fuelIndexes['takeoff'],
             'lildf' => $fuelIndexes['landing'],
         ];
-        $indices['doi'] = number_format(
-            $indices['basic_index'] +
-            $indices['pantry_index'] +
-            $indices['crew_index'],
-            2
-        );
+        $indices['doi'] = number_format($indices['basic_index'] + $indices['pantry_index'] + $indices['crew_index'], 2);
         $indices['dli'] = number_format($indices['doi'] + $indices['cargo_index'], 2);
         $indices['lizfw'] = number_format($indices['dli'] + $indices['pax_index'], 2);
         $indices['litow'] = number_format($indices['lizfw'] + $fuelIndexes['takeoff'], 2);
