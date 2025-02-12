@@ -7,6 +7,10 @@ import "../sass/app.scss";
 import Swal from "sweetalert2";
 window.Swal = Swal;
 
+// Import Chart.js
+import Chart from 'chart.js/auto';
+window.Chart = Chart;
+
 // Sweet Alert Pop-up
 window.addEventListener("alert", function (event) { 
     Swal.fire({

@@ -288,7 +288,6 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('livewire:navigated', function() {
             const chartValues = @json($distribution['trim_data'] ?? []);

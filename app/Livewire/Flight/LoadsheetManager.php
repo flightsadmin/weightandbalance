@@ -70,6 +70,8 @@ class LoadsheetManager extends Component
             'created_by' => auth()->id(),
         ]);
 
+        $this->dispatch('loadsheet-updated');
+
         $this->dispatch('alert', icon: 'success', message: 'Loadsheet generated successfully.');
     }
 
