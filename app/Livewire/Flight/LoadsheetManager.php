@@ -45,6 +45,7 @@ class LoadsheetManager extends Component
     public function generateLoadsheet()
     {
         $distribution = [
+            'trim_data' => $this->generateTrimData(),
             'flight' => $this->calculateIndices()['flight'],
             'load_data' => $this->generateLoadData(),
             'fuel' => [
@@ -236,6 +237,26 @@ class LoadsheetManager extends Component
                 ],
             ],
         ];
+    }
+
+    private function generateTrimData()
+    {
+        $envelopes = $this->flight->aircraft->type->envelopes()
+            ->where('is_active', true)
+            // ->where('name', '!=', 'FUEL')
+            ->get()->mapWithKeys(function ($envelope) {
+                $points = collect($envelope->points)->map(function ($point) {
+                    return [
+                        'x' => $point['index'],
+                        'y' => $point['weight']
+                    ];
+                })->values()->toArray();
+
+                return [strtolower($envelope->name) . 'Envelope' => $points];
+            })
+            ->toArray();
+
+        return $envelopes;
     }
 
     public function render()

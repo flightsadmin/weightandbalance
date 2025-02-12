@@ -259,21 +259,130 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title m-0">Trim Sheet</h3>
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title m-0">Trim Sheet</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="py-4">
+                                <canvas id="trimSheetChart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="py-4">
-                        @if (!$loadsheet)
-                            <p class="text-muted text-center">No loadsheet generated yet.</p>
-                        @else
-                            <p>Loadsheet generated successfully.</p>
-                            <pre>{{ json_encode($loadsheet->payload_distribution, JSON_PRETTY_PRINT, JSON_UNESCAPED_UNICODE) }}</pre>
-                        @endif
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div>
+                                @if ($loadsheet)
+                                    <pre>{{ json_encode($distribution['trim_data'], JSON_PRETTY_PRINT) }}</pre>
+                                @else
+                                    <p class="text-muted">No loadsheet generated yet.</p>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('livewire:navigated', function() {
+            const chartValues = @json($distribution['trim_data'] ?? []);
+            const ctx = document.getElementById('trimSheetChart').getContext('2d');
+            const trimSheetChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                            label: 'ZFW Envelope',
+                            data: chartValues.zfwEnvelope || [],
+                            borderColor: 'red',
+                            showLine: true,
+                            pointRadius: 0,
+                            fill: false,
+                        },
+                        {
+                            label: 'TOW Envelope',
+                            data: chartValues.towEnvelope || [],
+                            borderColor: 'blue',
+                            showLine: true,
+                            pointRadius: 0,
+                            fill: false,
+                        },
+                        {
+                            label: 'LDW Envelope',
+                            data: chartValues.ldwEnvelope || [],
+                            borderColor: 'green',
+                            showLine: true,
+                            pointRadius: 0,
+                            fill: false,
+                        },
+                        {
+                            label: 'ZFW',
+                            data: [{
+                                x: {{ $distribution['indices']['lizfw'] ?? 0 }},
+                                y: {{ $distribution['weights']['zero_fuel'] ?? 0 }}
+                            }],
+                            backgroundColor: 'red',
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'TOW',
+                            data: [{
+                                x: {{ $distribution['indices']['litow'] ?? 0 }},
+                                y: {{ $distribution['weights']['takeoff'] ?? 0 }}
+                            }],
+                            backgroundColor: 'blue',
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: {
+                                display: true,
+                                text: 'Index'
+                            },
+                            min: 25,
+                            max: 100
+                        },
+                        y: {
+                            type: 'linear',
+                            title: {
+                                display: true,
+                                text: 'Aircraft Weight (kg)'
+                            },
+                            min: 40600,
+                            max: 85000
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '(Index ' + (context.raw.x).toFixed(2) + ', Weight ' + (context.raw.y)
+                                        .toLocaleString() +
+                                        ' kg)';
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </div>
