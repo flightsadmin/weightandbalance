@@ -54,47 +54,78 @@ class CrewSeatingSeeder extends Seeder
                     ]
                 );
             }
-
+            // $distributions = [
+            //     1 => [
+            //         'FWD of FWD door' => 1,
+            //         'FWD of aft door RH' => 0,
+            //         'FWD of aft door LH' => 0,
+            //         'Aft of aft door' => 0,
+            //     ],
+            //     2 => [
+            //         'FWD of FWD door' => 1,
+            //         'FWD of aft door RH' => 0,
+            //         'FWD of aft door LH' => 0,
+            //         'Aft of aft door' => 1,
+            //     ],
+            //     3 => [
+            //         'FWD of FWD door' => 2,
+            //         'FWD of aft door RH' => 0,
+            //         'FWD of aft door LH' => 0,
+            //         'Aft of aft door' => 1,
+            //     ],
+            //     4 => [
+            //         'FWD of FWD door' => 2,
+            //         'FWD of aft door RH' => 0,
+            //         'FWD of aft door LH' => 1,
+            //         'Aft of aft door' => 1,
+            //     ],
+            //     5 => [
+            //         'FWD of FWD door' => 2,
+            //         'FWD of aft door RH' => 1,
+            //         'FWD of aft door LH' => 1,
+            //         'Aft of aft door' => 1,
+            //     ],
+            // ];
             $distributions = [
                 1 => [
-                    'FWD of FWD door' => 1,
-                    'FWD of aft door RH' => 0,
-                    'FWD of aft door LH' => 0,
-                    'Aft of aft door' => 0,
+                    1,
+                    0,
+                    0,
+                    0,
                 ],
                 2 => [
-                    'FWD of FWD door' => 1,
-                    'FWD of aft door RH' => 0,
-                    'FWD of aft door LH' => 0,
-                    'Aft of aft door' => 1,
+                    1,
+                    0,
+                    0,
+                    1,
                 ],
                 3 => [
-                    'FWD of FWD door' => 2,
-                    'FWD of aft door RH' => 0,
-                    'FWD of aft door LH' => 0,
-                    'Aft of aft door' => 1,
+                    2,
+                    0,
+                    0,
+                    1,
                 ],
                 4 => [
-                    'FWD of FWD door' => 2,
-                    'FWD of aft door RH' => 0,
-                    'FWD of aft door LH' => 1,
-                    'Aft of aft door' => 1,
+                    2,
+                    0,
+                    1,
+                    1,
                 ],
                 5 => [
-                    'FWD of FWD door' => 2,
-                    'FWD of aft door RH' => 1,
-                    'FWD of aft door LH' => 1,
-                    'Aft of aft door' => 1,
+                    2,
+                    1,
+                    1,
+                    1,
                 ],
             ];
 
-            // foreach ($distributions as $crewCount => $seatDistribution) {
-            //     $distribution = CrewDistribution::create([
-            //         'aircraft_type_id' => $type->id,
-            //         'crew_count' => $crewCount,
-            //         'distribution' => $seatDistribution,
-            //     ]);
-            // }
+            foreach ($distributions as $crewCount => $seatDistribution) {
+                $distribution = CrewDistribution::create([
+                    'aircraft_type_id' => $type->id,
+                    'crew_count' => $crewCount,
+                    'distribution' => $seatDistribution,
+                ]);
+            }
         }
     }
 }
