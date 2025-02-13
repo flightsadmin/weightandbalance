@@ -264,7 +264,7 @@
                         </div>
                         <div class="card-body">
                             <div class="py-4">
-                                <canvas id="trimSheetChart" height="200"></canvas>
+                                <canvas id="trimSheetChart" height="200" wire:ignore></canvas>
                             </div>
                         </div>
                     </div>
@@ -286,7 +286,7 @@
         </div>
     </div>
     <script>
-        document.addEventListener('livewire:navigated', function() {
+        document.addEventListener('livewire:initialized', function() {
             const chartValues = @json($distribution['trim_data'] ?? []);
             const ctx = document.getElementById('trimSheetChart').getContext('2d');
             const trimSheetChart = new Chart(ctx, {
