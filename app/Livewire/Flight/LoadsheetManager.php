@@ -57,9 +57,9 @@ class LoadsheetManager extends Component
             ],
             'weights' => [
                 'dry_operating_weight' => $this->calculateDryOperatingWeight(),
-                'zero_fuel' => $this->calculateZeroFuelWeight(),
-                'takeoff' => $this->calculateTakeoffWeight(),
-                'landing' => $this->calculateLandingWeight(),
+                'zero_fuel_weight' => $this->calculateZeroFuelWeight(),
+                'takeoff_weight' => $this->calculateTakeoffWeight(),
+                'landing_weight' => $this->calculateLandingWeight(),
             ],
             'indices' => $this->calculateIndices()['indices'],
         ];
@@ -75,6 +75,25 @@ class LoadsheetManager extends Component
         $this->dispatch('alert', icon: 'success', message: 'Loadsheet generated successfully.');
     }
 
+    private function calculateUnderload()
+    {
+        return min(
+            $this->flight->aircraft->type->max_zero_fuel_weight - $this->calculateZeroFuelWeight(),
+            $this->flight->aircraft->type->max_takeoff_weight - $this->calculateTakeoffWeight(),
+            $this->flight->aircraft->type->max_landing_weight - $this->calculateLandingWeight()
+        );
+    }
+
+    private function calculateTotalDeadload()
+    {
+        return array_sum(array_column($this->generateLoadData()['hold_breakdown'], 'weight'));
+    }
+
+    private function calculateTotalTrafficLoad()
+    {
+        return $this->calculateTotalDeadload() + array_sum(array_column($this->generateLoadData()['pax_by_type'], 'weight'));
+    }
+
     private function calculateCrewWeight()
     {
         return $this->flight->aircraft->type->getCrewIndexes($this->flight->fuel->crew)['weight'];
@@ -87,10 +106,10 @@ class LoadsheetManager extends Component
 
     private function calculateZeroFuelWeight()
     {
-        return $this->flight->aircraft->basic_weight +
-            $this->flight->passengers->sum('weight') +
-            $this->flight->baggage->sum('weight') +
-            $this->flight->cargo->sum('weight');
+        return
+            $this->calculateDryOperatingWeight() +
+            array_sum(array_column($this->generateLoadData()['pax_by_type'], 'weight')) +
+            array_sum(array_column($this->generateLoadData()['hold_breakdown'], 'weight'));
     }
 
     private function calculateTakeoffWeight()
@@ -123,6 +142,9 @@ class LoadsheetManager extends Component
             'sector' => $this->flight->departure_airport . '/' . $this->flight->arrival_airport,
             'version' => $this->flight->aircraft->type->code,
             'release_time' => now('Asia/Qatar')->format('H:i'),
+            'underload' => $this->calculateUnderload(),
+            'total_deadload' => $this->calculateTotalDeadload(),
+            'total_traffic_load' => $this->calculateTotalTrafficLoad()
         ];
 
         $indices = [
@@ -204,6 +226,7 @@ class LoadsheetManager extends Component
 
         return [
             'pax_by_type' => $orderedPaxByType,
+            'pax_by_type_count' => $paxByType,
             'passenger_weights_used' => $orderedWeightsUsed,
             'hold_breakdown' => $this->flight->aircraft->type->holds()
                 ->with('positions')

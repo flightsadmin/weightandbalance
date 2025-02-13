@@ -18,7 +18,7 @@
                     <div class="card-body p-2">
                         @php
                             $distribution = $loadsheet->payload_distribution;
-                            $pax = $loadsheet->payload_distribution['load_data'];
+                            $pax = $distribution['load_data'];
                             $totalPax = array_sum(
                                 array_column(
                                     array_filter($pax['pax_by_type'], fn($data, $type) => $type !== 'infant', ARRAY_FILTER_USE_BOTH),
@@ -26,11 +26,6 @@
                                 ),
                             );
 
-                            $totalDeadload = array_sum(array_column($pax['hold_breakdown'], 'weight'));
-                            $zfw = $flight->aircraft->type->max_zero_fuel_weight - $distribution['weights']['zero_fuel'];
-                            $tow = $flight->aircraft->type->max_takeoff_weight - $distribution['weights']['takeoff'];
-                            $ldw = $flight->aircraft->type->max_landing_weight - $distribution['weights']['landing'];
-                            $underload = min($zfw, $tow, $ldw);
                         @endphp
                         <div style="font-family: monospace;">
                             <p class="mb-0 ms-1">
@@ -113,15 +108,15 @@
                             <table class="table table-sm table-borderless m-0">
                                 <tr>
                                     <td>TOTAL TRAFFIC LOAD</td>
-                                    <td>{{ $distribution['weights']['zero_fuel'] - $flight->aircraft->basic_weight }}</td>
+                                    <td>{{ $distribution['flight']['total_traffic_load'] ?? 'N/A' }}</td>
                                 </tr>
                                 <tr>
                                     <td>DRY OPERATING WEIGHT</td>
-                                    <td>{{ $flight->aircraft->basic_weight }}</td>
+                                    <td>{{ $distribution['weights']['dry_operating_weight'] ?? 'N/A' }}</td>
                                 </tr>
                                 <tr>
                                     <td>ZERO FUEL WEIGHT ACTUAL</td>
-                                    <td>{{ $distribution['weights']['zero_fuel'] }} MAX
+                                    <td>{{ $distribution['weights']['zero_fuel_weight'] ?? 'N/A' }} MAX
                                         {{ $flight->aircraft->type->max_zero_fuel_weight }} ADJ
                                     </td>
                                 </tr>
@@ -131,8 +126,9 @@
                                 </tr>
                                 <tr>
                                     <td>TAKE OFF WEIGHT ACTUAL</td>
-                                    <td>{{ $distribution['weights']['takeoff'] }} MAX {{ $flight->aircraft->type->max_takeoff_weight }}
-                                        ADJ</td>
+                                    <td>{{ $distribution['weights']['takeoff_weight'] ?? 'N/A' }} MAX
+                                        {{ $flight->aircraft->type->max_takeoff_weight }} ADJ
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>TRIP FUEL</td>
@@ -140,8 +136,9 @@
                                 </tr>
                                 <tr>
                                     <td>LANDING WEIGHT ACTUAL</td>
-                                    <td>{{ $distribution['weights']['landing'] }} MAX {{ $flight->aircraft->type->max_landing_weight }}
-                                        ADJ</td>
+                                    <td>{{ $distribution['weights']['landing_weight'] ?? 'N/A' }} MAX
+                                        {{ $flight->aircraft->type->max_landing_weight }} ADJ
+                                    </td>
                                 </tr>
                             </table>
                             <hr class="my-0">
@@ -169,30 +166,30 @@
                             <table class="table table-sm table-borderless m-0">
                                 <tr>
                                     <td style="width: 35%">UNDERLOAD BEFORE LMC</td>
-                                    <td>{{ $underload }}</td>
+                                    <td>{{ $distribution['flight']['underload'] ?? 'N/A' }}</td>
                                     <td>LMC TOTAL</td>
                                 </tr>
                             </table>
                             <hr class="my-0">
                             <div>LOADMESSAGE AND CAPTAIN'S INFORMATION BEFORE LMC</div>
-                            <div>TAXI FUEL: {{ $distribution['fuel']['taxi'] }}</div>
+                            <div>TAXI FUEL: {{ $distribution['fuel']['taxi'] ?? 'N/A' }}</div>
                             {{-- LDM --}}
                             <div style="font-family: monospace;">
                                 <div class="mt-3">LDM</div>
                                 <div>
-                                    {{ $distribution['flight']['flight_number'] }}/{{ $distribution['flight']['flight_date'] }}.
+                                    {{ $distribution['flight']['flight_number'] }}/{{ $distribution['flight']['short_flight_date'] }}.
                                     {{ $distribution['flight']['registration'] }}.
                                     {{ $distribution['flight']['version'] }}.
                                     {{ $distribution['fuel']['crew'] ?? 'N/A' }}
                                 </div>
                                 <div>
                                     -{{ $distribution['flight']['destination'] }}.
-                                    @forelse ($pax['pax_by_type'] as $type => $count)
+                                    @forelse ($pax['pax_by_type'] as $count)
                                         {{ $count['count'] . '/' }}
                                     @empty
                                         NIL
                                     @endforelse
-                                    T{{ $totalDeadload }}.PAX/{{ $totalPax }}.PAD/0
+                                    T{{ $distribution['flight']['total_deadload'] }}.PAX/{{ $totalPax }}.PAD/0
                                 </div>
                                 <div>
                                     SI PAX WEIGHTS USED
@@ -208,7 +205,7 @@
                                     @empty
                                         C 0 M 0 B 0/0
                                     @endforelse
-                                    O 0 &nbsp; T {{ $totalDeadload }}
+                                    O 0 &nbsp; T {{ $distribution['flight']['total_deadload'] }}
                                 </div>
                                 <div>PANTRY CODE {{ $distribution['indices']['pantry']['code'] }}</div>
                                 <div>ACTUAL LOADING OF AIRCRAFT</div>
@@ -277,7 +274,9 @@
                         <div class="card-body">
                             <div>
                                 @if ($loadsheet)
-                                    <pre>{{ json_encode($distribution['trim_data'], JSON_PRETTY_PRINT) }}</pre>
+                                    @dump($distribution)
+
+                                    {{-- <pre>{{ json_encode($distribution['flight'], JSON_PRETTY_PRINT) }}</pre> --}}
                                 @else
                                     <p class="text-muted">No loadsheet generated yet.</p>
                                 @endif
