@@ -84,6 +84,17 @@ class LoadsheetManager extends Component
         return $this->flight->aircraft->type->getPantryDetails($this->flight->fuel->pantry);
     }
 
+    private function calculateFuel()
+    {
+        return [
+            'block' => $this->flight->fuel->block_fuel,
+            'taxi' => $this->flight->fuel->taxi_fuel,
+            'trip' => $this->flight->fuel->trip_fuel,
+            'takeoff' => $this->flight->fuel->take_off_fuel,
+            'crew' => $this->flight->fuel->crew,
+        ];
+    }
+
     public function finalizeLoadsheet()
     {
         $this->loadsheet->update([
@@ -99,22 +110,16 @@ class LoadsheetManager extends Component
     {
         $distribution = [
             'trim_data' => $this->generateTrimData(),
-            'flight' => $this->calculateIndices()['flight'],
+            'flight' => $this->generateFlightData(),
             'load_data' => $this->generateLoadData(),
-            'fuel' => [
-                'block' => $this->flight->fuel->block_fuel,
-                'taxi' => $this->flight->fuel->taxi_fuel,
-                'trip' => $this->flight->fuel->trip_fuel,
-                'takeoff' => $this->flight->fuel->take_off_fuel,
-                'crew' => $this->flight->fuel->crew,
-            ],
+            'fuel' => $this->calculateFuel(),
             'weights' => [
                 'dry_operating_weight' => $this->calculateDryOperatingWeight(),
                 'zero_fuel_weight' => $this->calculateZeroFuelWeight(),
                 'takeoff_weight' => $this->calculateTakeoffWeight(),
                 'landing_weight' => $this->calculateLandingWeight(),
             ],
-            'indices' => $this->calculateIndices()['indices'],
+            'indices' => $this->calculateIndices(),
         ];
 
         $this->loadsheet = $this->flight->loadsheets()->create([
@@ -128,22 +133,13 @@ class LoadsheetManager extends Component
         $this->dispatch('alert', icon: 'success', message: 'Loadsheet generated successfully.');
     }
 
-    private function calculateIndices()
+    private function generateFlightData()
     {
-        $aircraft = $this->flight->aircraft;
-        $type = $aircraft->type;
-        $fuel = $this->flight->fuel;
-        $crewIndexes = $type->getCrewIndexes($this->flight->fuel->crew);
-
-        $fuelIndexes = $type->getFuelIndexes(
-            $fuel->take_off_fuel,
-            $fuel->take_off_fuel - $fuel->trip_fuel
-        );
-        $flight = [
+        return [
             'flight_number' => $this->flight->flight_number,
             'flight_date' => strtoupper($this->flight->scheduled_departure_time?->format('dMY')),
             'short_flight_date' => $this->flight->scheduled_departure_time?->format('d'),
-            'registration' => $aircraft->registration_number,
+            'registration' => $this->flight->aircraft->registration_number,
             'destination' => $this->flight->arrival_airport,
             'sector' => $this->flight->departure_airport . '/' . $this->flight->arrival_airport,
             'version' => $this->flight->aircraft->type->code,
@@ -152,27 +148,48 @@ class LoadsheetManager extends Component
             'total_deadload' => $this->calculateTotalDeadload(),
             'total_traffic_load' => $this->calculateTotalTrafficLoad()
         ];
+    }
+
+    private function calculateIndices()
+    {
+        $aircraft = $this->flight->aircraft;
+        $type = $aircraft->type;
+        $fuel = $this->flight->fuel;
+
+        $crewIndexes = $type->getCrewIndexes($fuel->crew);
+        $fuelIndexes = $type->getFuelIndexes($fuel->take_off_fuel, $fuel->take_off_fuel - $fuel->trip_fuel);
+
+        $paxData = $this->generateLoadData()['pax_by_type'];
+        $cargoData = $this->generateLoadData()['hold_breakdown'];
 
         $indices = [
             'pantry' => $this->calculatePantryIndex(),
-            'basic_index' => number_format($aircraft->basic_index, 2),
-            'crew_index' => number_format($crewIndexes['index'], 2),
-            'pax_index' => number_format(array_sum(array_column($this->generateLoadData()['pax_by_type'], 'index')), 2),
-            'cargo_index' => number_format(array_sum(array_column($this->generateLoadData()['hold_breakdown'], 'index')), 2),
-            'pantry_index' => $this->calculatePantryIndex()['index'] ?? 0,
+            'basic_index' => $aircraft->basic_index,
+            'crew_index' => $crewIndexes['index'],
+            'pax_index' => array_sum(array_column($paxData, 'index')),
+            'cargo_index' => array_sum(array_column($cargoData, 'index')),
             'litof' => $fuelIndexes['takeoff'],
             'lildf' => $fuelIndexes['landing'],
         ];
-        $indices['doi'] = number_format($indices['basic_index'] + $indices['pantry_index'] + $indices['crew_index'], 2);
-        $indices['dli'] = number_format($indices['doi'] + $indices['cargo_index'], 2);
-        $indices['lizfw'] = number_format($indices['dli'] + $indices['pax_index'], 2);
-        $indices['litow'] = number_format($indices['lizfw'] + $fuelIndexes['takeoff'], 2);
-        $indices['lildw'] = number_format($indices['litow'] + $fuelIndexes['landing'], 2);
-        $indices['maczfw'] = number_format($type->getZfwMac($this->calculateZeroFuelWeight(), $indices['lizfw']), 2);
-        $indices['mactow'] = number_format($type->getTowMac($this->calculateTakeoffWeight(), $indices['litow']), 2);
-        $indices['macldw'] = number_format($type->getLdwMac($this->calculateLandingWeight(), $indices['lildw']), 2);
 
-        return ['flight' => $flight, 'indices' => $indices];
+        $indices['doi'] = $indices['basic_index'] + $indices['pantry']['index'] + $indices['crew_index'];
+        $indices['dli'] = $indices['doi'] + $indices['cargo_index'];
+        $indices['lizfw'] = $indices['dli'] + $indices['pax_index'];
+        $indices['litow'] = $indices['lizfw'] + $fuelIndexes['takeoff'];
+        $indices['lildw'] = $indices['litow'] + $fuelIndexes['landing'];
+        $indices['maczfw'] = $type->getZfwMac($this->calculateZeroFuelWeight(), $indices['lizfw']);
+        $indices['mactow'] = $type->getTowMac($this->calculateTakeoffWeight(), $indices['litow']);
+        $indices['macldw'] = $type->getLdwMac($this->calculateLandingWeight(), $indices['lildw']);
+
+
+        foreach ($indices as &$value) {
+            if (is_numeric($value)) {
+                $value = number_format($value, 2);
+            }
+        }
+        unset($value);
+
+        return $indices;
     }
 
     private function generateLoadData()

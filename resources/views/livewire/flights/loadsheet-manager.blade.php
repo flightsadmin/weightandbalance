@@ -274,7 +274,7 @@
                         <div class="card-body">
                             <div>
                                 @if ($loadsheet)
-                                    <pre> {{ json_encode($distribution['load_data']['hold_breakdown'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
+                                    <pre> {{ json_encode($distribution['indices'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
                                 @else
                                     <p class="text-muted">No loadsheet generated yet.</p>
                                 @endif
