@@ -274,9 +274,7 @@
                         <div class="card-body">
                             <div>
                                 @if ($loadsheet)
-                                    @dump($distribution)
-
-                                    {{-- <pre>{{ json_encode($distribution['flight'], JSON_PRETTY_PRINT) }}</pre> --}}
+                                    <pre> {{ json_encode($distribution['load_data']['hold_breakdown'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
                                 @else
                                     <p class="text-muted">No loadsheet generated yet.</p>
                                 @endif
@@ -322,7 +320,7 @@
                             label: 'ZFW',
                             data: [{
                                 x: {{ $distribution['indices']['lizfw'] ?? 0 }},
-                                y: {{ $distribution['weights']['zero_fuel'] ?? 0 }}
+                                y: {{ $distribution['weights']['zero_fuel_weight'] ?? 0 }}
                             }],
                             backgroundColor: 'red',
                             pointRadius: 4
@@ -331,7 +329,7 @@
                             label: 'TOW',
                             data: [{
                                 x: {{ $distribution['indices']['litow'] ?? 0 }},
-                                y: {{ $distribution['weights']['takeoff'] ?? 0 }}
+                                y: {{ $distribution['weights']['takeoff_weight'] ?? 0 }}
                             }],
                             backgroundColor: 'blue',
                             pointRadius: 4

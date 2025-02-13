@@ -245,14 +245,18 @@ class LoadsheetManager extends Component
                 })->filter(fn($hold) => $hold['weight'] > 0)->values()->toArray(),
             'deadload_by_type' => [
                 'C' => [
-                    'pieces' => $this->flight->cargo->sum('pieces'),
-                    'weight' => $this->flight->cargo->sum('weight'),
+                    'pieces' => $this->flight->cargo->where('status', 'loaded')->sum('pieces'),
+                    'weight' => $this->flight->cargo->where('status', 'loaded')->sum('weight'),
                 ],
                 'B' => [
-                    'pieces' => $this->flight->baggage->count(),
-                    'weight' => $this->flight->baggage->sum('weight'),
+                    'pieces' => $this->flight->baggage->where('status', 'loaded')->count(),
+                    'weight' => $this->flight->baggage->where('status', 'loaded')->sum('weight'),
                 ],
                 'M' => [
+                    'pieces' => 0,
+                    'weight' => 0,
+                ],
+                'O' => [
                     'pieces' => 0,
                     'weight' => 0,
                 ],
