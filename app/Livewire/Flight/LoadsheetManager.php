@@ -31,6 +31,59 @@ class LoadsheetManager extends Component
         $this->loadplan = $this->flight->loadplans()->latest()->first();
     }
 
+    private function calculateTotalDeadload()
+    {
+        return array_sum(array_column($this->generateLoadData()['hold_breakdown'], 'weight'));
+    }
+
+    private function calculateTotalTrafficLoad()
+    {
+        return $this->calculateTotalDeadload() + array_sum(array_column($this->generateLoadData()['pax_by_type'], 'weight'));
+    }
+
+    private function calculateCrewWeight()
+    {
+        return $this->flight->aircraft->type->getCrewIndexes($this->flight->fuel->crew)['weight'];
+    }
+
+    private function calculateDryOperatingWeight()
+    {
+        return $this->flight->aircraft->basic_weight + $this->calculateCrewWeight();
+    }
+
+    private function calculateZeroFuelWeight()
+    {
+        return $this->calculateDryOperatingWeight() + $this->calculateTotalTrafficLoad();
+    }
+
+    private function calculateTakeoffWeight()
+    {
+        return $this->calculateZeroFuelWeight() + $this->flight->fuel->take_off_fuel;
+    }
+
+    private function calculateLandingWeight()
+    {
+        return $this->calculateTakeoffWeight() - $this->flight->fuel->trip_fuel;
+    }
+
+    private function calculateUnderload()
+    {
+        return min(
+            $this->flight->aircraft->type->max_zero_fuel_weight - $this->calculateZeroFuelWeight(),
+            $this->flight->aircraft->type->max_takeoff_weight - $this->calculateTakeoffWeight(),
+            $this->flight->aircraft->type->max_landing_weight - $this->calculateLandingWeight()
+        );
+    }
+
+    private function calculatePantryIndex()
+    {
+        if (!$this->flight->fuel) {
+            return;
+        }
+
+        return $this->flight->aircraft->type->getPantryDetails($this->flight->fuel->pantry);
+    }
+
     public function finalizeLoadsheet()
     {
         $this->loadsheet->update([
@@ -73,53 +126,6 @@ class LoadsheetManager extends Component
         $this->dispatch('loadsheet-updated');
 
         $this->dispatch('alert', icon: 'success', message: 'Loadsheet generated successfully.');
-    }
-
-    private function calculateUnderload()
-    {
-        return min(
-            $this->flight->aircraft->type->max_zero_fuel_weight - $this->calculateZeroFuelWeight(),
-            $this->flight->aircraft->type->max_takeoff_weight - $this->calculateTakeoffWeight(),
-            $this->flight->aircraft->type->max_landing_weight - $this->calculateLandingWeight()
-        );
-    }
-
-    private function calculateTotalDeadload()
-    {
-        return array_sum(array_column($this->generateLoadData()['hold_breakdown'], 'weight'));
-    }
-
-    private function calculateTotalTrafficLoad()
-    {
-        return $this->calculateTotalDeadload() + array_sum(array_column($this->generateLoadData()['pax_by_type'], 'weight'));
-    }
-
-    private function calculateCrewWeight()
-    {
-        return $this->flight->aircraft->type->getCrewIndexes($this->flight->fuel->crew)['weight'];
-    }
-
-    private function calculateDryOperatingWeight()
-    {
-        return $this->flight->aircraft->basic_weight + $this->calculateCrewWeight();
-    }
-
-    private function calculateZeroFuelWeight()
-    {
-        return
-            $this->calculateDryOperatingWeight() +
-            array_sum(array_column($this->generateLoadData()['pax_by_type'], 'weight')) +
-            array_sum(array_column($this->generateLoadData()['hold_breakdown'], 'weight'));
-    }
-
-    private function calculateTakeoffWeight()
-    {
-        return $this->calculateZeroFuelWeight() + $this->flight->fuel->take_off_fuel;
-    }
-
-    private function calculateLandingWeight()
-    {
-        return $this->calculateTakeoffWeight() - $this->flight->fuel->trip_fuel;
     }
 
     private function calculateIndices()
@@ -167,15 +173,6 @@ class LoadsheetManager extends Component
         $indices['macldw'] = number_format($type->getLdwMac($this->calculateLandingWeight(), $indices['lildw']), 2);
 
         return ['flight' => $flight, 'indices' => $indices];
-    }
-
-    private function calculatePantryIndex()
-    {
-        if (!$this->flight->fuel) {
-            return;
-        }
-
-        return $this->flight->aircraft->type->getPantryDetails($this->flight->fuel->pantry);
     }
 
     private function generateLoadData()
@@ -245,12 +242,12 @@ class LoadsheetManager extends Component
                 })->filter(fn($hold) => $hold['weight'] > 0)->values()->toArray(),
             'deadload_by_type' => [
                 'C' => [
-                    'pieces' => $this->flight->cargo->where('status', 'loaded')->sum('pieces'),
-                    'weight' => $this->flight->cargo->where('status', 'loaded')->sum('weight'),
+                    'pieces' => $this->flight->cargo->where('status', 'loaded')->whereNotNull('container_id')->sum('pieces'),
+                    'weight' => $this->flight->cargo->where('status', 'loaded')->whereNotNull('container_id')->sum('weight'),
                 ],
                 'B' => [
-                    'pieces' => $this->flight->baggage->where('status', 'loaded')->count(),
-                    'weight' => $this->flight->baggage->where('status', 'loaded')->sum('weight'),
+                    'pieces' => $this->flight->baggage->where('status', 'loaded')->whereNotNull('container_id')->count(),
+                    'weight' => $this->flight->baggage->where('status', 'loaded')->whereNotNull('container_id')->sum('weight'),
                 ],
                 'M' => [
                     'pieces' => 0,
