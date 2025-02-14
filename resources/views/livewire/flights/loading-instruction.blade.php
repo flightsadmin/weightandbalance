@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container-fluid">
     <pre class="small m-0" style="font-family: monospace; line-height: 1.2;">
 LOADING INSTRUCTION/REPORT             PREPARED           PRINTED
 ALL WEIGHTS IN KILOS                   N/A                {{ now()->format('Hi') }}                                    

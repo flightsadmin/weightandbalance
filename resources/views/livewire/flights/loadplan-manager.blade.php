@@ -190,18 +190,29 @@
                     <h5 class="modal-title">Loading Instruction Report Preview</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-2">
+                <div class="modal-body p-2" id="lirfPrintArea">
                     @if ($showLirfPreview)
                         @include('livewire.flights.loading-instruction')
                     @endif
                 </div>
                 <div class="modal-footer py-2 d-flex justify-content-between">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-sm" wire:click="printLIRF">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="printLIRF()">
                         <i class="bi bi-printer"></i> Print LIRF
                     </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        function printLIRF() {
+            const printContent = document.getElementById('lirfPrintArea').innerHTML;
+            const originalContent = document.body.innerHTML;
+
+            document.body.innerHTML = printContent;
+            window.print();
+            document.body.innerHTML = originalContent;
+        }
+    </script>
 </div>
