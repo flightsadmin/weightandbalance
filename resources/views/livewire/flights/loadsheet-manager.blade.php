@@ -1,5 +1,5 @@
 <div class="mb-4">
-    <div class="row">
+    <div class="row g-2">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -239,7 +239,6 @@
                 @else
                     <div class="card-body">
                         <div class="text-center py-4">
-                            <p class="text-muted">No loadsheet generated yet.</p>
                             @if (!$flight->fuel)
                                 <div class="alert alert-warning">
                                     <i class="bi bi-exclamation-triangle"></i> Fuel data must be added before generating loadsheet.
@@ -248,6 +247,10 @@
                             @if (!$loadplan || $loadplan->status !== 'released')
                                 <div class="alert alert-warning">
                                     <i class="bi bi-exclamation-triangle"></i> Load plan must be released before generating loadsheet.
+                                </div>
+                            @else
+                                <div class="alert alert-success">
+                                    <p class="text-muted m-0">No loadsheet generated yet.</p>
                                 </div>
                             @endif
                         </div>
@@ -276,7 +279,7 @@
                                 @if ($loadsheet)
                                     <pre> {{ json_encode($distribution['indices'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
                                 @else
-                                    <p class="text-muted">No loadsheet generated yet.</p>
+                                    <p class="text-muted m-0">No loadsheet generated yet.</p>
                                 @endif
                             </div>
                         </div>
@@ -370,8 +373,7 @@
                                         label += ': ';
                                     }
                                     label += '(Index ' + (context.raw.x).toFixed(2) + ', Weight ' + (context.raw.y)
-                                        .toLocaleString() +
-                                        ' kg)';
+                                        .toLocaleString() + ' kg)';
                                     return label;
                                 }
                             }
