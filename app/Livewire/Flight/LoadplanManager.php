@@ -31,7 +31,7 @@ class LoadplanManager extends Component
                 'last_modified_by' => auth()->id(),
             ]);
 
-        $this->containerPositions = $this->loadplan->container_positions ?? [];
+        $this->containerPositions = $this->loadplan->loading ?? [];
     }
 
     public function updateContainerPosition($containerId, $fromPosition, $toPosition)
@@ -55,7 +55,7 @@ class LoadplanManager extends Component
         }
 
         if (!$fromPosition && isset($this->containerPositions[$containerId])) {
-            $fromPosition = $this->containerPositions[$containerId];
+            $fromPosition = $this->containerPositions[$containerId]['position_id'];
         }
 
         if (isset($this->containerPositions[$containerId])) {
@@ -63,7 +63,18 @@ class LoadplanManager extends Component
         }
 
         if ($position) {
-            $this->containerPositions[$containerId] = $position->id;
+            $this->containerPositions[$containerId] = [
+                'position_id' => $position->id,
+                'position_code' => $position->code,
+                'hold_name' => $position->hold->name,
+                'container_number' => $container->container_number,
+                'content_type' => $container->pivot->type,
+                'weight' => $container->weight,
+                'pieces' => $container->pivot->pieces,
+                'destination' => $this->flight->arrival_airport,
+                'updated_at' => now()->toDateTimeString(),
+            ];
+
             $container->updatePosition($position->id, $this->flight->id);
             $this->dispatch('container_position_updated');
         } else {
@@ -72,7 +83,7 @@ class LoadplanManager extends Component
         }
 
         $this->loadplan->update([
-            'container_positions' => $this->containerPositions,
+            'loading' => $this->containerPositions,
             'last_modified_by' => auth()->id(),
         ]);
 
@@ -119,22 +130,16 @@ class LoadplanManager extends Component
             return;
         }
 
-        $loadInstructions = collect($this->containerPositions)->map(function ($positionId, $containerId) {
-            $container = $this->flight->containers->find($containerId);
-            $position = $this->flight->aircraft->type->holds()
-                ->whereHas('positions', fn($q) => $q->where('id', $positionId))
-                ->with(['positions' => fn($q) => $q->where('id', $positionId)])
-                ->first()
-                ->positions
-                ->first();
-
+        // Use the stored container data directly
+        $loadInstructions = collect($this->containerPositions)->map(function ($containerData) {
             return [
-                'hold' => $position->hold->name,
-                'position' => $position->code,
-                'container_number' => $container->container_number,
-                'content_type' => $container->pivot->type,
-                'weight' => $container->weight,
-                'destination' => $this->flight->arrival_airport,
+                'hold' => $containerData['hold_name'],
+                'position' => $containerData['position_code'],
+                'container_number' => $containerData['container_number'],
+                'content_type' => $containerData['content_type'],
+                'weight' => $containerData['weight'],
+                'pieces' => $containerData['pieces'] ?? null,
+                'destination' => $containerData['destination'],
             ];
         })->sortBy([
                     ['hold', 'asc'],

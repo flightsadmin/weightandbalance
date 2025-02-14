@@ -13,14 +13,14 @@ class Loadplan extends Model
         'flight_id',
         'status', // draft, released, archived
         'version',
-        'container_positions', // JSON field storing container positions
+        'loading', // JSON field storing container positions
         'last_modified_by',
         'released_at',
         'released_by',
     ];
 
     protected $casts = [
-        'container_positions' => 'array',
+        'loading' => 'array',
         'released_at' => 'datetime',
     ];
 
