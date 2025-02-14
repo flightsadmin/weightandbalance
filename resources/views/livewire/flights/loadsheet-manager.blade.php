@@ -8,9 +8,13 @@
                         @if ($loadsheet && !$loadsheet->final)
                             <button class="btn btn-success btn-sm m-0" wire:click="finalizeLoadsheet">
                                 <i class="bi bi-check2-circle"></i> Finalize Loadsheet</button>
+                        @else
+                            <button class="btn btn-danger btn-sm m-0" wire:click="revokeLoadsheet"
+                                wire:confirm="Are you sure you want to revoke this loadsheet?">
+                                <i class="bi bi-trash-fill"></i> Revoke Loadsheet</button>
                         @endif
                         <button class="btn btn-primary btn-sm m-0" wire:click="generateLoadsheet"
-                            {{ !$flight->fuel || !$loadplan || $loadplan->status !== 'released' ? 'disabled' : '' }}>
+                            {{ !$flight->fuel || !$loadplan || $loadplan->status !== 'released' || $loadsheet->final ? 'disabled' : '' }}>
                             <i class="bi bi-plus-circle"></i> Generate New Loadsheet</button>
                     </div>
                 </div>

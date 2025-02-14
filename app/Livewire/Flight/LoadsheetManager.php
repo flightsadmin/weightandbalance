@@ -106,6 +106,17 @@ class LoadsheetManager extends Component
         $this->dispatch('alert', icon: 'success', message: 'Loadsheet finalized successfully.');
     }
 
+    public function revokeLoadsheet()
+    {
+        $this->loadsheet->update([
+            'final' => false,
+            'released_by' => null,
+            'released_at' => null,
+        ]);
+
+        $this->dispatch('alert', icon: 'success', message: 'Loadsheet Revoked successfully.');
+    }
+
     public function generateLoadsheet()
     {
         $distribution = [

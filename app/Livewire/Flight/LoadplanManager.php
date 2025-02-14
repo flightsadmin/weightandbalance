@@ -5,7 +5,6 @@ namespace App\Livewire\Flight;
 use App\Models\Flight;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class LoadplanManager extends Component
 {
@@ -136,22 +135,33 @@ class LoadplanManager extends Component
             $this->dispatch('alert', icon: 'error', message: 'Loadplan must be released before printing LIRF.');
             return;
         }
+        $loadInstructions = $this->flight->aircraft->type->holds()
+            ->with('positions')
+            ->get()
+            ->flatMap(function ($hold) {
+                return $hold->positions->map(function ($position) use ($hold) {
+                    $containerData = collect($this->containerPositions)
+                        ->first(function ($container) use ($position) {
+                            return $container['position_id'] === $position->id;
+                        });
 
-        // Use the stored container data directly
-        $loadInstructions = collect($this->containerPositions)->map(function ($containerData) {
-            return [
-                'hold' => $containerData['hold_name'],
-                'position' => $containerData['position_code'],
-                'container_number' => $containerData['container_number'],
-                'content_type' => $containerData['content_type'],
-                'weight' => $containerData['weight'],
-                'pieces' => $containerData['pieces'] ?? null,
-                'destination' => $containerData['destination'],
-            ];
-        })->sortBy([
-                    ['hold', 'asc'],
-                    ['position', 'asc'],
-                ])->values();
+                    return [
+                        'hold' => $hold->name,
+                        'position' => $position->code,
+                        'container_number' => $containerData['container_number'] ?? 'NIL',
+                        'content_type' => $containerData['content_type'] ?? 'NIL',
+                        'weight' => $containerData['weight'] ?? 0,
+                        'pieces' => $containerData['pieces'] ?? null,
+                        'destination' => $containerData['destination'] ?? $this->flight->arrival_airport,
+                        'is_empty' => is_null($containerData),
+                    ];
+                });
+            })
+            ->sortBy([
+                ['hold', 'asc'],
+                ['position', 'asc'],
+            ])
+            ->values();
 
         $this->loadingInstructions = $loadInstructions;
 

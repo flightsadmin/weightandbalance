@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->foreignId('flight_id')->constrained()->cascadeOnDelete();
             $table->foreignId('position_id')->nullable()->constrained('hold_positions')->nullOnDelete();
             $table->enum('type', ['baggage', 'cargo']);
+            $table->integer('pieces')->nullable();
             $table->enum('status', ['empty', 'loading', 'loaded', 'unloaded'])->default('unloaded')->nullable();
             $table->timestamps();
 
