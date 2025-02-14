@@ -23,7 +23,10 @@ class LoadplanManager extends Component
 
     public function mount(Flight $flight)
     {
-        $this->flight = $flight->load('aircraft.type.holds.positions');
+        $this->flight = $flight->load([
+            'aircraft.type.holds.positions',
+            'containers' => fn($q) => $q->withPivot(['type', 'pieces', 'status', 'position_id'])
+        ]);
         $this->loadplan = $flight->loadplans()->latest()->first()
             ?? $flight->loadplans()->create([
                 'status' => 'draft',
@@ -36,7 +39,11 @@ class LoadplanManager extends Component
 
     public function updateContainerPosition($containerId, $fromPosition, $toPosition)
     {
-        $container = $this->flight->containers()->find($containerId);
+        // Load container with pivot data
+        $container = $this->flight->containers()
+            ->withPivot(['type', 'pieces', 'status', 'position_id'])
+            ->find($containerId);
+
         if (!$container)
             return;
 
@@ -172,7 +179,7 @@ class LoadplanManager extends Component
     public function render()
     {
         $containers = $this->flight->containers()
-            ->withPivot(['type', 'status', 'position_id'])
+            ->withPivot(['type', 'pieces', 'status', 'position_id'])
             ->get();
 
         $availableContainers = $containers->whereNotIn('id', array_keys($this->containerPositions));

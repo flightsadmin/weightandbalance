@@ -146,6 +146,7 @@
                             :class="{ 'unplanned-area': true, 'highlight': selectedContainer || selectedPosition }">
                             <div class="container-list row g-2" x-on:click.stop>
                                 @forelse ($availableContainers as $container)
+                                    @dump($container->pivot->type)
                                     <div class="container-item col-md-4 {{ $container->pivot->type }}"
                                         x-on:click.stop="selectContainer({{ $container->id }})"
                                         :class="{ 'selected': selectedContainer === {{ $container->id }} }">
