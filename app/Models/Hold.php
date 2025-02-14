@@ -52,8 +52,11 @@ class Hold extends Model
 
     public function getCurrentWeight($containerPositions, $containers)
     {
-        return $containers->whereIn('id', array_keys($containerPositions))
-            ->filter(fn($container) => str_starts_with($containerPositions[$container->id], $this->code))
+        return collect($containerPositions)
+            ->filter(function ($containerData) {
+                // Check if the container is in this hold
+                return $containerData['hold_name'] === $this->name;
+            })
             ->sum('weight');
     }
 

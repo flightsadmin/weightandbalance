@@ -11,7 +11,7 @@
     height: 300px;
     border: 1px solid #0d6efd;
     background-color: #fff;
-    overflow: auto; /* Ensure overflow if the container is too small */
+    overflow: auto;
 }
 
 .hold-group {
@@ -22,7 +22,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    overflow: visible; /* Allow overflow within the group */
+    overflow: visible;
 }
 
 .hold-header {
@@ -39,7 +39,7 @@
     padding: 0.25rem;
     flex: 1;
     justify-content: space-around;
-    overflow: visible; /* Ensure overflow within the positions */
+    overflow: visible;
 }
 
 .position-row {
@@ -48,7 +48,7 @@
     align-items: center;
     justify-content: space-between;
     flex: 1;
-    overflow: visible; /* Allow content to overflow */
+    overflow: visible;
 }
 
 .row-number {
@@ -64,7 +64,7 @@
     justify-content: space-around;
     flex: 1;
     height: 100%;
-    overflow: visible; /* Allow overflow within position slots */
+    overflow: visible;
     gap: 0.5rem;
     padding: 0.25rem;
 }
@@ -86,51 +86,129 @@
     transition: all 0.2s ease-in-out;
 }
 
-.position-L {
-    border-bottom: 1px solid #0d6efd; 
+.position-L { 
+    border-bottom: 1px solid #0d6efd;
+    /* margin-right: 0.15rem; */
 }
 
-.position-R { 
-    border-top: 1px solid #0d6efd;
+.position-R {
+    border-top: 1px solid #0d6efd; 
+    /* margin-left: 0.15rem; */
 }
 
 .position-center { 
     border-top: 1px solid #0d6efd;
     border-bottom: 1px solid #0d6efd;
+    /* margin: 0.15rem; */
+}
+
+.hold-position.selected {
+    border-color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.hold-position.occupied {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.position-card {
+    width: 100%;
+    height: 100%;
+}
+
+.position-card .card {
+    height: 100%;
+    margin: 0;
+    border: none;
+}
+
+.card.baggage { 
+    background-color: rgba(13, 110, 253, 0.5);
+    font-size: 0.70rem;
+}
+
+.card.cargo { 
+    background-color: rgba(255, 193, 7, 0.5);
+    font-size: 0.70rem;
+}
+
+.position-code {
+    font-size: 0.65rem;
+    font-weight: bold;
+    color: #6c757d;
+    margin-bottom: 0.1rem;
+}
+
+.container-number {
+    font-size: 0.65rem;
+    margin-bottom: 0.1rem;
+}
+
+.container-details {
+    font-size: 0.60rem;
+    line-height: 1;
 }
 
 .empty-position {
     text-align: center;
-    color: #6c757d;
-    font-size: 0.75rem;
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    margin: 1px;
+    justify-content: center;
 }
 
-.empty-position i { font-size: 0.75rem; margin-bottom: 0.15rem; }
-.empty-position small { font-size: 0.75rem; opacity: 0.75; }
-
-.position-card,
-.bulk-container-item {
-    width: 100%;
-    cursor: pointer;
-}
-
-.position-card .card {
-    margin: 0;
-    border: 1px solid #dee2e6;
-}
-
-.position-card .card-body {
-    padding: 0.5rem;
-}
-
-.position-card h6 { 
-    font-size: 0.75rem;
+.empty-position .position-code {
     margin-bottom: 0.25rem;
+}
+
+.empty-position i {
+    font-size: 0.75rem;
+    margin-bottom: 0.15rem;
+    color: #6c757d;
+}
+
+.empty-position small {
+    font-size: 0.65rem;
+    color: #6c757d;
+}
+
+.card-body .container-number {
+    font-size: 0.60rem;
+    color: #6c757d;
+}   
+
+.position-card.selected .card {
+    border: 1px solid #0d6efd;
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.hold-positions {
+    display: flex;
+    border: 1px solid #0d6efd;
+    padding: 0.25rem;
+    flex: 1;
+    justify-content: space-around;
+    overflow: visible;
+}
+
+.position-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+}
+
+.position-slots {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: space-around;
+    flex: 1;
+    height: 100%;
+    gap: 0.5rem;
+    padding: 0.25rem;
 }
 
 .hold-section {
@@ -162,139 +240,11 @@
     border-left-color: #dc3545;
 }
 
-.hold-group[data-hold="FH"],
-.hold-group[data-hold="AH"] {
-    border-color: #0d6efd;
-}
-
-.hold-group[data-hold="FH"] .hold-header,
-.hold-group[data-hold="AH"] .hold-header {
-    border-bottom-color: #0d6efd;
-}
-
-.hold-group[data-hold="FH"] .hold-positions,
-.hold-group[data-hold="AH"] .hold-positions {
-    border-color: #0d6efd;
-}
-
-/* Adjusting bulk hold to be bigger */
-.hold-group[data-hold="BH"] {
-    flex: 0.6;
-}
-
-.hold-group[data-hold="BH"] .hold-positions {
-    display: flex;
-    flex-wrap: nowrap;  /* Prevent wrapping */
-    justify-content: flex-start;
-    gap: 0.25rem;
-    overflow-x: auto;  /* Enable horizontal scroll */
-    overflow-y: hidden; /* Disable vertical scroll */
-    flex-direction: row; /* Ensure horizontal layout */
-    padding: 0.25rem;
-    /* Add smooth scrolling */
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Hide scrollbar but keep functionality */
-.hold-group[data-hold="BH"] .hold-positions::-webkit-scrollbar {
-    height: 6px;
-}
-
-.hold-group[data-hold="BH"] .hold-positions::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-.hold-group[data-hold="BH"] .hold-positions::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
-}
-
-.hold-group[data-hold="BH"] .hold-position {
-    flex: 0 0 auto;  /* Prevent position shrinking */
-    width: 80px;     /* Match other hold sizes */
-    height: 80px;
-    min-height: unset;
-    padding: 0.25rem;
-    margin: 1px;
-}
-
-.hold-position:not([data-hold="BH"]).occupied {
-    cursor: not-allowed;
-}
-
-.hold-position:not([data-hold="BH"]).occupied.dragover {
-    background-color: rgba(220, 53, 69, 0.1) !important;
-    border-color: #dc3545 !important;
-}
-
-.bulk-containers-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    padding: 0.25rem;
-}
-
-.bulk-container-item,
-.empty-bulk-position {
-    flex: 0 0 auto;
-    width: 80px;
-    height: 80px;
-    text-align: center;
-    color: #6c757d;
-    font-size: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 1px;
-}
-
-.bulk-container-details {
-    width: 100%;
-    text-align: center;
-}
-
-.container-number { 
-    font-weight: 500;
-    font-size: 0.75rem;
-    word-wrap: break-word;
-    white-space: normal; 
-}
-
 .container-weight { 
     color: #6c757d; 
     font-size: 0.75rem; 
 }
 
-.dragging,
-.dragover {
-    display: none;
-}
-
-/* Add these styles to ensure proper visibility */
-.hold-position.occupied {
-    background-color: rgba(13, 110, 253, 0.05);
-}
-
-.hold-position.selected {
-    border-color: #0d6efd;
-    background-color: rgba(13, 110, 253, 0.1);
-}
-
-.position-card.selected .card,
-.bulk-container-item.selected {
-    border-color: #0d6efd;
-    background-color: rgba(13, 110, 253, 0.05);
-}
-
-/* Ensure proper spacing in the position slots */
-.position-slots {
-    gap: 0.5rem;
-    padding: 0.25rem;
-}
-
-/* Add these styles for the unplanned area */
 .unplanned-area {
     min-height: 100px;
     border: 2px dashed #dee2e6;
@@ -307,7 +257,6 @@
     background-color: rgba(13, 110, 253, 0.05);
 }
 
-/* Make sure empty state is centered */
 .container-list:empty + .text-center {
     width: 100%;
     display: flex;
@@ -336,25 +285,14 @@
     border-color: #0d6efd;
 }
 
-/* Add these styles for container type colors */
 .container-item.baggage .card {
-    border-left: 4px solid #0d6efd;  /* Bootstrap primary color for baggage */
+    border-left: 4px solid #0d6efd;
     background-color: rgba(13, 110, 253, 0.05);
 }
 
 .container-item.cargo .card {
-    border-left: 4px solid #ffc107;  /* Bootstrap warning color for cargo */
+    border-left: 4px solid #ffc107;
     background-color: rgba(255, 193, 7, 0.05);
-}
-
-.card.baggage {
-    background-color: rgba(13, 110, 253, 0.5);
-    font-size: 0.70rem;
-}
-
-.card.cargo {
-    background-color: rgba(255, 193, 7, 0.5);
-    font-size: 0.70rem;
 }
 
 .bulk-container-item.baggage {
