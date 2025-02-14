@@ -1,4 +1,57 @@
-<div x-data="containerManager()">
+<div x-data="{
+    selectedContainer: null,
+    selectedPosition: null,
+
+    selectContainer(containerId) {
+        if (this.selectedContainer === containerId) {
+            this.selectedContainer = null;
+        } else {
+            this.selectedContainer = containerId;
+            this.selectedPosition = null;
+        }
+    },
+
+    selectPosition(positionId) {
+        if (this.selectedContainer) {
+            $wire.updateContainerPosition(this.selectedContainer, null, positionId);
+            this.selectedContainer = null;
+            this.selectedPosition = null;
+        } else if (this.selectedPosition === positionId) {
+            this.selectedPosition = null;
+        } else {
+            let containerInPosition = Object.entries($wire.containerPositions)
+                .find(([contId, posId]) => posId === positionId);
+
+            if (containerInPosition) {
+                $wire.updateContainerPosition(containerInPosition[0], positionId, null);
+            }
+
+            this.selectedPosition = positionId;
+            this.selectedContainer = null;
+        }
+    },
+
+    removeSelectedContainer() {
+        // Handle container in position
+        if (this.selectedPosition) {
+            let containerInPosition = Object.entries($wire.containerPositions)
+                .find(([contId, posId]) => posId === this.selectedPosition);
+
+            if (containerInPosition) {
+                $wire.updateContainerPosition(containerInPosition[0], this.selectedPosition, null);
+            }
+            this.selectedPosition = null;
+        }
+        // Handle selected container
+        else if (this.selectedContainer) {
+            let currentPosition = $wire.containerPositions[this.selectedContainer];
+            if (currentPosition) {
+                $wire.updateContainerPosition(this.selectedContainer, currentPosition, null);
+            }
+            this.selectedContainer = null;
+        }
+    }
+}">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="card-title">Loadplan</h3>
@@ -130,63 +183,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function containerManager() {
-            return {
-                selectedContainer: null,
-                selectedPosition: null,
-
-                selectContainer(containerId) {
-                    if (this.selectedContainer === containerId) {
-                        this.selectedContainer = null;
-                    } else {
-                        this.selectedContainer = containerId;
-                        this.selectedPosition = null;
-                    }
-                },
-
-                selectPosition(positionId) {
-                    if (this.selectedContainer) {
-                        @this.updateContainerPosition(this.selectedContainer, null, positionId);
-                        this.selectedContainer = null;
-                        this.selectedPosition = null;
-                    } else if (this.selectedPosition === positionId) {
-                        this.selectedPosition = null;
-                    } else {
-                        let containerInPosition = Object.entries(@json($containerPositions))
-                            .find(([contId, posId]) => posId === positionId);
-
-                        if (containerInPosition) {
-                            @this.updateContainerPosition(containerInPosition[0], positionId, null);
-                        }
-
-                        this.selectedPosition = positionId;
-                        this.selectedContainer = null;
-                    }
-                },
-
-                removeSelectedContainer() {
-                    // Handle container in position
-                    if (this.selectedPosition) {
-                        let containerInPosition = Object.entries(@json($containerPositions))
-                            .find(([contId, posId]) => posId === this.selectedPosition);
-
-                        if (containerInPosition) {
-                            @this.updateContainerPosition(containerInPosition[0], this.selectedPosition, null);
-                        }
-                        this.selectedPosition = null;
-                    }
-                    // Handle selected container
-                    else if (this.selectedContainer) {
-                        let currentPosition = @json($containerPositions)[this.selectedContainer];
-                        if (currentPosition) {
-                            @this.updateContainerPosition(this.selectedContainer, currentPosition, null);
-                        }
-                        this.selectedContainer = null;
-                    }
-                }
-            };
-        }
-    </script>
 </div>
