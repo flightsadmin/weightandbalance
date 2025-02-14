@@ -55,20 +55,18 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="card-title">Loadplan</h3>
-            @if ($loadplan->status === 'released')
-                <span class="badge bg-success">v{{ $loadplan->version }}</span>
-            @else
-                <span class="badge bg-warning">Draft</span>
-            @endif
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="me-2">
-                </div>
+            <div class="d-flex gap-2">
                 <button wire:click="releaseLoadplan" class="btn btn-sm btn-{{ $loadplan->status === 'released' ? 'warning' : 'primary' }}">
                     @if ($loadplan->status === 'released')
                         <i class="bi bi-arrow-repeat"></i> Release Loadplan v{{ $loadplan->version + 1 }}
                     @else
                         <i class="bi bi-check2-circle"></i> Release Loadplan
                     @endif
+                </button>
+                <button class="btn btn-sm btn-secondary" wire:click="previewLIRF"
+                    @if ($loadplan->status !== 'released') disabled @endif data-bs-toggle="modal"
+                    data-bs-target="#lirfPreviewModal">
+                    <i class="bi bi-file-earmark-text"></i> Preview LIRF
                 </button>
             </div>
         </div>
@@ -179,6 +177,29 @@
 
                 <div class="col-md-6">
                     <livewire:container.manager :flight="$flight" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIRF Preview Modal -->
+    <div class="modal modal-fullscreen fade" id="lirfPreviewModal" tabindex="-1" wire:ignore.self>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h5 class="modal-title">Loading Instruction Report Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-2">
+                    @if ($showLirfPreview)
+                        @include('livewire.flights.loading-instruction')
+                    @endif
+                </div>
+                <div class="modal-footer py-2 d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-sm" wire:click="printLIRF">
+                        <i class="bi bi-printer"></i> Print LIRF
+                    </button>
                 </div>
             </div>
         </div>

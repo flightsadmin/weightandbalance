@@ -5,6 +5,7 @@ namespace App\Livewire\Flight;
 use App\Models\Flight;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LoadplanManager extends Component
 {
@@ -14,7 +15,11 @@ class LoadplanManager extends Component
 
     public $containerPositions = [];
 
+    public $loadingInstructions = [];
+
     public $isDragging = false;
+
+    public $showLirfPreview = false;
 
     public function mount(Flight $flight)
     {
@@ -105,6 +110,111 @@ class LoadplanManager extends Component
             icon: 'success',
             message: 'Loadplan released successfully.'
         );
+    }
+
+    public function printLIRF()
+    {
+        if ($this->loadplan->status !== 'released') {
+            $this->dispatch('alert', icon: 'error', message: 'Loadplan must be released before printing LIRF.');
+            return;
+        }
+
+        $loadInstructions = collect($this->containerPositions)->map(function ($positionId, $containerId) {
+            $container = $this->flight->containers->find($containerId);
+            $position = $this->flight->aircraft->type->holds()
+                ->whereHas('positions', fn($q) => $q->where('id', $positionId))
+                ->with(['positions' => fn($q) => $q->where('id', $positionId)])
+                ->first()
+                ->positions
+                ->first();
+
+            return [
+                'hold' => $position->hold->name,
+                'position' => $position->code,
+                'container_number' => $container->container_number,
+                'content_type' => $container->pivot->type,
+                'weight' => $container->weight,
+                'destination' => $this->flight->arrival_airport,
+            ];
+        })->sortBy([
+                    ['hold', 'asc'],
+                    ['position', 'asc'],
+                ])->values();
+
+        $this->loadingInstructions = $loadInstructions;
+        $holdSummary = $this->flight->aircraft->type->holds
+            ->map(function ($hold) {
+                $actualWeight = $hold->getCurrentWeight($this->containerPositions, $this->flight->containers);
+                return [
+                    'name' => $hold->name,
+                    'actual_weight' => $actualWeight,
+                    'max_weight' => $hold->max_weight,
+                    'available' => $hold->max_weight - $actualWeight,
+                ];
+            });
+
+        $pdf = Pdf::loadView('livewire.flights.loading-instruction', [
+            'flight' => $this->flight,
+            'loadplan' => $this->loadplan,
+            'loadInstructions' => $this->loadingInstructions,
+            'holdSummary' => $holdSummary,
+        ]);
+
+        return response()->streamDownload(
+            fn() => print ($pdf->output()),
+            "LIRF_{$this->flight->flight_number}_{$this->loadplan->version}.pdf"
+        );
+    }
+
+    public function previewLIRF()
+    {
+        if ($this->loadplan->status !== 'released') {
+            $this->dispatch('alert', icon: 'error', message: 'Loadplan must be released before printing LIRF.');
+            return;
+        }
+
+        $loadInstructions = collect($this->containerPositions)->map(function ($positionId, $containerId) {
+            $container = $this->flight->containers->find($containerId);
+            $position = $this->flight->aircraft->type->holds()
+                ->whereHas('positions', fn($q) => $q->where('id', $positionId))
+                ->with(['positions' => fn($q) => $q->where('id', $positionId)])
+                ->first()
+                ->positions
+                ->first();
+
+            return [
+                'hold' => $position->hold->name,
+                'position' => $position->code,
+                'container_number' => $container->container_number,
+                'content_type' => $container->pivot->type,
+                'weight' => $container->weight,
+                'destination' => $this->flight->arrival_airport,
+            ];
+        })->sortBy([
+                    ['hold', 'asc'],
+                    ['position', 'asc'],
+                ])->values();
+
+        $this->loadingInstructions = $loadInstructions;
+
+        $holdSummary = $this->flight->aircraft->type->holds
+            ->map(function ($hold) {
+                $actualWeight = $hold->getCurrentWeight($this->containerPositions, $this->flight->containers);
+                return [
+                    'name' => $hold->name,
+                    'actual_weight' => $actualWeight,
+                    'max_weight' => $hold->max_weight,
+                    'available' => $hold->max_weight - $actualWeight,
+                ];
+            });
+
+        $this->showLirfPreview = true;
+        $this->dispatch('show-lirf-preview', [
+            'flight' => $this->flight,
+            'loadplan' => $this->loadplan,
+            'loadInstructions' => $loadInstructions,
+            'holdSummary' => $holdSummary,
+        ]);
     }
 
     #[On('containerSaved')]

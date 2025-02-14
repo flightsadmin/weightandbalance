@@ -47,12 +47,9 @@ class Manager extends Component
 
     public function unassignContainer($containerId)
     {
-        $d = $this->flight->containers()->findOrFail($containerId)->pivot->container_id;
-        dd($d);
         $this->flight->containers()->detach($containerId);
         $this->dispatch('alert', icon: 'success', message: 'Container unassigned successfully.');
         $this->dispatch('containerSaved');
-
     }
 
     #[On('container_position_updated')]

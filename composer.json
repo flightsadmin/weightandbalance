@@ -10,10 +10,11 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "fakerphp/faker": "^1.23",
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.5",
-        "fakerphp/faker": "^1.23",
         "nativephp/electron": "^1.0.0-beta.1"
     },
     "require-dev": {
