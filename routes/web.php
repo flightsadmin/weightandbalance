@@ -30,14 +30,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('containers', App\Livewire\Container\Manager::class)->name('containers.index');
     Route::get('crews', App\Livewire\Crew\Manager::class)->name('crews.index');
 
-    Route::get('users', App\Livewire\Users::class)->name('users.index');
+    Route::get('users', App\Livewire\User\Manager::class)->name('users.index');
 });
-Route::middleware(['auth', 'role:super-admin|admin|user'])->prefix('admin')->group(function () {
-    Route::get('/', App\Livewire\Users::class)->name('admin.index');
-    Route::get('/users', App\Livewire\Users::class)->name('admin.users');
-    Route::get('/users/{id}', [App\Livewire\Users::class, 'details'])->name('admin.users.show');
-    Route::get('/roles', App\Livewire\Roles::class)->name('admin.roles');
-    Route::get('/permissions', App\Livewire\Permissions::class)->name('admin.permissions');
+Route::middleware(['auth', 'role:super-admin'])->prefix('admin')->group(function () {
+    Route::get('/users', App\Livewire\User\Manager::class)->name('admin.users');
+    Route::get('/roles', App\Livewire\Role\Manager::class)->name('admin.roles');
+    Route::get('/permissions', App\Livewire\Permission\Manager::class)->name('admin.permissions');
 });
 
 

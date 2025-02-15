@@ -66,6 +66,7 @@ class DatabaseSeeder extends Seeder
         });
 
         $this->call([
+            AdminSeeder::class,
             AircraftConfigSeeder::class,
             EnvelopeSeeder::class,
             CrewSeatingSeeder::class,

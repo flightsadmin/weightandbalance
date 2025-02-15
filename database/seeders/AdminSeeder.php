@@ -8,7 +8,6 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\PermissionRegistrar;
 
 class AdminSeeder extends Seeder
 {
@@ -18,7 +17,7 @@ class AdminSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $actions = ["create", "edit", "view", "delete"];
-        $models = ["User", "Role", "Permission", "Schedule"];
+        $models = ["User", "Role", "Permission", "Schedule", "Flight"];
 
         foreach ($models as $model) {
             foreach ($actions as $action) {
@@ -30,11 +29,11 @@ class AdminSeeder extends Seeder
         $roles = [
             [
                 'name' => 'user',
-                'permissions' => ['viewUser'],
+                'permissions' => ['viewUser', 'viewRole', 'viewPermission'],
             ],
             [
                 'name' => 'admin',
-                'permissions' => ['viewUser', 'createUser'],
+                'permissions' => ['viewUser', 'createUser', 'editUser', 'deleteUser', 'viewRole', 'createRole', 'editRole', 'deleteRole', 'viewPermission', 'createPermission', 'editPermission', 'deletePermission'],
             ],
             [
                 'name' => 'super-admin',

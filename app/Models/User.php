@@ -22,6 +22,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'active',
+        'last_login_at',
+        'last_login_ip',
     ];
 
     /**
@@ -44,6 +47,21 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'active' => 'boolean',
+            'last_login_at' => 'datetime',
         ];
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('active', true);
+    }
+
+    public function updateLastLogin()
+    {
+        $this->update([
+            'last_login_at' => now(),
+            'last_login_ip' => request()->ip()
+        ]);
     }
 }
