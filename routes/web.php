@@ -19,14 +19,27 @@ Route::get('/database', function () {
     return redirect()->back()->with('success', 'Database migrated and seeded successfully!');
 })->name('migrate');
 
-// Public routes
-Route::get('airlines', App\Livewire\Airline\Index::class)->name('airlines.index');
-Route::get('airlines/{airline}', App\Livewire\Airline\Show::class)->name('airlines.show');
-Route::get('aircraft_types', App\Livewire\AircraftType\Manager::class)->name('aircraft_types.index');
-Route::get('aircraft_types/{aircraft_type}', App\Livewire\AircraftType\Show::class)->name('aircraft_types.show');
-Route::get('flights', App\Livewire\Flight\FlightManager::class)->name('flights.index');
-Route::get('flights/{flight}', App\Livewire\Flight\Show::class)->name('flights.show');
-Route::get('flights/{flight}/containers', App\Livewire\Container\Manager::class)->name('flights.containers');
+Route::middleware(['auth'])->group(function () {
+    Route::get('airlines', App\Livewire\Airline\Index::class)->name('airlines.index');
+    Route::get('airlines/{airline}', App\Livewire\Airline\Show::class)->name('airlines.show');
+    Route::get('aircraft_types', App\Livewire\AircraftType\Manager::class)->name('aircraft_types.index');
+    Route::get('aircraft_types/{aircraft_type}', App\Livewire\AircraftType\Show::class)->name('aircraft_types.show');
+    Route::get('flights', App\Livewire\Flight\FlightManager::class)->name('flights.index');
+    Route::get('flights/{flight}', App\Livewire\Flight\Show::class)->name('flights.show');
+    Route::get('flights/{flight}/containers', App\Livewire\Container\Manager::class)->name('flights.containers');
+    Route::get('containers', App\Livewire\Container\Manager::class)->name('containers.index');
+    Route::get('crews', App\Livewire\Crew\Manager::class)->name('crews.index');
 
-Route::get('containers', App\Livewire\Container\Manager::class)->name('containers.index');
-Route::get('crews', App\Livewire\Crew\Manager::class)->name('crews.index');
+    Route::get('users', App\Livewire\Users::class)->name('users.index');
+});
+Route::middleware(['auth', 'role:super-admin|admin|user'])->prefix('admin')->group(function () {
+    Route::get('/', App\Livewire\Users::class)->name('admin.index');
+    Route::get('/users', App\Livewire\Users::class)->name('admin.users');
+    Route::get('/users/{id}', [App\Livewire\Users::class, 'details'])->name('admin.users.show');
+    Route::get('/roles', App\Livewire\Roles::class)->name('admin.roles');
+    Route::get('/permissions', App\Livewire\Permissions::class)->name('admin.permissions');
+});
+
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Auth::routes();

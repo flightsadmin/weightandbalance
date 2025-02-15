@@ -27,13 +27,11 @@
 
     <div class="dropdown mt-auto mb-3">
         {{ $flights->links() }}
-        {{-- <div class="d-flex flex-column align-items-center"> --}}
         <hr class="mt-2">
         <a href="#" class="d-flex align-items-center text-center text-reset text-decoration-none dropdown-toggle"
             data-bs-toggle="dropdown" aria-expanded="false">
-            <strong>Dropdown</strong>
+            <strong>{{ auth()->user()->name }}</strong>
         </a>
-        {{-- </div> --}}
         <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
             <li>
                 <form action="{{ route('migrate') }}" method="GET" style="margin: 0;">
@@ -64,6 +62,14 @@
             <li class="dropdown-item">
                 <a class="nav-link" wire:navigate href="{{ route('crews.index') }}">
                     <i class="bi bi-people-fill"></i> Crew
+                </a>
+            </li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li class="dropdown-item">
+                <a class="nav-link" wire:navigate href="{{ route('users.index') }}">
+                    <i class="bi bi-person-fill-dash"></i> Users
                 </a>
             </li>
         </ul>

@@ -14,7 +14,7 @@
                                 <i class="bi bi-trash-fill"></i> Revoke Loadsheet</button>
                         @endif
                         <button class="btn btn-primary btn-sm m-0" wire:click="generateLoadsheet"
-                            {{ !$flight->fuel || !$loadplan || $loadplan->status !== 'released' || $loadsheet->final ? 'disabled' : '' }}>
+                            {{ !$flight->fuel || !$loadplan || $loadplan->status !== 'released' ? 'disabled' : '' }}>
                             <i class="bi bi-plus-circle"></i> Generate New Loadsheet</button>
                     </div>
                 </div>

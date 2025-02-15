@@ -57,16 +57,13 @@
             <h3 class="card-title">Loadplan</h3>
             <div class="d-flex gap-2">
                 <button wire:click="releaseLoadplan" class="btn btn-sm btn-{{ $loadplan->status === 'released' ? 'warning' : 'primary' }}">
-                    @if ($loadplan->status === 'released')
-                        <i class="bi bi-arrow-repeat"></i> Release Loadplan v{{ $loadplan->version + 1 }}
-                    @else
-                        <i class="bi bi-check2-circle"></i> Release Loadplan
-                    @endif
+                    <i class="bi bi-{{ $loadplan->status === 'released' ? 'arrow-repeat' : 'check2-circle' }}"></i>
+                    Release Loadplan v{{ $loadplan->version + 1 }}
                 </button>
-                <button class="btn btn-sm btn-secondary" wire:click="previewLIRF"
+                <button class="btn btn-sm btn-primary" wire:click="previewLIRF"
                     @if ($loadplan->status !== 'released') disabled @endif data-bs-toggle="modal"
                     data-bs-target="#lirfPreviewModal">
-                    <i class="bi bi-file-earmark-text"></i> Preview LIRF
+                    <i class="bi bi-file-earmark-pdf-fill"></i> Preview LIRF
                 </button>
             </div>
         </div>
