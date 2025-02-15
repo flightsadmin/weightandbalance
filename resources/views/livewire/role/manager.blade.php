@@ -94,7 +94,7 @@
                                                                 value="{{ $permission['name'] }}"
                                                                 id="permission_{{ $permission['id'] }}">
                                                             <label class="form-check-label" for="permission_{{ $permission['id'] }}">
-                                                                {{ str($permission['name'])->title() }}
+                                                                {{ $permission['name'] }}
                                                             </label>
                                                         </div>
                                                     </td>

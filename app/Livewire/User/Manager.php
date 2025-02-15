@@ -39,6 +39,8 @@ class Manager extends Component
 
     public function mount()
     {
+        $this->authorize('viewUser');
+
         $this->roles = Role::all()->map(function ($role) {
             return [
                 'id' => $role->id,
@@ -49,6 +51,8 @@ class Manager extends Component
 
     public function edit(User $user)
     {
+        $this->authorize('editUser');
+
         $this->editingUser = $user;
         $this->form = [
             'name' => $user->name,
@@ -63,6 +67,12 @@ class Manager extends Component
 
     public function save()
     {
+        if ($this->editingUser) {
+            $this->authorize('editUser');
+        } else {
+            $this->authorize('createUser');
+        }
+
         $rules = $this->rules;
 
         if ($this->editingUser) {
@@ -99,8 +109,20 @@ class Manager extends Component
         $this->reset(['form', 'editingUser', 'showModal', 'selectedRoles']);
     }
 
+    public function delete(User $user)
+    {
+        $this->authorize('deleteUser');
+        abort_if($user->id === auth()->id(), 403, 'Cannot delete your own account');
+
+        $user->delete();
+        $this->dispatch('alert', icon: 'success', message: 'User deleted successfully.');
+    }
+
     public function toggleStatus(User $user)
     {
+        $this->authorize('editUser');
+        abort_if($user->hasRole('super-admin') && !auth()->user()->hasRole('super-admin'), 403);
+
         $user->update(['active' => !$user->active]);
         $this->dispatch('alert', icon: 'success', message: 'User status updated successfully.');
     }

@@ -82,6 +82,14 @@
                     <i class="bi bi-database-fill-gear"></i> Permissions
                 </a>
             </li>
+            <li class="dropdown-item">
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="nav-link">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </form>
+            </li>
         </ul>
     </div>
 </div>

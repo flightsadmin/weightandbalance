@@ -6,10 +6,12 @@
                 <input type="text" wire:model.live.debounce.300ms="search"
                     class="form-control form-control-sm"
                     placeholder="Search users...">
-                <button class="btn btn-primary btn-sm" wire:click="$toggle('showModal')"
-                    data-bs-toggle="modal" data-bs-target="#userFormModal">
-                    <i class="bi bi-person-plus"></i> Add User
-                </button>
+                @can('createUser')
+                    <button class="btn btn-primary btn-sm" wire:click="$toggle('showModal')"
+                        data-bs-toggle="modal" data-bs-target="#userFormModal">
+                        <i class="bi bi-person-plus"></i> Add User
+                    </button>
+                @endcan
             </div>
         </div>
 
@@ -36,17 +38,30 @@
                                     @endforeach
                                 </td>
                                 <td>
-                                    <button wire:click="toggleStatus({{ $user->id }})"
-                                        class="btn btn-sm btn-{{ $user->active ? 'success' : 'danger' }}">
-                                        {{ $user->active ? 'Active' : 'Inactive' }}
-                                    </button>
+                                    @if (auth()->user()->canEditUser($user))
+                                        <button wire:click="toggleStatus({{ $user->id }})"
+                                            @if ($user->hasRole('super-admin') && !auth()->user()->hasRole('super-admin')) disabled @endif
+                                            class="btn btn-sm btn-{{ $user->active ? 'success' : 'danger' }}">
+                                            {{ $user->active ? 'Active' : 'Inactive' }}
+                                        </button>
+                                    @endif
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary"
-                                        wire:click="edit({{ $user->id }})"
-                                        data-bs-toggle="modal" data-bs-target="#userFormModal">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
+                                    @can('editUser')
+                                        <button class="btn btn-sm btn-primary"
+                                            wire:click="edit({{ $user->id }})"
+                                            data-bs-toggle="modal" data-bs-target="#userFormModal">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    @endcan
+
+                                    @can('deleteUser')
+                                        <button class="btn btn-sm btn-danger"
+                                            wire:click="delete({{ $user->id }})"
+                                            wire:confirm="Are you sure you want to delete this user?">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    @endcan
                                 </td>
                             </tr>
                         @empty
@@ -109,38 +124,40 @@
                                 {{ !$editingUser ? 'required' : '' }}>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Roles</label>
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered">
-                                    <tbody>
-                                        @foreach ($roles->chunk(4) as $chunk)
-                                            <tr>
-                                                @foreach ($chunk as $role)
-                                                    <td class="p-1">
-                                                        <div class="form-check">
-                                                            <input type="checkbox" class="form-check-input"
-                                                                wire:model="selectedRoles"
-                                                                value="{{ $role['name'] }}"
-                                                                id="role_{{ $role['id'] }}">
-                                                            <label class="form-check-label" for="role_{{ $role['id'] }}">
-                                                                {{ str($role['name'])->title() }}
-                                                            </label>
-                                                        </div>
-                                                    </td>
-                                                @endforeach
-                                                @for ($i = $chunk->count(); $i < 4; $i++)
-                                                    <td></td>
-                                                @endfor
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                        @can('editUser')
+                            <div class="mb-3">
+                                <label class="form-label">Roles</label>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered">
+                                        <tbody>
+                                            @foreach ($roles->chunk(4) as $chunk)
+                                                <tr>
+                                                    @foreach ($chunk as $role)
+                                                        <td class="p-1">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" class="form-check-input"
+                                                                    wire:model="selectedRoles"
+                                                                    value="{{ $role['name'] }}"
+                                                                    id="role_{{ $role['id'] }}">
+                                                                <label class="form-check-label" for="role_{{ $role['id'] }}">
+                                                                    {{ str($role['name'])->title() }}
+                                                                </label>
+                                                            </div>
+                                                        </td>
+                                                    @endforeach
+                                                    @for ($i = $chunk->count(); $i < 4; $i++)
+                                                        <td></td>
+                                                    @endfor
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                                @error('selectedRoles')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
                             </div>
-                            @error('selectedRoles')
-                                <div class="text-danger small">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        @endcan
 
                         <div class="mb-3">
                             <div class="form-check form-switch">
