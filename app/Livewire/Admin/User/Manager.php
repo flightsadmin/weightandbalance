@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\User;
+namespace App\Livewire\Admin\User;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -132,13 +132,13 @@ class Manager extends Component
 
     public function render()
     {
-        return view('livewire.user.manager', [
+        return view('livewire.admin.user.manager', [
             'users' => User::query()
                 ->with('roles')
                 ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%")
                     ->orWhere('email', 'like', "%{$this->search}%"))
                 ->orderBy('name')
                 ->paginate(10),
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Permission;
+namespace App\Livewire\Admin\Permission;
 
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -65,11 +65,11 @@ class Manager extends Component
 
     public function render()
     {
-        return view('livewire.permission.manager', [
+        return view('livewire.admin.permission.manager', [
             'permissions' => Permission::query()
                 ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
                 ->orderBy('name')
                 ->paginate(10),
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

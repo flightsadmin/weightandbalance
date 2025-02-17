@@ -29,12 +29,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('flights/{flight}/containers', App\Livewire\Container\Manager::class)->name('flights.containers');
     Route::get('containers', App\Livewire\Container\Manager::class)->name('containers.index');
     Route::get('crews', App\Livewire\Crew\Manager::class)->name('crews.index');
-});
-
-Route::middleware(['auth', 'role:super-admin|admin|user'])->prefix('admin')->group(function () {
-    Route::get('/users', App\Livewire\User\Manager::class)->name('admin.users');
-    Route::get('/roles', App\Livewire\Role\Manager::class)->name('admin.roles');
-    Route::get('/permissions', App\Livewire\Permission\Manager::class)->name('admin.permissions');
+    Route::get('admin', App\Livewire\Admin\Manager::class)->name('admin')->middleware('role:super-admin|admin');
 });
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

@@ -68,18 +68,8 @@
                 <hr class="dropdown-divider">
             </li>
             <li class="dropdown-item">
-                <a class="nav-link" wire:navigate href="{{ route('admin.users') }}">
-                    <i class="bi bi-person-fill-gear"></i> Users
-                </a>
-            </li>
-            <li class="dropdown-item">
-                <a class="nav-link" wire:navigate href="{{ route('admin.roles') }}">
-                    <i class="bi bi-shield-shaded"></i> Roles
-                </a>
-            </li>
-            <li class="dropdown-item">
-                <a class="nav-link" wire:navigate href="{{ route('admin.permissions') }}">
-                    <i class="bi bi-database-fill-gear"></i> Permissions
+                <a class="nav-link" wire:navigate href="{{ route('admin') }}">
+                    <i class="bi bi-person-fill-gear"></i> Admin
                 </a>
             </li>
             <li class="dropdown-item">

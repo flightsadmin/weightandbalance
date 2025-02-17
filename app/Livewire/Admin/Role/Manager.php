@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Role;
+namespace App\Livewire\Admin\Role;
 
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -84,12 +84,12 @@ class Manager extends Component
 
     public function render()
     {
-        return view('livewire.role.manager', [
+        return view('livewire.admin.role.manager', [
             'roles' => Role::query()
                 ->with('permissions')
                 ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
                 ->orderBy('name')
                 ->paginate(10),
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

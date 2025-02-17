@@ -100,7 +100,7 @@ class AircraftConfigSeeder extends Seeder
                         'designation' => $actualRow.$column,
                         'type' => 'economy',
                         'is_exit' => in_array($actualRow, [12, 13]),
-                        'is_blocked' => false,
+                        'is_blocked' => in_array($actualRow, [1, 10]),
                         'created_at' => now(),
                         'updated_at' => now(),
 
