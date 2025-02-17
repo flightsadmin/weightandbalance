@@ -30,7 +30,7 @@ class AircraftTypeFactory extends Factory
             'empty' => 42600,
             'cargo' => 16600,
             'fuel' => 24210,
-            'category' => 'Narrow-body'
+            'category' => 'Narrow-body',
         ];
 
         return [

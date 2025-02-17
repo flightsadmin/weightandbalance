@@ -56,6 +56,7 @@ class Container extends Model
         if ($currentFlight = $this->getCurrentFlight()) {
             return HoldPosition::find($currentFlight->pivot->position_id);
         }
+
         return null;
     }
 
@@ -63,7 +64,7 @@ class Container extends Model
     {
         $this->flights()->updateExistingPivot($flightId, [
             'position_id' => $positionId,
-            'status' => $positionId ? 'loaded' : 'unloaded'
+            'status' => $positionId ? 'loaded' : 'unloaded',
         ]);
     }
 

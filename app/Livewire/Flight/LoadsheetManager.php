@@ -77,7 +77,7 @@ class LoadsheetManager extends Component
 
     private function calculatePantryIndex()
     {
-        if (!$this->flight->fuel) {
+        if (! $this->flight->fuel) {
             return;
         }
 
@@ -152,12 +152,12 @@ class LoadsheetManager extends Component
             'short_flight_date' => $this->flight->scheduled_departure_time?->format('d'),
             'registration' => $this->flight->aircraft->registration_number,
             'destination' => $this->flight->arrival_airport,
-            'sector' => $this->flight->departure_airport . '/' . $this->flight->arrival_airport,
+            'sector' => $this->flight->departure_airport.'/'.$this->flight->arrival_airport,
             'version' => $this->flight->aircraft->type->code,
             'release_time' => now('Asia/Qatar')->format('H:i'),
             'underload' => $this->calculateUnderload(),
             'total_deadload' => $this->calculateTotalDeadload(),
-            'total_traffic_load' => $this->calculateTotalTrafficLoad()
+            'total_traffic_load' => $this->calculateTotalTrafficLoad(),
         ];
     }
 
@@ -192,7 +192,6 @@ class LoadsheetManager extends Component
         $indices['mactow'] = $type->getTowMac($this->calculateTakeoffWeight(), $indices['litow']);
         $indices['macldw'] = $type->getLdwMac($this->calculateLandingWeight(), $indices['lildw']);
 
-
         foreach ($indices as &$value) {
             if (is_numeric($value)) {
                 $value = number_format($value, 2);
@@ -208,7 +207,7 @@ class LoadsheetManager extends Component
         $passengerTypes = ['male', 'female', 'child', 'infant'];
 
         $paxByType = $this->flight->passengers->groupBy('type')
-            ->map(fn($group) => $group->count());
+            ->map(fn ($group) => $group->count());
 
         $orderedPaxByType = collect($passengerTypes)->mapWithKeys(function ($type) {
             $zones = $this->flight->aircraft->type->cabinZones()
@@ -216,11 +215,11 @@ class LoadsheetManager extends Component
                     'seats.passenger' => function ($query) use ($type) {
                         $query->where('flight_id', $this->flight->id)
                             ->where('type', $type);
-                    }
+                    },
                 ])->get();
 
             $zoneData = $zones->map(function ($zone) use ($type) {
-                $passengerCount = $zone->seats->filter(fn($seat) => $seat->passenger)->count();
+                $passengerCount = $zone->seats->filter(fn ($seat) => $seat->passenger)->count();
                 $weight = $passengerCount * $this->flight->airline->getStandardPassengerWeight($type);
 
                 return [
@@ -229,7 +228,7 @@ class LoadsheetManager extends Component
                     'weight' => $weight,
                     'index' => round($weight * $zone->index, 2),
                 ];
-            })->filter(fn($zone) => $zone['count'] > 0)->values();
+            })->filter(fn ($zone) => $zone['count'] > 0)->values();
 
             $totalCount = $zoneData->sum('count');
             $totalWeight = $zoneData->sum('weight');
@@ -241,11 +240,11 @@ class LoadsheetManager extends Component
                     'weight' => $totalWeight,
                     'index' => round($totalIndex, 2),
                     'zones' => $zoneData,
-                ]
+                ],
             ];
         })->toArray();
 
-        $orderedWeightsUsed = collect($passengerTypes)->mapWithKeys(fn($type) => [
+        $orderedWeightsUsed = collect($passengerTypes)->mapWithKeys(fn ($type) => [
             $type => $this->flight->airline->getStandardPassengerWeight($type),
         ])->toArray();
 
@@ -267,7 +266,7 @@ class LoadsheetManager extends Component
                         'weight' => $weight,
                         'index' => round($weight * $hold->index, 2),
                     ];
-                })->filter(fn($hold) => $hold['weight'] > 0)->values()->toArray(),
+                })->filter(fn ($hold) => $hold['weight'] > 0)->values()->toArray(),
             'deadload_by_type' => [
                 'C' => [
                     'pieces' => $this->flight->cargo->where('status', 'loaded')->whereNotNull('container_id')->sum('pieces'),
@@ -297,11 +296,11 @@ class LoadsheetManager extends Component
                 $points = collect($envelope->points)->map(function ($point) {
                     return [
                         'x' => $point['index'],
-                        'y' => $point['weight']
+                        'y' => $point['weight'],
                     ];
                 })->values()->toArray();
 
-                return [strtolower($envelope->name) . 'Envelope' => $points];
+                return [strtolower($envelope->name).'Envelope' => $points];
             })
             ->toArray();
 

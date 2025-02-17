@@ -60,7 +60,7 @@ class AircraftType extends Model
     {
         return $this->holds
             ->where('is_active', true)
-            ->flatMap(fn($hold) => $hold->getPositions())
+            ->flatMap(fn ($hold) => $hold->getPositions())
             ->values();
     }
 
@@ -143,7 +143,7 @@ class AircraftType extends Model
     {
         $envelope = $this->envelopes()->where('name', 'FUEL')->first();
 
-        if (!$envelope || !$envelope->points) {
+        if (! $envelope || ! $envelope->points) {
             return 0;
         }
 
@@ -176,9 +176,8 @@ class AircraftType extends Model
         $REF_STA = $this->getSetting('ref_sta_at', 18.850);
 
         // Formula: %MAC = ((C * (I-K))/W + Ref.Sta - LEMAC) / (MAC/100)
-        return (
-            ((($C * ($index - $K)) / $weight + $REF_STA - $LEMAC) / ($MAC / 100))
-        );
+        return
+            (($C * ($index - $K)) / $weight + $REF_STA - $LEMAC) / ($MAC / 100);
     }
 
     public function getZfwMac($weight, $index)
@@ -204,7 +203,7 @@ class AircraftType extends Model
 
         $distribution = $this->crewDistributions()->where('crew_count', $cabinCrewCount)->first();
 
-        if (!$distribution) {
+        if (! $distribution) {
             return $deckCrewIndex;
         }
 
@@ -217,6 +216,7 @@ class AircraftType extends Model
                 $cabinCrewIndex += $locationIndex;
             }
         }
+
         return $deckCrewIndex + $cabinCrewIndex;
     }
 

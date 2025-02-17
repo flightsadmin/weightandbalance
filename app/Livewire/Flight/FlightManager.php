@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Flight;
 
-use App\Models\Flight;
 use App\Models\Aircraft;
 use App\Models\Airline;
+use App\Models\Flight;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -13,19 +13,31 @@ class FlightManager extends Component
     use WithPagination;
 
     public $paginationTheme = 'bootstrap';
+
     public $showModal = false;
+
     public $editMode = false;
+
     public $search = '';
+
     public $status = '';
+
     public $airline_id = '';
+
     public $date = '';
 
     public $flight;
+
     public $flight_number = '';
+
     public $aircraft_id = '';
+
     public $departure_airport = '';
+
     public $arrival_airport = '';
+
     public $scheduled_departure_time = '';
+
     public $scheduled_arrival_time = '';
 
     protected $rules = [
@@ -87,6 +99,7 @@ class FlightManager extends Component
             'scheduled_arrival_time',
         ]);
     }
+
     public function updateStatus(Flight $flight, $status)
     {
         if (in_array($status, ['scheduled', 'boarding', 'departed', 'arrived', 'cancelled'])) {
@@ -104,11 +117,11 @@ class FlightManager extends Component
         $flights = Flight::query()
             ->with(['aircraft.airline', 'aircraft.type'])
             ->when($this->search, function ($query) {
-                $query->whereAny(['flight_number', 'departure_airport', 'arrival_airport'], 'like', '%' . $this->search . '%');
+                $query->whereAny(['flight_number', 'departure_airport', 'arrival_airport'], 'like', '%'.$this->search.'%');
             })
-            ->when($this->status, fn($query) => $query->where('status', $this->status))
-            ->when($this->airline_id, fn($query) => $query->where('airline_id', $this->airline_id))
-            ->when($this->date, fn($query) => $query->whereDate('scheduled_departure_time', $this->date))
+            ->when($this->status, fn ($query) => $query->where('status', $this->status))
+            ->when($this->airline_id, fn ($query) => $query->where('airline_id', $this->airline_id))
+            ->when($this->date, fn ($query) => $query->whereDate('scheduled_departure_time', $this->date))
             ->orderBy('scheduled_departure_time')
             ->paginate(10);
 

@@ -11,8 +11,11 @@ class Manager extends Component
     use WithPagination;
 
     public $paginationTheme = 'bootstrap';
+
     public $search = '';
+
     public $showModal = false;
+
     public $editingPermission = null;
 
     public $form = [
@@ -38,7 +41,7 @@ class Manager extends Component
 
         $permissionData = [
             'name' => $this->form['name'],
-            'guard_name' => 'web' // Set default guard
+            'guard_name' => 'web', // Set default guard
         ];
 
         if ($this->editingPermission) {
@@ -64,9 +67,9 @@ class Manager extends Component
     {
         return view('livewire.permission.manager', [
             'permissions' => Permission::query()
-                ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%"))
+                ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
                 ->orderBy('name')
-                ->paginate(10)
+                ->paginate(10),
         ])->layout('components.layouts.app');
     }
 }

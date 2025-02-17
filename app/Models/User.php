@@ -11,7 +11,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -61,7 +61,7 @@ class User extends Authenticatable
     {
         $this->update([
             'last_login_at' => now(),
-            'last_login_ip' => request()->ip()
+            'last_login_ip' => request()->ip(),
         ]);
     }
 
@@ -73,7 +73,7 @@ class User extends Authenticatable
         }
 
         // Admin can edit non-admin users
-        if ($this->hasRole('admin') && !$user->hasRole('super-admin')) {
+        if ($this->hasRole('admin') && ! $user->hasRole('super-admin')) {
             return true;
         }
 

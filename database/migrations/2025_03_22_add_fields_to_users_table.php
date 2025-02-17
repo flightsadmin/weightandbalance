@@ -21,4 +21,4 @@ return new class extends Migration
             $table->dropColumn(['active', 'last_login_at', 'last_login_ip']);
         });
     }
-}; 
+};

@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\AircraftType;
-use App\Models\CrewSeating;
 use App\Models\CrewDistribution;
+use App\Models\CrewSeating;
 use Illuminate\Database\Seeder;
 
 class CrewSeatingSeeder extends Seeder

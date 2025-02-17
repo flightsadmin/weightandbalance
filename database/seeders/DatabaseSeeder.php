@@ -56,7 +56,7 @@ class DatabaseSeeder extends Seeder
                             Container::factory(rand(1, 2))->forAirline($airline)->create()->each(function ($container) use ($flight, $type) {
                                 $flight->containers()->attach($container->id, [
                                     'type' => $type,
-                                    'status' => 'unloaded'
+                                    'status' => 'unloaded',
                                 ]);
                             });
                         }

@@ -15,8 +15,11 @@ class Manager extends Component
     public $paginationTheme = 'bootstrap';
 
     public $search = '';
+
     public $showModal = false;
+
     public $roles = [];
+
     public $selectedRoles = [];
 
     public $form = [
@@ -24,7 +27,7 @@ class Manager extends Component
         'email' => '',
         'password' => '',
         'password_confirmation' => '',
-        'active' => true
+        'active' => true,
     ];
 
     public $editingUser = null;
@@ -34,7 +37,7 @@ class Manager extends Component
         'form.email' => 'required|email|unique:users,email',
         'form.password' => 'required|min:8|confirmed',
         'form.active' => 'boolean',
-        'selectedRoles' => 'array'
+        'selectedRoles' => 'array',
     ];
 
     public function mount()
@@ -44,7 +47,7 @@ class Manager extends Component
         $this->roles = Role::all()->map(function ($role) {
             return [
                 'id' => $role->id,
-                'name' => $role->name
+                'name' => $role->name,
             ];
         });
     }
@@ -59,7 +62,7 @@ class Manager extends Component
             'email' => $user->email,
             'password' => '',
             'password_confirmation' => '',
-            'active' => $user->active
+            'active' => $user->active,
         ];
         $this->selectedRoles = $user->roles->pluck('name')->toArray();
         $this->showModal = true;
@@ -76,8 +79,8 @@ class Manager extends Component
         $rules = $this->rules;
 
         if ($this->editingUser) {
-            $rules['form.email'] = 'required|email|unique:users,email,' . $this->editingUser->id;
-            if (!$this->form['password']) {
+            $rules['form.email'] = 'required|email|unique:users,email,'.$this->editingUser->id;
+            if (! $this->form['password']) {
                 unset($rules['form.password']);
             }
         }
@@ -87,7 +90,7 @@ class Manager extends Component
         $userData = [
             'name' => $this->form['name'],
             'email' => $this->form['email'],
-            'active' => $this->form['active']
+            'active' => $this->form['active'],
         ];
 
         if ($this->form['password']) {
@@ -121,9 +124,9 @@ class Manager extends Component
     public function toggleStatus(User $user)
     {
         $this->authorize('editUser');
-        abort_if($user->hasRole('super-admin') && !auth()->user()->hasRole('super-admin'), 403);
+        abort_if($user->hasRole('super-admin') && ! auth()->user()->hasRole('super-admin'), 403);
 
-        $user->update(['active' => !$user->active]);
+        $user->update(['active' => ! $user->active]);
         $this->dispatch('alert', icon: 'success', message: 'User status updated successfully.');
     }
 
@@ -132,10 +135,10 @@ class Manager extends Component
         return view('livewire.user.manager', [
             'users' => User::query()
                 ->with('roles')
-                ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%")
+                ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%")
                     ->orWhere('email', 'like', "%{$this->search}%"))
                 ->orderBy('name')
-                ->paginate(10)
+                ->paginate(10),
         ])->layout('components.layouts.app');
     }
 }

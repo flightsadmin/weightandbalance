@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Container;
 
-use App\Models\Flight;
-use Livewire\Component;
 use App\Models\Container;
+use App\Models\Flight;
 use Livewire\Attributes\On;
+use Livewire\Component;
 use Livewire\WithPagination;
 
 class Manager extends Component
@@ -13,11 +13,17 @@ class Manager extends Component
     use WithPagination;
 
     public $paginationTheme = 'bootstrap';
+
     public Flight $flight;
+
     public $showModal = false;
+
     public $search = '';
+
     public $type = '';
+
     public $selected = [];
+
     public $assignmentType = 'baggage';
 
     public function mount(Flight $flight)
@@ -36,7 +42,7 @@ class Manager extends Component
         foreach ($containers as $container) {
             $this->flight->containers()->attach($container->id, [
                 'type' => $this->assignmentType,
-                'status' => 'unloaded'
+                'status' => 'unloaded',
             ]);
         }
 

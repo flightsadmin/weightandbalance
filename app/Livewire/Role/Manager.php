@@ -4,18 +4,23 @@ namespace App\Livewire\Role;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class Manager extends Component
 {
     use WithPagination;
 
     public $paginationTheme = 'bootstrap';
+
     public $search = '';
+
     public $showModal = false;
+
     public $editingRole = null;
+
     public $permissions = [];
+
     public $selectedPermissions = [];
 
     public $form = [
@@ -24,7 +29,7 @@ class Manager extends Component
 
     protected $rules = [
         'form.name' => 'required|string|max:255',
-        'selectedPermissions' => 'array'
+        'selectedPermissions' => 'array',
     ];
 
     public function mount()
@@ -32,7 +37,7 @@ class Manager extends Component
         $this->permissions = Permission::all()->map(function ($permission) {
             return [
                 'id' => $permission->id,
-                'name' => $permission->name
+                'name' => $permission->name,
             ];
         });
     }
@@ -53,7 +58,7 @@ class Manager extends Component
 
         $roleData = [
             'name' => $this->form['name'],
-            'guard_name' => 'web' // Set default guard
+            'guard_name' => 'web', // Set default guard
         ];
 
         if ($this->editingRole) {
@@ -82,9 +87,9 @@ class Manager extends Component
         return view('livewire.role.manager', [
             'roles' => Role::query()
                 ->with('permissions')
-                ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%"))
+                ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
                 ->orderBy('name')
-                ->paginate(10)
+                ->paginate(10),
         ])->layout('components.layouts.app');
     }
 }

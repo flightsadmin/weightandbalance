@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\AircraftType;
 use App\Models\Airline;
 use App\Models\CabinZone;
-use App\Models\Envelope;
 use App\Models\Hold;
 use Illuminate\Database\Seeder;
 
@@ -54,17 +53,17 @@ class AircraftConfigSeeder extends Seeder
         foreach ($pantries as $code => $data) {
             $aircraftType->settings()->updateOrCreate(
                 ['key' => "pantry_{$code}_name", 'airline_id' => $airline->id],
-                ['value' => $data['name'], 'type' => 'string', 'description' => 'Name for ' . $data['name']]
+                ['value' => $data['name'], 'type' => 'string', 'description' => 'Name for '.$data['name']]
             );
 
             $aircraftType->settings()->updateOrCreate(
                 ['key' => "pantry_{$code}_weight", 'airline_id' => $airline->id],
-                ['value' => $data['weight'], 'type' => 'integer', 'description' => 'Weight for ' . $data['name']]
+                ['value' => $data['weight'], 'type' => 'integer', 'description' => 'Weight for '.$data['name']]
             );
 
             $aircraftType->settings()->updateOrCreate(
                 ['key' => "pantry_{$code}_index", 'airline_id' => $airline->id],
-                ['value' => $data['index'], 'type' => 'float', 'description' => 'Index for ' . $data['name']]
+                ['value' => $data['index'], 'type' => 'float', 'description' => 'Index for '.$data['name']]
             );
         }
 
@@ -98,7 +97,7 @@ class AircraftConfigSeeder extends Seeder
                         'cabin_zone_id' => $zone->id,
                         'row' => $actualRow,
                         'column' => $column,
-                        'designation' => $actualRow . $column,
+                        'designation' => $actualRow.$column,
                         'type' => 'economy',
                         'is_exit' => in_array($actualRow, [12, 13]),
                         'is_blocked' => false,
