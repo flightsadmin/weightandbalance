@@ -135,4 +135,11 @@ class Flight extends Model
     {
         return $this->hasOne(Loadplan::class)->latestOfMany();
     }
+
+    public function seats()
+    {
+        return $this->belongsToMany(Seat::class, 'flight_seats')
+            ->withPivot('is_blocked', 'blocked_reason')
+            ->withTimestamps();
+    }
 }

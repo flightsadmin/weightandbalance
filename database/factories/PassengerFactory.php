@@ -21,14 +21,41 @@ class PassengerFactory extends Factory
     public function definition(): array
     {
         return [
-            'flight_id' => null,
-            'seat_id' => null,
             'name' => fake()->name(),
+            'ticket_number' => strtoupper(fake()->bothify('??#####')),
             'type' => fake()->randomElement(['male', 'female', 'child', 'infant']),
-            'ticket_number' => strtoupper(fake()->bothify('#############')),
-            'acceptance_status' => fake()->randomElement(['booked', 'accepted', 'standby', 'offloaded']),
-            'boarding_status' => fake()->randomElement(['boarding', 'boarding', 'unboarded']),
+            'acceptance_status' => 'pending',
+            'boarding_status' => 'unboarded',
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterCreating(function (Passenger $passenger) {
+            if ($passenger->flight) {
+                // Get an available seat for this flight
+                $availableSeat = $passenger->flight->aircraft->type->seats()
+                    ->whereDoesntHave('passenger', function ($query) use ($passenger) {
+                        $query->where('flight_id', $passenger->flight_id);
+                    })
+                    ->whereDoesntHave('flights', function ($query) use ($passenger) {
+                        $query->where('flights.id', $passenger->flight_id)
+                            ->where('flight_seats.is_blocked', true);
+                    })
+                    ->inRandomOrder()
+                    ->first();
+
+                if ($availableSeat) {
+                    // Create flight_seats entry if needed
+                    $passenger->flight->seats()->firstOrCreate(
+                        ['seat_id' => $availableSeat->id],
+                        ['is_blocked' => false]
+                    );
+
+                    $passenger->update(['seat_id' => $availableSeat->id]);
+                }
+            }
+        });
     }
 
     public function forFlight(Flight $flight)

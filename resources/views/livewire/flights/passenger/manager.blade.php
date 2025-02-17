@@ -35,7 +35,6 @@
                     <th>Seat</th>
                     <th>Baggage</th>
                     <th>Acceptance</th>
-                    <th>Boarding</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -44,7 +43,7 @@
                     <tr wire:key="{{ $passenger->id }}">
                         <td>
                             <a href="#" wire:click.prevent="showPassengerDetails({{ $passenger->id }})"
-                                class="text-decoration-none text-reset" data-bs-toggle="modal"
+                                class="text-decoration-none" data-bs-toggle="modal"
                                 data-bs-target="#passengerDetailsModal">
                                 {{ $passenger->name }}
                             </a>
@@ -61,21 +60,17 @@
                         @endunless
                         <td>{{ $passenger->ticket_number }}</td>
                         <td>
-                            <button class="btn btn-sm {{ $passenger->seat ? 'btn-success' : 'btn-outline-primary' }}"
-                                wire:click="assignSeat({{ $passenger->id }})" data-bs-toggle="modal"
+                            <button class="btn btn-sm btn-primary"
+                                wire:click="showSeatModal({{ $passenger->id }})" data-bs-toggle="modal"
                                 data-bs-target="#seatModal">
-                                @if ($passenger->seat)
-                                    <i class="bi bi-person-check"></i> {{ $passenger->seat->designation }}
-                                @else
-                                    <i class="bi bi-person-plus"></i> Assign Seat
-                                @endif
+                                <i class="bi bi-person-check"></i> {{ $passenger->seat->designation ?? 'Assign' }}
                             </button>
                         </td>
                         <td>
                             <button class="btn btn-sm btn-link text-decoration-none text-reset"
                                 wire:click="editBaggage({{ $passenger->id }})" data-bs-toggle="modal"
                                 data-bs-target="#baggageModal">
-                                {{ $passenger->baggage_count }} <i class="bi bi-luggage-fill"></i> pcs
+                                {{ $passenger->baggage->count() }} <i class="bi bi-luggage-fill"></i> pcs
                             </button>
                         </td>
                         <td>
@@ -115,28 +110,6 @@
                             </div>
                         </td>
                         <td>
-                            <div class="dropdown d-inline">
-                                <button
-                                    class="btn btn-sm btn-{{ $passenger->boarding_status === 'boarded' ? 'success' : ($passenger->boarding_status === 'unboarded' ? 'danger' : 'warning') }} dropdown-toggle"
-                                    type="button" data-bs-toggle="dropdown">
-                                    {{ str_replace('_', ' ', ucwords($passenger->boarding_status)) }}
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <button class="dropdown-item" wire:click="updateBoardingStatus({{ $passenger->id }}, 'boarded')">
-                                            <i class="bi bi-check-circle text-success"></i> Boarded
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button class="dropdown-item"
-                                            wire:click="updateBoardingStatus({{ $passenger->id }}, 'unboarded')">
-                                            <i class="bi bi-x-circle text-danger"></i> Unboarded
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                        <td class="text-end">
                             <button class="btn btn-sm btn-link" wire:click="edit({{ $passenger->id }})"
                                 data-bs-toggle="modal" data-bs-target="#passengerFormModal">
                                 <i class="bi bi-pencil"></i>
@@ -154,10 +127,9 @@
                 @endforelse
             </tbody>
         </table>
-    </div>
-
-    <div class="d-flex justify-content-between align-items-center">
-        {{ $passengers->links() }}
+        <div>
+            {{ $passengers->links() }}
+        </div>
     </div>
 
     <!-- Modal -->
@@ -345,152 +317,156 @@
     </div>
 
     <!-- Seat Assignment Modal -->
+    {{-- @include('livewire.flights.passenger.partials.seat-modal') --}}
     <div class="modal fade" id="seatModal" tabindex="-1" wire:ignore.self>
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        Assign Seat - {{ $selectedPassenger?->name }}
-                        @if ($selectedPassenger?->seat)
-                            <small class="text-muted">(Current: {{ $selectedPassenger->seat->designation }})</small>
-                        @endif
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    @if ($seats && $seats->count() > 0)
-                        <div class="seat-map border">
-                            @php
-                                $columns = $seats->pluck('column')->unique()->sort();
-                                $rows = $seats->pluck('row')->unique()->sort();
-                            @endphp
-
-                            <div class="seat-table">
-                                <!-- Column Headers -->
-                                <div class="seat-row header">
-                                    @foreach ($columns as $column)
-                                        <div class="seat-cell header">{{ $column }}</div>
-                                    @endforeach
-                                </div>
-
-                                <!-- Seat Rows -->
-                                @foreach ($rows as $row)
+                <form wire:submit="assignSeat">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Assign Seat</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="seat-container">
+                            @dump($editingPassenger)
+                            <div class="seat-grid">
+                                @php
+                                    $allSeats = $seats
+                                        ->pluck('seats')
+                                        ->flatten()
+                                        ->sortBy(['row', 'column']);
+                                @endphp
+                                @foreach ($allSeats->groupBy('row') as $row => $rowSeats)
                                     <div class="seat-row">
-                                        @foreach ($columns as $column)
-                                            @php
-                                                $seat = $seats->where('row', $row)->where('column', $column)->first();
-                                            @endphp
-                                            <div class="seat-cell {{ !$seat ? 'empty' : '' }} 
-                                                {{ $seat && $seat->is_occupied ? 'bg-secondary bi bi-person-fill' : '' }}
-                                                {{ $seat && $seat->is_blocked ? 'bg-danger' : '' }}
-                                                {{ $seat && $selectedPassenger && $selectedPassenger->seat_id === $seat->id ? 'current-seat bg-success' : '' }}"
-                                                @if ($seat && !$seat->is_occupied && !$seat->is_blocked) wire:click="selectSeat({{ $seat->id }})"
-                                                    style="{{ $selectedSeat == $seat->id ? 'background-color: #0d6efd; color: white;' : '' }}" @endif
-                                                {{ $seat && ($seat->is_occupied || $seat->is_blocked) ? 'style=cursor:not-allowed' : '' }}>
-                                                @if ($seat)
-                                                    <small>{{ $seat->designation }}</small>
-                                                @else
-                                                    <small>-</small>
-                                                @endif
+                                        @foreach ($rowSeats->sortBy('column') as $seat)
+                                            <div class="seat-cell 
+                                            {{ $seat->is_occupied ? 'occupied' : '' }}
+                                            {{ $seat->is_blocked ? 'blocked' : '' }}
+                                            {{ $selectedSeat == $seat->id ? 'selected' : '' }}"
+                                                wire:click="{{ !$seat->is_occupied && !$seat->is_blocked ? 'selectSeat(' . $seat->id . ')' : '' }}">
+                                                {{ $seat->designation }}
                                             </div>
                                         @endforeach
                                     </div>
                                 @endforeach
                             </div>
-                        </div>
 
-                        <div class="mt-3">
-                            <div class="d-flex gap-2 align-items-center small">
-                                <span class="badge bg-warning">Exit Row</span>
-                                <span class="badge bg-secondary">Occupied</span>
-                                <span class="badge bg-outline-primary">Available</span>
-                                <span class="badge bg-success text-white">Current Seat</span>
+                            <div class="seat-legend">
+                                <div class="legend-item">
+                                    <div class="seat-cell"></div>
+                                    <span>Available</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="seat-cell occupied"></div>
+                                    <span>Occupied</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="seat-cell blocked"></div>
+                                    <span>Blocked</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="seat-cell selected"></div>
+                                    <span>Selected</span>
+                                </div>
                             </div>
                         </div>
-                    @else
-                        <div class="alert alert-info">
-                            No seats configured for this aircraft.
-                        </div>
-                    @endif
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-danger"
-                        wire:click="removeSeatAssignment"
-                        @if (!$selectedSeat) disabled @endif>
-                        Remove Seat
-                    </button>
-                    <button type="button" class="btn btn-sm btn-secondary"
-                        data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-sm btn-primary"
-                        wire:click="saveSeatAssignment">Save</button>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-primary" @if (!$selectedSeat) disabled @endif>
+                            Assign Seat
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <style>
-        .seat-table {
+        .seat-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .seat-grid {
             display: table;
-            margin: 0 auto;
             border-spacing: 2px;
             border-collapse: separate;
+            margin: 0 auto;
         }
 
         .seat-row {
             display: table-row;
         }
 
-        .seat-row.header {
+        .row-number {
+            display: table-cell;
             font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+            padding-right: 4px;
+            font-size: 0.80rem;
         }
 
         .seat-cell {
             display: table-cell;
             cursor: pointer;
-            padding: 8px;
-            border-radius: 4px;
+            padding: 4px;
+            border-radius: 3px;
             border: 1px solid #dee2e6;
-            transition: background-color 0.2s;
+            transition: all 0.2s;
             text-align: center;
-            min-width: 40px;
-            height: 40px;
+            min-width: 35px;
+            height: 35px;
             vertical-align: middle;
-            position: relative;
+            font-size: 0.80rem;
         }
 
-        .seat-cell.header {
-            border: none;
-            font-weight: bold;
-            cursor: default;
-            background-color: #f8f9fa;
-        }
-
-        .seat-cell.empty {
-            border: none;
-            cursor: default;
-        }
-
-        .seat-cell:not(.header):not(.empty):hover:not(.bg-secondary):not(.bg-danger) {
+        .seat-cell:hover:not(.occupied):not(.blocked) {
             background-color: #e9ecef;
         }
 
-        .seat-cell.bg-secondary {
+        .seat-cell.occupied {
+            background-color: #6c757d;
             color: white;
+            cursor: not-allowed;
         }
 
-        .seat-cell.current-seat {
-            border: 2px solid #0d6efd;
+        .seat-cell.blocked {
+            background-color: #dc3545;
+            color: white;
+            cursor: not-allowed;
         }
 
-        .seat-cell i {
-            font-size: 0.875rem;
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
+        .seat-cell.selected {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
         }
 
-        .seat-cell small {
+        .seat-legend {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #dee2e6;
             font-size: 0.75rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .legend-item .seat-cell {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            cursor: default;
         }
     </style>
 
@@ -505,8 +481,7 @@
                 modal.hide();
             });
             $wire.on('seat-saved', () => {
-                const modal = new bootstrap.Modal(document.getElementById('seatModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('seatModal')).hide();
             });
         </script>
     @endscript

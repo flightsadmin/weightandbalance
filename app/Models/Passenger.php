@@ -37,4 +37,9 @@ class Passenger extends Model
     {
         return $this->belongsTo(Seat::class);
     }
+
+    public function getFlightSeatAttribute()
+    {
+        return $this->seat?->designation ?? 'No Seat';
+    }
 }

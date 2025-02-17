@@ -5,6 +5,7 @@ namespace App\Livewire\Passenger;
 use App\Models\Baggage;
 use App\Models\Flight;
 use App\Models\Passenger;
+use App\Models\Seat;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -15,7 +16,9 @@ class Manager extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    public $flight = null;
+    public Flight $flight;
+
+    public $passenger;
 
     public $showForm = false;
 
@@ -45,35 +48,46 @@ class Manager extends Component
 
     public $seatsByZone = [];
 
+    public $seatForm = [
+        'seat_id' => null,
+    ];
+
     protected $rules = [
         'form.name' => 'required|string|max:255',
         'form.ticket_number' => 'nullable|string|max:255',
         'form.type' => 'required|in:male,female,child,infant',
+        'seatForm.seat_id' => 'nullable|exists:seats,id',
     ];
 
-    public function mount(?Flight $flight = null)
+    public function mount(Flight $flight)
     {
-        $this->flight = $flight;
-        if ($this->flight) {
-            $this->loadSeats();
-        }
+        $this->flight = $flight->load(['passengers.seat', 'aircraft.type.cabinZones.seats']);
     }
 
     public function loadSeats()
     {
         if ($this->flight) {
-            return $this->flight->aircraft->type->seats()
-                ->with(['passenger', 'cabinZone'])
-                ->orderBy('row')
-                ->orderBy('column')
-                ->get()
-                ->map(function ($seat) {
-                    $seat->is_occupied = $seat->passenger !== null;
-                    if ($seat->is_occupied && $this->selectedPassenger && $seat->passenger_id === $this->selectedPassenger->id) {
-                        $seat->is_occupied = false;
+            return $this->flight->aircraft->type->cabinZones()
+                ->with([
+                    'seats' => function ($query) {
+                        $query->orderBy('row')
+                            ->orderBy('column');
                     }
+                ])->get()
+                ->map(function ($zone) {
+                    $zone->seats = $zone->seats->map(function ($seat) {
+                        $seat->is_occupied = $seat->passenger()
+                            ->where('flight_id', $this->flight->id)
+                            ->exists();
 
-                    return $seat;
+                        $seat->is_blocked = $this->flight->seats()
+                            ->where('seat_id', $seat->id)
+                            ->where('is_blocked', true)
+                            ->exists();
+
+                        return $seat;
+                    });
+                    return $zone;
                 });
         }
 
@@ -82,12 +96,8 @@ class Manager extends Component
 
     public function edit(Passenger $passenger)
     {
-        $this->editingPassenger = $passenger;
-        $this->form = $passenger->only([
-            'name',
-            'ticket_number',
-            'type',
-        ]);
+        $this->passenger = $passenger;
+        $this->form = $passenger->only(['name', 'ticket_number', 'type']);
         $this->showForm = true;
     }
 
@@ -95,38 +105,35 @@ class Manager extends Component
     {
         $this->validate();
 
-        $data = array_merge($this->form, [
-            'flight_id' => $this->flight?->id,
+        $this->flight->passengers()->create([
+            'name' => $this->form['name'],
+            'ticket_number' => $this->form['ticket_number'],
+            'type' => $this->form['type'],
+            'acceptance_status' => 'pending',
+            'boarding_status' => 'unboarded',
         ]);
 
-        if ($this->editingPassenger) {
-            $this->editingPassenger->update($data);
-        } else {
-            Passenger::create($data);
-        }
+        $this->reset('form', 'showForm');
+        $this->dispatch('alert', icon: 'success', message: 'Passenger added successfully.');
+    }
 
-        $this->reset('form', 'editingPassenger', 'showForm');
-        $this->dispatch(
-            'alert',
-            icon: 'success',
-            message: 'Passenger saved successfully.'
-        );
-        $this->dispatch('passenger-saved');
+    public function update()
+    {
+        $this->validate();
+
+        $this->passenger->update($this->form);
+        $this->reset('form', 'showForm', 'passenger');
+        $this->dispatch('alert', icon: 'success', message: 'Passenger updated successfully.');
     }
 
     public function delete(Passenger $passenger)
     {
         $passenger->delete();
-        $this->dispatch(
-            'alert',
-            icon: 'success',
-            message: 'Passenger removed successfully.'
-        );
+        $this->dispatch('alert', icon: 'success', message: 'Passenger deleted successfully.');
     }
 
-    public function updateAcceptanceStatus($passengerId, $status)
+    public function updateAcceptanceStatus(Passenger $passenger, $status)
     {
-        $passenger = Passenger::findOrFail($passengerId);
         $passenger->update([
             'acceptance_status' => $status,
         ]);
@@ -134,21 +141,7 @@ class Manager extends Component
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: ucfirst($status).' passenger successfully.'
-        );
-    }
-
-    public function updateBoardingStatus($passengerId, $status)
-    {
-        $passenger = Passenger::findOrFail($passengerId);
-        $passenger->update([
-            'boarding_status' => $status,
-        ]);
-
-        $this->dispatch(
-            'alert',
-            icon: 'success',
-            message: ucfirst($status).' passenger successfully.'
+            message: ucfirst($status) . ' passenger successfully.'
         );
     }
 
@@ -158,7 +151,7 @@ class Manager extends Component
         for ($i = 0; $i < $this->pieces; $i++) {
             $this->editingPassenger->baggage()->create([
                 'flight_id' => $this->editingPassenger->flight->id,
-                'tag_number' => $this->editingPassenger->flight->airline->iata_code.str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
+                'tag_number' => $this->editingPassenger->flight->airline->iata_code . str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
                 'weight' => $this->weight / $this->pieces,
             ]);
         }
@@ -183,65 +176,103 @@ class Manager extends Component
             ])->find($passengerId);
     }
 
-    public function assignSeat(Passenger $passenger)
+    public function showSeatModal(Passenger $passenger)
     {
-        $this->selectedPassenger = $passenger;
+        dd($passenger);
+        $this->editingPassenger = $passenger->load('seat');
         $this->selectedSeat = $passenger->seat_id;
+        $this->seatForm['seat_id'] = $passenger->seat_id;
         $this->showSeatModal = true;
     }
 
     public function selectSeat($seatId)
     {
         $this->selectedSeat = $seatId;
+        $this->seatForm['seat_id'] = $seatId;
     }
 
-    public function removeSeatAssignment()
+    public function assignSeat()
     {
-        if ($this->selectedPassenger) {
-            $this->selectedPassenger->seat_id = null;
-            $this->selectedPassenger->save();
-            $this->selectedSeat = null;
-            $this->dispatch('alert', icon: 'success', message: 'Seat assignment removed.');
+        if (!$this->editingPassenger) {
+            $this->dispatch('alert', icon: 'error', message: 'No passenger selected.');
+            return;
         }
+
+        if (!$this->selectedSeat) {
+            $this->dispatch('alert', icon: 'error', message: 'Please select a seat.');
+            return;
+        }
+
+        $seat = Seat::find($this->selectedSeat);
+
+        if (!$seat->isAvailable($this->flight)) {
+            $this->dispatch('alert', icon: 'error', message: 'This seat is not available.');
+            return;
+        }
+
+        // Check if the relationship doesn't exist before attaching
+        if (!$this->flight->seats()->where('seat_id', $seat->id)->exists()) {
+            $this->flight->seats()->attach($seat->id, [
+                'is_blocked' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Get fresh passenger instance to update
+        $passenger = Passenger::find($this->editingPassenger['id']);
+        $passenger->update([
+            'seat_id' => $seat->id
+        ]);
+
+        $this->reset(['seatForm', 'showSeatModal', 'selectedSeat']);
+        $this->editingPassenger = null;
+
+        $this->dispatch('seat-saved');
+        $this->dispatch('alert', icon: 'success', message: 'Seat assigned successfully.');
     }
 
-    public function saveSeatAssignment()
+    public function removeSeat(Passenger $passenger)
     {
-        if ($this->selectedPassenger && $this->selectedSeat) {
-            $this->selectedPassenger->seat_id = $this->selectedSeat;
-            $this->selectedPassenger->save();
-            $this->dispatch('alert', icon: 'success', message: 'Seat assigned successfully.');
+        $passenger->update(['seat_id' => null]);
+        $this->dispatch('alert', icon: 'success', message: 'Seat assignment removed.');
+    }
+
+    public function blockSeat($seatId)
+    {
+        // Check if the relationship doesn't exist before attaching
+        if (!$this->flight->seats()->where('seat_id', $seatId)->exists()) {
+            $this->flight->seats()->attach($seatId, [
+                'is_blocked' => true,
+                'blocked_reason' => 'Blocked by staff',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        } else {
+            $this->flight->seats()->updateExistingPivot($seatId, [
+                'is_blocked' => true,
+                'blocked_reason' => 'Blocked by staff',
+            ]);
         }
-        $this->selectedSeat = null;
-        $this->selectedPassenger = null;
+
+        $this->dispatch('alert', icon: 'success', message: 'Seat blocked successfully.');
+    }
+
+    public function unblockSeat($seatId)
+    {
+        $this->flight->seats()->updateExistingPivot($seatId, [
+            'is_blocked' => false,
+            'blocked_reason' => null,
+        ]);
+
+        $this->dispatch('alert', icon: 'success', message: 'Seat unblocked successfully.');
     }
 
     #[On('passenger-saved')]
     public function render()
     {
-        $query = Passenger::query()
-            ->with(['flight', 'baggage', 'seat'])
-            ->withCount('baggage');
-
-        if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('ticket_number', 'like', '%'.$this->search.'%')
-                    ->whereHas('seat', function ($q) {
-                        $q->where('row', 'like', '%'.$this->search.'%')
-                            ->orWhere('column', 'like', '%'.$this->search.'%');
-                    });
-            });
-        }
-
-        if ($this->flight) {
-            $query->where('flight_id', $this->flight->id);
-        }
-
-        $query->orderByDesc('updated_at');
-
         return view('livewire.flights.passenger.manager', [
-            'passengers' => $query->paginate(10),
+            'passengers' => $this->flight->passengers()->with('seat')->paginate(10),
             'seats' => $this->loadSeats(),
         ]);
     }

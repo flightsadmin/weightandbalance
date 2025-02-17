@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Seat extends Model
 {
@@ -35,14 +36,42 @@ class Seat extends Model
         return $this->belongsTo(CabinZone::class);
     }
 
-    public function passenger(): HasOne
+    public function passenger($flightId = null)
     {
-        return $this->hasOne(Passenger::class);
+        $query = $this->hasOne(Passenger::class);
+
+        if ($flightId) {
+            $query->where('flight_id', $flightId);
+        } elseif (request()->flight) {
+            $query->where('flight_id', request()->flight->id);
+        }
+
+        return $query;
     }
 
-    public function scopeAvailable($query)
+    public function flights(): BelongsToMany
     {
-        return $query->whereDoesntHave('passenger')
-            ->where('is_blocked', false);
+        return $this->belongsToMany(Flight::class, 'flight_seats')
+            ->withPivot('is_blocked', 'blocked_reason')
+            ->withTimestamps();
+    }
+
+    public function scopeAvailable($query, $flight)
+    {
+        return $query->whereDoesntHave('passenger', function ($q) use ($flight) {
+            $q->where('flight_id', $flight->id);
+        })->whereDoesntHave('flights', function ($q) use ($flight) {
+            $q->where('flights.id', $flight->id)
+                ->where('flight_seats.is_blocked', true);
+        });
+    }
+
+    public function isAvailable($flight)
+    {
+        return !$this->passenger($flight->id)->exists() &&
+            !$this->flights()
+                ->where('flights.id', $flight->id)
+                ->where('flight_seats.is_blocked', true)
+                ->exists();
     }
 }
