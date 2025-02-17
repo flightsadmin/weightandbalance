@@ -1,9 +1,9 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h2 class="card-title m-0">Boarding Control</h2>
-        <div class="d-flex justify-content-between align-items-center gap-2">
-            <button class="btn btn-sm btn-primary">
-                Boarded: {{ $boardedCount }}/{{ $totalCount }}
+        <div class="d-flex justify-content-between align-items-center gap-2 m-0">
+            <button class="btn btn-sm btn-{{ $boardedCount === $totalCount ? 'success' : 'primary' }}">
+                <i class="bi bi-person-check"></i> Boarded: {{ $boardedCount }}/{{ $totalCount }}
             </button>
         </div>
     </div>
@@ -11,14 +11,19 @@
     <div class="card-body">
         <ul class="nav nav-tabs mb-3">
             <li class="nav-item">
-                <button class="nav-link {{ $activeTab === 'seat' ? 'active' : '' }}" wire:click="setTab('seat')">Board by Seat</button>
+                <button class="nav-link {{ $activeTab === 'seat' ? 'active' : '' }}" wire:click="setTab('seat')">
+                    <i class="bi bi-airplane-seats"></i> Board by Seat
+                </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link {{ $activeTab === 'list' ? 'active' : '' }}" wire:click="setTab('list')">Passenger List</button>
+                <button class="nav-link {{ $activeTab === 'list' ? 'active' : '' }}" wire:click="setTab('list')">
+                    <i class="bi bi-list-check"></i> Passenger List
+                </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link {{ $activeTab === 'boarded' ? 'active' : '' }}" wire:click="setTab('boarded')">Boarded
-                    Passengers</button>
+                <button class="nav-link {{ $activeTab === 'boarded' ? 'active' : '' }}" wire:click="setTab('boarded')">
+                    <i class="bi bi-person-check"></i> Boarded Passengers
+                </button>
             </li>
         </ul>
 
@@ -50,7 +55,7 @@
                         <button class="btn btn-primary btn-sm"
                             wire:click="boardSelected"
                             @if (empty($selectedPassengers)) disabled @endif>
-                            Board Selected ({{ count($selectedPassengers) }})
+                            <i class="bi bi-person-check"></i> Board Selected ({{ count($selectedPassengers) }})
                         </button>
                     </div>
                 </div>
@@ -58,37 +63,49 @@
         @endif
 
         <div class="table-responsive">
-            <table class="table table-sm table-hover">
+            <table class="table table-sm table-hover align-middle">
                 <thead>
                     <tr>
                         @if ($activeTab === 'list')
-                            <th>
-                                <input type="checkbox" wire:model.live="selectAll">
+                            <th width="40">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input"
+                                        wire:model.live="selectAll"
+                                        id="selectAll">
+                                </div>
                             </th>
                         @endif
-                        <th>Seat</th>
+                        <th width="40">#</th>
+                        <th width="80">Seat</th>
                         <th>Name</th>
                         <th>Ticket Number</th>
-                        <th>Type</th>
+                        <th width="100">Type</th>
                         @if ($activeTab === 'boarded')
-                            <th>Actions</th>
+                            <th width="100">Actions</th>
                         @endif
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($passengers as $passenger)
+                    @forelse($passengers as $index => $passenger)
                         <tr>
                             @if ($activeTab === 'list')
                                 <td>
-                                    <input type="checkbox"
-                                        wire:model.live="selectedPassengers"
-                                        value="{{ $passenger->id }}">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input"
+                                            wire:model.live="selectedPassengers"
+                                            value="{{ $passenger->id }}">
+                                    </div>
                                 </td>
                             @endif
+                            <td>{{ $passengers->firstItem() + $index }}</td>
                             <td>{{ $passenger->seat?->designation ?? 'No Seat' }}</td>
                             <td>{{ $passenger->name }}</td>
                             <td>{{ $passenger->ticket_number }}</td>
-                            <td>{{ ucfirst($passenger->type) }}</td>
+                            <td>
+                                <span class="badge bg-{{ $passenger->type === 'infant' ? 'warning' : 'info' }}">
+                                    {{ ucfirst($passenger->type) }}
+                                </span>
+                            </td>
                             @if ($activeTab === 'boarded')
                                 <td>
                                     <button class="btn btn-sm btn-danger"
@@ -101,7 +118,9 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center">No passengers found</td>
+                            <td colspan="{{ $activeTab === 'list' ? 6 : ($activeTab === 'boarded' ? 6 : 5) }}" class="text-center">
+                                No passengers found
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>

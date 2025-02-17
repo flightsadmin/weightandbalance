@@ -16,8 +16,7 @@
             <span class="badge bg-danger">{{ $passengers->where('boarding_status', 'unboarded')->count() }} Unboarded</span>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-primary btn-sm" wire:click="$toggle('showForm')" data-bs-toggle="modal"
-                data-bs-target="#passengerFormModal">
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#passengerFormModal">
                 <i class="bi bi-plus-circle"></i> Add Passenger
             </button>
         </div>

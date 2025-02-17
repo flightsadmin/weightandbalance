@@ -22,6 +22,8 @@ class BoardingControl extends Component
 
     public $search = '';
 
+    public $selectAll = false;
+
     public function mount(Flight $flight)
     {
         $this->flight = $flight->load(['passengers.seat', 'aircraft.type.cabinZones.seats']);
@@ -31,13 +33,39 @@ class BoardingControl extends Component
     {
         $this->activeTab = $tab;
         $this->resetPage();
+        $this->reset(['selectedPassengers', 'selectAll', 'search']);
+    }
+
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selectedPassengers = $this->flight->passengers()
+                ->where('acceptance_status', 'accepted')
+                ->where('boarding_status', '!=', 'boarded')
+                ->when(
+                    $this->search,
+                    fn($q) =>
+                    $q->whereAny(['name', 'ticket_number'], 'like', "%{$this->search}%")
+                )
+                ->pluck('id')
+                ->map(fn($id) => (string) $id)
+                ->toArray();
+        } else {
+            $this->selectedPassengers = [];
+        }
+    }
+
+    public function updatedSelectedPassengers()
+    {
+        $this->selectAll = false;
     }
 
     public function boardBySeat()
     {
         $passenger = $this->flight->passengers()
-            ->whereHas('seat', fn($q) => $q->where('designation', $this->seatNumber))
+            ->whereHas('seat', fn($q) => $q->where('designation', strtoupper($this->seatNumber)))
             ->where('acceptance_status', 'accepted')
+            ->where('boarding_status', '!=', 'boarded')
             ->first();
 
         if (!$passenger) {
@@ -52,12 +80,13 @@ class BoardingControl extends Component
 
     public function boardSelected()
     {
-        $this->flight->passengers()
+        $count = $this->flight->passengers()
             ->whereIn('id', $this->selectedPassengers)
             ->update(['boarding_status' => 'boarded']);
 
         $this->selectedPassengers = [];
-        $this->dispatch('alert', icon: 'success', message: 'Selected passengers boarded successfully');
+        $this->selectAll = false;
+        $this->dispatch('alert', icon: 'success', message: $count . ' passengers boarded successfully');
     }
 
     public function unboardPassenger($passengerId)
@@ -75,19 +104,24 @@ class BoardingControl extends Component
             ->with('seat')
             ->where('acceptance_status', 'accepted');
 
-        if ($this->activeTab === 'list') {
-            $query->where('boarding_status', '!=', 'boarded')
-                ->when(
-                    $this->search,
-                    fn($q) =>
-                    $q->whereAny(['name', 'ticket_number'], 'like', "%{$this->search}%")
-                );
+        if ($this->activeTab === 'list' || $this->activeTab === 'seat') {
+            $query->where('boarding_status', '!=', 'boarded');
         } elseif ($this->activeTab === 'boarded') {
             $query->where('boarding_status', 'boarded');
         }
 
+        if ($this->activeTab === 'list') {
+            $query->when(
+                $this->search,
+                fn($q) =>
+                $q->whereAny(['name', 'ticket_number'], 'like', "%{$this->search}%")
+            );
+        }
+
+        $query->orderBy('seat_id');
+
         return view('livewire.flights.boarding-control', [
-            'passengers' => $query->paginate(5),
+            'passengers' => $query->paginate(10),
             'boardedCount' => $this->flight->passengers()->where('boarding_status', 'boarded')->count(),
             'totalCount' => $this->flight->passengers()->where('acceptance_status', 'accepted')->count(),
         ]);
