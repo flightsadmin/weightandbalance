@@ -21,10 +21,8 @@
                         data-bs-target="#flightFormModal">
                         <i class="bi bi-plus-lg"></i> Add Flight
                     </button>
-
                 </div>
             </div>
-
         </div>
 
         <div class="card-body">

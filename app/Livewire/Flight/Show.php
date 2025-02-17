@@ -30,7 +30,7 @@ class Show extends Component
             'cargo_count' => $this->flight->cargo->count(),
             'passengers_count' => $this->flight->passengers->count(),
             'crew_count' => $this->flight->crew->count(),
-            'containers_count' => $this->flight->containers->count(),
+            'boarding_count' => $this->flight->passengers()->where('boarding_status', 'boarded')->count(),
         ]);
     }
 }

@@ -7,6 +7,31 @@
             </a>
         </li>
         <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle {{ in_array($activeTab, ['passengers', 'boarding']) ? 'active' : '' }}"
+                data-bs-toggle="dropdown" role="button" aria-expanded="false" href="#">
+                <i class="bi bi-people"></i> PAX Control
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    <a wire:click.prevent="setTab('passengers')" href=""
+                        class="dropdown-item {{ $activeTab === 'passengers' ? 'active' : '' }}">
+                        <i class="bi bi-people"></i> Check-in
+                        <span class="badge bg-secondary">{{ $passengers_count }}</span>
+                    </a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a wire:click.prevent="setTab('boarding')" href=""
+                        class="dropdown-item {{ $activeTab === 'boarding' ? 'active' : '' }}">
+                        <i class="bi bi-door-open-fill"></i> Boarding
+                        <span class="badge bg-secondary">{{ $boarding_count }}</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle {{ in_array($activeTab, ['baggage', 'cargo', 'containers']) ? 'active' : '' }}"
                 data-bs-toggle="dropdown" role="button" aria-expanded="false" href="#">
                 <i class="bi bi-archive"></i> Deadload
@@ -30,13 +55,6 @@
                     </a>
                 </li>
             </ul>
-        </li>
-        <li class="nav-item">
-            <a wire:click.prevent="setTab('passengers')" href=""
-                class="nav-link {{ $activeTab === 'passengers' ? 'active' : '' }}">
-                <i class="bi bi-people"></i> Passengers
-                <span class="badge bg-secondary">{{ $passengers_count }}</span>
-            </a>
         </li>
         <li class="nav-item">
             <a wire:click.prevent="setTab('crew')" href=""
@@ -77,6 +95,8 @@
             <livewire:cargo.manager :flight="$flight" />
         @elseif ($activeTab === 'passengers')
             <livewire:passenger.manager :flight="$flight" />
+        @elseif ($activeTab === 'boarding')
+            <livewire:flight.boarding-control :flight="$flight" />
         @elseif ($activeTab === 'crew')
             <livewire:crew.manager :flight="$flight" />
         @elseif ($activeTab === 'loadplan')
