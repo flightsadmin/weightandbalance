@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('loadsheets', function (Blueprint $table) {
@@ -14,6 +13,7 @@ return new class extends Migration
             $table->json('payload_distribution');
             $table->integer('edition')->default(1);
             $table->boolean('final')->default(false);
+            $table->enum('status', ['draft', 'released', 'revoked'])->default('draft');
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->foreignId('released_by')->nullable()->constrained('users');
             $table->timestamp('released_at')->nullable();

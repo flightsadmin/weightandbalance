@@ -12,6 +12,7 @@ class Loadsheet extends Model
         'payload_distribution',
         'edition',
         'final',
+        'status',
         'created_by',
         'released_by',
         'released_at',

@@ -97,8 +97,14 @@ class LoadsheetManager extends Component
 
     public function finalizeLoadsheet()
     {
+        if (!$this->loadsheet) {
+            $this->dispatch('alert', icon: 'error', message: 'No loadsheet found to finalize.');
+            return;
+        }
+
         $this->loadsheet->update([
             'final' => true,
+            'status' => 'released',
             'released_by' => auth()->id(),
             'released_at' => now(),
         ]);
@@ -108,13 +114,22 @@ class LoadsheetManager extends Component
 
     public function revokeLoadsheet()
     {
+        if (!$this->loadsheet) {
+            $this->dispatch('alert', icon: 'error', message: 'No loadsheet found to revoke.');
+            return;
+        }
+
+        if (!$this->loadsheet->final) {
+            $this->dispatch('alert', icon: 'error', message: 'Only finalized loadsheets can be revoked.');
+            return;
+        }
+
         $this->loadsheet->update([
+            'status' => 'revoked',
             'final' => false,
-            'released_by' => null,
-            'released_at' => null,
         ]);
 
-        $this->dispatch('alert', icon: 'success', message: 'Loadsheet Revoked successfully.');
+        $this->dispatch('alert', icon: 'success', message: 'Loadsheet revoked successfully.');
     }
 
     public function generateLoadsheet()

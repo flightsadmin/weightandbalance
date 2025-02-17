@@ -5,17 +5,25 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title m-0">Load Sheet</h3>
                     <div class="d-flex gap-2 m-0">
-                        @if ($loadsheet && !$loadsheet->final)
-                            <button class="btn btn-success btn-sm m-0" wire:click="finalizeLoadsheet">
-                                <i class="bi bi-check2-circle"></i> Finalize Loadsheet</button>
-                        @else
-                            <button class="btn btn-danger btn-sm m-0" wire:click="revokeLoadsheet"
-                                wire:confirm="Are you sure you want to revoke this loadsheet?">
-                                <i class="bi bi-trash-fill"></i> Revoke Loadsheet</button>
+                        @if ($loadsheet)
+                            @if (!$loadsheet->final && $loadsheet->status !== 'revoked')
+                                <button class="btn btn-success btn-sm m-0" wire:click="finalizeLoadsheet">
+                                    <i class="bi bi-check2-circle"></i> Finalize Loadsheet
+                                </button>
+                            @elseif($loadsheet->status === 'released')
+                                <button class="btn btn-secondary btn-sm m-0" wire:click="revokeLoadsheet"
+                                    wire:confirm="Are you sure you want to revoke this loadsheet?">
+                                    <i class="bi bi-trash-fill"></i> Revoke Loadsheet
+                                </button>
+                            @endif
                         @endif
-                        <button class="btn btn-primary btn-sm m-0" wire:click="generateLoadsheet"
-                            {{ !$flight->fuel || !$loadplan || $loadplan->status !== 'released' ? 'disabled' : '' }}>
-                            <i class="bi bi-plus-circle"></i> Generate New Loadsheet</button>
+
+                        @if (!$loadsheet || $loadsheet->status === 'revoked')
+                            <button class="btn btn-primary btn-sm m-0" wire:click="generateLoadsheet"
+                                {{ !$flight->fuel || !$loadplan || $loadplan->status !== 'released' ? 'disabled' : '' }}>
+                                <i class="bi bi-plus-circle"></i> Generate New Loadsheet
+                            </button>
+                        @endif
                     </div>
                 </div>
                 @if ($loadsheet)
