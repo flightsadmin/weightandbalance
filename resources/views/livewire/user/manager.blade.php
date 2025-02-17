@@ -130,7 +130,7 @@
                                 <div class="table-responsive">
                                     <table class="table table-sm table-bordered">
                                         <tbody>
-                                            @foreach ($roles->chunk(4) as $chunk)
+                                            @foreach ($roles->chunk(3) as $chunk)
                                                 <tr>
                                                     @foreach ($chunk as $role)
                                                         <td class="p-1">
@@ -145,7 +145,7 @@
                                                             </div>
                                                         </td>
                                                     @endforeach
-                                                    @for ($i = $chunk->count(); $i < 4; $i++)
+                                                    @for ($i = $chunk->count(); $i < 3; $i++)
                                                         <td></td>
                                                     @endfor
                                                 </tr>

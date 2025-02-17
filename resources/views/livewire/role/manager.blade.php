@@ -15,12 +15,12 @@
 
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover table-sm">
+                <table class="table table-hover table-bordered table-sm">
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th style="width: 150px;">Name</th>
                             <th>Permissions</th>
-                            <th>Actions</th>
+                            <th style="width: 100px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
