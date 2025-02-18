@@ -130,6 +130,7 @@ class Manager extends Component
 
         $this->reset('form', 'showForm');
         $this->dispatch('alert', icon: 'success', message: 'Passenger added successfully.');
+        $this->dispatch('passenger-saved');
     }
 
     public function update()
@@ -139,12 +140,14 @@ class Manager extends Component
         $this->passenger->update($this->form);
         $this->reset('form', 'showForm', 'passenger');
         $this->dispatch('alert', icon: 'success', message: 'Passenger updated successfully.');
+        $this->dispatch('passenger-saved');
     }
 
     public function delete(Passenger $passenger)
     {
         $passenger->delete();
         $this->dispatch('alert', icon: 'success', message: 'Passenger deleted successfully.');
+        $this->dispatch('passenger-saved');
     }
 
     public function updateAcceptanceStatus(Passenger $passenger, $status)
@@ -158,6 +161,7 @@ class Manager extends Component
             icon: 'success',
             message: ucfirst($status) . ' passenger successfully.'
         );
+        $this->dispatch('passenger-saved');
     }
 
     public function saveBaggage()
@@ -172,6 +176,7 @@ class Manager extends Component
         }
         $this->dispatch('alert', icon: 'success', message: 'Baggage saved successfully.');
         $this->dispatch('baggage-saved');
+        $this->dispatch('passenger-saved');
     }
 
     public function editBaggage(Passenger $passenger)
@@ -240,12 +245,14 @@ class Manager extends Component
 
         $this->dispatch('seat-saved');
         $this->dispatch('alert', icon: 'success', message: 'Seat assigned successfully.');
+        $this->dispatch('passenger-saved');
     }
 
     public function removeSeat(Passenger $passenger)
     {
         $passenger->update(['seat_id' => null]);
         $this->dispatch('alert', icon: 'success', message: 'Seat assignment removed.');
+        $this->dispatch('passenger-saved');
     }
 
     public function blockSeat($seatId)
@@ -266,6 +273,7 @@ class Manager extends Component
         }
 
         $this->dispatch('alert', icon: 'success', message: 'Seat blocked successfully.');
+        $this->dispatch('passenger-saved');
     }
 
     public function unblockSeat($seatId)
@@ -276,6 +284,7 @@ class Manager extends Component
         ]);
 
         $this->dispatch('alert', icon: 'success', message: 'Seat unblocked successfully.');
+        $this->dispatch('passenger-saved');
     }
 
     #[On('passenger-saved')]

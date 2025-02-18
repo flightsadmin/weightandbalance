@@ -78,6 +78,7 @@ class BoardingControl extends Component
         $passenger->update(['boarding_status' => 'boarded']);
         $this->seatNumber = '';
         $this->dispatch('alert', icon: 'success', message: 'Passenger boarded successfully');
+        $this->dispatch('boarding-updated');
     }
 
     public function boardSelected()
@@ -89,6 +90,7 @@ class BoardingControl extends Component
         $this->selectedPassengers = [];
         $this->selectAll = false;
         $this->dispatch('alert', icon: 'success', message: $count . ' passengers boarded successfully');
+        $this->dispatch('boarding-updated');
     }
 
     public function unboardPassenger($passengerId)
@@ -98,6 +100,7 @@ class BoardingControl extends Component
             ->update(['boarding_status' => 'unboarded']);
 
         $this->dispatch('alert', icon: 'success', message: 'Passenger unboarded successfully');
+        $this->dispatch('boarding-updated');
     }
 
     public function render()

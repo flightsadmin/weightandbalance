@@ -16,7 +16,7 @@
                     <a wire:click.prevent="setTab('passengers')" href=""
                         class="dropdown-item {{ $activeTab === 'passengers' ? 'active' : '' }}">
                         <i class="bi bi-people"></i> Check-in
-                        <span class="badge bg-secondary">{{ $passengers_count }}</span>
+                        <span class="badge bg-secondary">{{ $flight->passengers_count }}</span>
                     </a>
                 </li>
                 <li>
@@ -26,7 +26,7 @@
                     <a wire:click.prevent="setTab('boarding')" href=""
                         class="dropdown-item {{ $activeTab === 'boarding' ? 'active' : '' }}">
                         <i class="bi bi-door-open-fill"></i> Boarding
-                        <span class="badge bg-secondary">{{ $boarding_count }}</span>
+                        <span class="badge bg-secondary">{{ $flight->boarded_count }}/{{ $flight->accepted_count }}</span>
                     </a>
                 </li>
             </ul>
@@ -41,7 +41,7 @@
                     <a wire:click.prevent="setTab('baggage')" href=""
                         class="dropdown-item {{ $activeTab === 'baggage' ? 'active' : '' }}">
                         <i class="bi bi-bag"></i> Baggage
-                        <span class="badge bg-secondary">{{ $baggage_count }}</span>
+                        <span class="badge bg-secondary">{{ $flight->baggage_count }}</span>
                     </a>
                 </li>
                 <li>
@@ -51,7 +51,7 @@
                     <a wire:click.prevent="setTab('cargo')" href=""
                         class="dropdown-item {{ $activeTab === 'cargo' ? 'active' : '' }}">
                         <i class="bi bi-box"></i> Cargo
-                        <span class="badge bg-secondary">{{ $cargo_count }}</span>
+                        <span class="badge bg-secondary">{{ $flight->cargo_count }}</span>
                     </a>
                 </li>
             </ul>
@@ -60,7 +60,7 @@
             <a wire:click.prevent="setTab('crew')" href=""
                 class="nav-link {{ $activeTab === 'crew' ? 'active' : '' }}">
                 <i class="bi bi-person-badge"></i> Crew
-                <span class="badge bg-secondary">{{ $crew_count }}</span>
+                <span class="badge bg-secondary">{{ $flight->crew_count }}</span>
             </a>
         </li>
         <li class="nav-item">
