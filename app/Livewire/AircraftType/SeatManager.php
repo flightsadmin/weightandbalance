@@ -15,7 +15,7 @@ class SeatManager extends Component
     public $bulkForm = [
         'start_row' => 1,
         'end_row' => 10,
-        'columns' => ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'],
+        'columns' => ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K'],
         'cabin_zone_id' => '',
         'type' => 'economy',
     ];
@@ -26,7 +26,6 @@ class SeatManager extends Component
         'cabin_zone_id' => '',
         'type' => 'economy',
         'is_exit' => false,
-        'is_blocked' => false,
         'notes' => '',
     ];
 
@@ -47,13 +46,14 @@ class SeatManager extends Component
                     'cabin_zone_id' => $this->bulkForm['cabin_zone_id'],
                     'row' => $row,
                     'column' => $column,
-                    'designation' => $row.$column,
+                    'designation' => $row . $column,
                     'type' => $this->bulkForm['type'],
                 ]);
             }
         }
 
         $this->dispatch('alert', icon: 'success', message: 'Seats created successfully.');
+        $this->dispatch('seats-created');
         $this->reset('bulkForm', 'showBulkCreateModal');
     }
 
@@ -64,7 +64,6 @@ class SeatManager extends Component
             'cabin_zone_id',
             'type',
             'is_exit',
-            'is_blocked',
             'notes',
         ]);
     }
@@ -75,12 +74,12 @@ class SeatManager extends Component
             'seatForm.cabin_zone_id' => 'required|exists:cabin_zones,id',
             'seatForm.type' => 'required|in:economy,business,first',
             'seatForm.is_exit' => 'boolean',
-            'seatForm.is_blocked' => 'boolean',
             'seatForm.notes' => 'nullable|string',
         ]);
 
         $this->editingSeat->update($this->seatForm);
         $this->dispatch('alert', icon: 'success', message: 'Seat updated successfully.');
+        $this->dispatch('seat-saved');
         $this->reset('editingSeat', 'seatForm');
     }
 

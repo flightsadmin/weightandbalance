@@ -118,7 +118,7 @@
                                 <div class="mb-3">
                                     <label class="form-label">Columns</label>
                                     <div class="row">
-                                        @foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K'] as $letter)
+                                        @foreach ($bulkForm['columns'] as $letter)
                                             <div class="col-auto">
                                                 <div class="form-check">
                                                     <input type="checkbox" class="form-check-input"
@@ -214,14 +214,6 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input"
-                                            wire:model="seatForm.is_blocked" id="is_blocked">
-                                        <label class="form-check-label" for="is_blocked">Blocked</label>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
                                     <label class="form-label">Notes</label>
                                     <textarea class="form-control form-control-sm"
                                         wire:model="seatForm.notes" rows="2"></textarea>
@@ -232,11 +224,13 @@
                                     wire:click="deleteSeat({{ $editingSeat?->id }})"
                                     wire:confirm="Are you sure you want to delete this seat?"
                                     data-bs-dismiss="modal">
-                                    Delete Seat
+                                    <i class="bi bi-trash"></i> Delete Seat
                                 </button>
                                 <button type="button" class="btn btn-sm btn-secondary"
                                     data-bs-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-sm btn-primary">Update Seat</button>
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-pencil-square"></i> Update Seat
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -247,7 +241,12 @@
         <style>
             .seat-cell {
                 cursor: pointer;
+                font-size: 10px;
                 padding: 5px;
+                text-align: center;
+                vertical-align: middle;
+                width: 30px;
+                height: 30px;
                 border-radius: 4px;
                 transition: background-color 0.2s;
             }
@@ -265,6 +264,11 @@
             <script>
                 $wire.on('seat-saved', () => {
                     const modal = bootstrap.Modal.getInstance(document.getElementById('editSeatModal'));
+                    modal.hide();
+                });
+
+                $wire.on('seats-created', () => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('bulkCreateModal'));
                     modal.hide();
                 });
             </script>

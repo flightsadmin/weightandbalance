@@ -85,7 +85,7 @@ class AircraftConfigSeeder extends Seeder
 
             $zone->seats()->delete();
             $rows = ceil($zone->max_capacity / 10);
-            $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K'];
 
             $seats = [];
             for ($row = 1; $row <= $rows; $row++) {
