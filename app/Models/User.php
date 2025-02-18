@@ -64,20 +64,4 @@ class User extends Authenticatable
             'last_login_ip' => request()->ip(),
         ]);
     }
-
-    public function canEditUser(User $user): bool
-    {
-        // Super admin can edit anyone
-        if ($this->hasRole('super-admin')) {
-            return true;
-        }
-
-        // Admin can edit non-admin users
-        if ($this->hasRole('admin') && ! $user->hasRole('super-admin')) {
-            return true;
-        }
-
-        // Users can edit their own profile
-        return $this->id === $user->id;
-    }
 }

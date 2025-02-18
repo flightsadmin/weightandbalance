@@ -5,6 +5,11 @@
             <button class="btn btn-sm btn-{{ $boardedCount === $totalCount ? 'success' : 'primary' }}">
                 <i class="bi bi-person-check"></i> Boarded: {{ $boardedCount }}/{{ $totalCount }}
             </button>
+            <div class="d-flex gap-2">
+                <span class="badge bg-primary">{{ $passengers->count() }} Passengers</span>
+                <span class="badge bg-success">{{ $passengers->where('boarding_status', 'boarded')->count() }} Boarded</span>
+                <span class="badge bg-danger">{{ $passengers->where('boarding_status', 'unboarded')->count() }} Unboarded</span>
+            </div>
         </div>
     </div>
 

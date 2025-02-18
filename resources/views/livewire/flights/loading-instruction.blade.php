@@ -5,7 +5,7 @@
             <tr>
                 <td style="padding: 0; line-height: 1.5;">LOADING INSTRUCTION/REPORT</td>
                 <td style="padding: 0; line-height: 1.5;"></td>
-                <td style="padding: 0; line-height: 1.5;">PREPARED</td>
+                <td style="padding: 0; line-height: 1.5;">PREPARED BY</td>
                 <td style="padding: 0; line-height: 1.5;"></td>
                 <td style="padding: 0; line-height: 1.5;"></td>
                 <td style="padding: 0; line-height: 1.5;">VERSION</td>
@@ -13,7 +13,7 @@
             <tr>
                 <td style="padding: 0; line-height: 1.5;">ALL WEIGHTS IN KILOS</td>
                 <td style="padding: 0; line-height: 1.5;"></td>
-                <td style="padding: 0; line-height: 1.5;">N/A</td>
+                <td style="padding: 0; line-height: 1.5;">{{ str($loadplan->releaser->name)->upper() ?? 'N/A' }}</td>
                 <td style="padding: 0; line-height: 1.5;"></td>
                 <td style="padding: 0; line-height: 1.5;"></td>
                 <td style="padding: 0; line-height: 1.5;">{{ $loadplan->version }}</td>

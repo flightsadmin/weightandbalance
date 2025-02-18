@@ -5,15 +5,10 @@
                 placeholder="Search by name, ticket or seat number...">
         </div>
         <div class="d-flex gap-2">
-            <span class="badge bg-primary">{{ $passengers->count() }} Passengers</span>
-            <span class="badge bg-success">{{ $passengers->where('acceptance_status', 'accepted')->count() }} Accepted</span>
-            <span class="badge bg-warning">{{ $passengers->where('acceptance_status', 'standby')->count() }} Standby</span>
-            <span class="badge bg-danger">{{ $passengers->where('acceptance_status', 'offloaded')->count() }} Offloaded</span>
-        </div>
-        <div class="d-flex gap-2">
-            <span class="badge bg-primary">{{ $passengers->count() }} Passengers</span>
-            <span class="badge bg-success">{{ $passengers->where('boarding_status', 'boarded')->count() }} Boarded</span>
-            <span class="badge bg-danger">{{ $passengers->where('boarding_status', 'unboarded')->count() }} Unboarded</span>
+            <span class="badge bg-primary">{{ $flight->passengers_count }} Passengers</span>
+            <span class="badge bg-success">{{ $flight->accepted_count }} Accepted</span>
+            <span class="badge bg-warning">{{ $flight->standby_count }} Standby</span>
+            <span class="badge bg-danger">{{ $flight->offloaded_count }} Offloaded</span>
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#passengerFormModal">
@@ -22,111 +17,115 @@
         </div>
     </div>
 
-    <div class="card-body table-responsive">
-        <table class="table table-sm table-hover">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    @unless ($flight)
-                        <th>Flight</th>
-                    @endunless
-                    <th>Ticket Number</th>
-                    <th>Seat</th>
-                    <th>Baggage</th>
-                    <th>Acceptance</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($passengers as $passenger)
-                    <tr wire:key="{{ $passenger->id }}">
-                        <td>
-                            <a href="#" wire:click.prevent="showPassengerDetails({{ $passenger->id }})"
-                                class="text-decoration-none" data-bs-toggle="modal"
-                                data-bs-target="#passengerDetailsModal">
-                                {{ $passenger->name }}
-                            </a>
-                        </td>
-                        <td>{{ ucfirst($passenger->type ?? 'N/A') }}</td>
-                        @unless ($flight)
-                            <td>
-                                @if ($passenger->flight)
-                                    {{ $passenger->flight->flight_number }}
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
-                        @endunless
-                        <td>{{ $passenger->ticket_number }}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary"
-                                wire:click="showSeatModal({{ $passenger->id }})" data-bs-toggle="modal"
-                                data-bs-target="#seatModal">
-                                <i class="bi bi-person-check"></i> {{ $passenger->seat->designation ?? 'Assign' }}
-                            </button>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-link text-decoration-none text-reset"
-                                wire:click="editBaggage({{ $passenger->id }})" data-bs-toggle="modal"
-                                data-bs-target="#baggageModal">
-                                {{ $passenger->baggage->count() }} <i class="bi bi-luggage-fill"></i> pcs
-                            </button>
-                        </td>
-                        <td>
-                            <div class="dropdown d-inline">
-                                <button
-                                    class="btn btn-sm btn-{{ $passenger->acceptance_status === 'accepted' ? 'success' : ($passenger->acceptance_status === 'standby' ? 'warning' : 'danger') }} dropdown-toggle"
-                                    type="button" data-bs-toggle="dropdown">
-                                    {{ str_replace('_', ' ', ucwords($passenger->acceptance_status)) }}
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <button class="dropdown-item" wire:click="updateAcceptanceStatus({{ $passenger->id }}, 'booked')">
-                                            <i class="bi bi-bookmark-check-fill text-secondary"></i> Booked
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button class="dropdown-item" wire:click="updateAcceptanceStatus({{ $passenger->id }}, 'standby')">
-                                            <i class="bi bi-hourglass-split text-warning"></i> Standby
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button class="dropdown-item"
-                                            wire:click="updateAcceptanceStatus({{ $passenger->id }}, 'accepted')">
-                                            <i class="bi bi-check-circle text-success"></i> Accepted
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li>
-                                        <button class="dropdown-item"
-                                            wire:click="updateAcceptanceStatus({{ $passenger->id }}, 'offloaded')">
-                                            <i class="bi bi-x-circle text-danger"></i> Offloaded
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-link" wire:click="edit({{ $passenger->id }})"
-                                data-bs-toggle="modal" data-bs-target="#passengerFormModal">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-link text-danger" wire:click="delete({{ $passenger->id }})"
-                                wire:confirm="Are you sure you want to remove this passenger?">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                @empty
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
                     <tr>
-                        <td colspan="{{ $flight ? 6 : 7 }}" class="text-center">No passengers found.</td>
+                        <th>Name</th>
+                        <th>Type</th>
+                        @unless ($flight)
+                            <th>Flight</th>
+                        @endunless
+                        <th>Ticket Number</th>
+                        <th>Seat</th>
+                        <th>Baggage</th>
+                        <th>Acceptance</th>
+                        <th>Action</th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse ($passengers as $passenger)
+                        <tr wire:key="{{ $passenger->id }}">
+                            <td>
+                                <a href="#" wire:click.prevent="showPassengerDetails({{ $passenger->id }})"
+                                    class="text-decoration-none" data-bs-toggle="modal"
+                                    data-bs-target="#passengerDetailsModal">
+                                    {{ $passenger->name }}
+                                </a>
+                            </td>
+                            <td>{{ ucfirst($passenger->type ?? 'N/A') }}</td>
+                            @unless ($flight)
+                                <td>
+                                    @if ($passenger->flight)
+                                        {{ $passenger->flight->flight_number }}
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                            @endunless
+                            <td>{{ $passenger->ticket_number }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary"
+                                    wire:click="showSeatModal({{ $passenger->id }})" data-bs-toggle="modal"
+                                    data-bs-target="#seatModal">
+                                    <i class="bi bi-person-check"></i> {{ $passenger->seat->designation ?? 'Assign' }}
+                                </button>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-link text-decoration-none text-reset"
+                                    wire:click="editBaggage({{ $passenger->id }})" data-bs-toggle="modal"
+                                    data-bs-target="#baggageModal">
+                                    {{ $passenger->baggage_count }} <i class="bi bi-luggage-fill"></i> pcs
+                                </button>
+                            </td>
+                            <td>
+                                <div class="dropdown d-inline">
+                                    <button
+                                        class="btn btn-sm btn-{{ $passenger->acceptance_status === 'accepted' ? 'success' : ($passenger->acceptance_status === 'standby' ? 'warning' : 'danger') }} dropdown-toggle"
+                                        type="button" data-bs-toggle="dropdown">
+                                        {{ str_replace('_', ' ', ucwords($passenger->acceptance_status)) }}
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <button class="dropdown-item"
+                                                wire:click="updateAcceptanceStatus({{ $passenger->id }}, 'booked')">
+                                                <i class="bi bi-bookmark-check-fill text-secondary"></i> Booked
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item"
+                                                wire:click="updateAcceptanceStatus({{ $passenger->id }}, 'standby')">
+                                                <i class="bi bi-hourglass-split text-warning"></i> Standby
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item"
+                                                wire:click="updateAcceptanceStatus({{ $passenger->id }}, 'accepted')">
+                                                <i class="bi bi-check-circle text-success"></i> Accepted
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item"
+                                                wire:click="updateAcceptanceStatus({{ $passenger->id }}, 'offloaded')">
+                                                <i class="bi bi-x-circle text-danger"></i> Offloaded
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-link" wire:click="edit({{ $passenger->id }})"
+                                    data-bs-toggle="modal" data-bs-target="#passengerFormModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-link text-danger" wire:click="delete({{ $passenger->id }})"
+                                    wire:confirm="Are you sure you want to remove this passenger?">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ $flight ? 6 : 7 }}" class="text-center">No passengers found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
         <div>
             {{ $passengers->links() }}
         </div>
@@ -317,18 +316,22 @@
     </div>
 
     <!-- Seat Assignment Modal -->
-    {{-- @include('livewire.flights.passenger.partials.seat-modal') --}}
     <div class="modal fade" id="seatModal" tabindex="-1" wire:ignore.self>
         <div class="modal-dialog">
             <div class="modal-content">
-                <form wire:submit="assignSeat">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Assign Seat</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header d-flex justify-content-between align-items-center">
+                    <h5 class="modal-title mt-0">Assign Seat</h5>
+                    <div class="d-flex gap-3 ms-auto">
+                        <span class="badge text-bg-secondary">Occupied</span>
+                        <span class="badge text-bg-danger">Blocked</span>
+                        <span class="badge text-bg-primary">Selected</span>
+                        <span class="badge text-bg-light">Available</span>
                     </div>
+                    <button type="button" class="btn-close mt-0" data-bs-dismiss="modal"></button>
+                </div>
+                <form wire:submit.prevent="assignSeat">
                     <div class="modal-body">
                         <div class="seat-container">
-                            @dump($editingPassenger)
                             <div class="seat-grid">
                                 @php
                                     $allSeats = $seats
@@ -349,25 +352,6 @@
                                         @endforeach
                                     </div>
                                 @endforeach
-                            </div>
-
-                            <div class="seat-legend">
-                                <div class="legend-item">
-                                    <div class="seat-cell"></div>
-                                    <span>Available</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="seat-cell occupied"></div>
-                                    <span>Occupied</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="seat-cell blocked"></div>
-                                    <span>Blocked</span>
-                                </div>
-                                <div class="legend-item">
-                                    <div class="seat-cell selected"></div>
-                                    <span>Selected</span>
-                                </div>
                             </div>
                         </div>
                     </div>

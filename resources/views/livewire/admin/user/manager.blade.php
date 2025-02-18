@@ -3,9 +3,11 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h2 class="card-title m-0">Users</h2>
             <div class="d-flex justify-content-end align-items-center gap-2">
-                <input type="text" wire:model.live.debounce.300ms="search"
-                    class="form-control form-control-sm"
-                    placeholder="Search users...">
+                <div>
+                    <input type="text" wire:model.live.debounce.300ms="search"
+                        class="form-control form-control-sm"
+                        placeholder="Search users...">
+                </div>
                 @can('createUser')
                     <button class="btn btn-primary btn-sm" wire:click="$toggle('showModal')"
                         data-bs-toggle="modal" data-bs-target="#userFormModal">

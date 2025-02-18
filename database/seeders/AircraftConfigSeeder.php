@@ -98,7 +98,7 @@ class AircraftConfigSeeder extends Seeder
                         'column' => $column,
                         'designation' => $actualRow . $column,
                         'type' => 'economy',
-                        'is_exit' => in_array($actualRow, [12, 13]),
+                        'is_exit' => in_array($actualRow, [5, 13]),
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];

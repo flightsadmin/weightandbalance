@@ -3,9 +3,11 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h2 class="card-title m-0">Roles</h2>
             <div class="d-flex justify-content-end align-items-center gap-2">
-                <input type="text" wire:model.live.debounce.300ms="search"
-                    class="form-control form-control-sm"
-                    placeholder="Search roles...">
+                <div>
+                    <input type="text" wire:model.live.debounce.300ms="search"
+                        class="form-control form-control-sm"
+                        placeholder="Search roles...">
+                </div>
                 <button class="btn btn-primary btn-sm" wire:click="$toggle('showModal')"
                     data-bs-toggle="modal" data-bs-target="#roleFormModal">
                     <i class="bi bi-plus-lg"></i> Add Role
