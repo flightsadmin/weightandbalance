@@ -113,13 +113,8 @@ class Manager extends Component
                                 }
                             ]);
                     }
-                ])->get()
-                ->map(function ($zone) {
-                    $zone->seats = $zone->seats->map(function ($seat) {
-                        return $seat;
-                    });
-                    return $zone;
-                });
+                ])
+                ->get();
         }
 
         return collect();
@@ -297,6 +292,28 @@ class Manager extends Component
 
         $this->dispatch('alert', icon: 'success', message: 'Seat unblocked successfully.');
         $this->dispatch('passenger-saved');
+    }
+
+    public function toggleSeatBlock($seatId)
+    {
+        $seat = Seat::findOrFail($seatId);
+
+        if ($seat->passenger()->where('flight_id', $this->flight->id)->exists()) {
+            $this->dispatch('alert', icon: 'error', message: 'Cannot block an occupied seat');
+            return;
+        }
+
+        $flightSeat = $this->flight->seats()->firstOrCreate(
+            ['seat_id' => $seatId],
+            ['is_blocked' => false]
+        );
+
+        $flightSeat->pivot->update([
+            'is_blocked' => !$flightSeat->pivot->is_blocked,
+            'blocked_reason' => !$flightSeat->pivot->is_blocked ? 'Blocked by staff' : null
+        ]);
+
+        $this->dispatch('alert', icon: 'success', message: $flightSeat->pivot->is_blocked ? 'Seat blocked successfully' : 'Seat unblocked successfully');
     }
 
     #[On('passenger-saved')]

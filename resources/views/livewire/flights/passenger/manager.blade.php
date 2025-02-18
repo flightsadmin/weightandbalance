@@ -436,15 +436,20 @@
                                     <div class="seat-row">
                                         @foreach ($rowSeats->sortBy('column') as $seat)
                                             <div class="seat-cell 
-                                            {{ $seat->is_occupied ? 'occupied' : '' }}
-                                            {{ $seat->is_blocked ? 'blocked' : '' }}
-                                            {{ $selectedSeat == $seat->id ? 'selected' : '' }}"
-                                                wire:click="{{ !$seat->is_occupied && !$seat->is_blocked ? 'selectSeat(' . $seat->id . ')' : '' }}">
+                                                {{ $seat->is_occupied ? 'occupied' : '' }}
+                                                {{ $seat->is_blocked ? 'blocked' : '' }}
+                                                {{ $selectedSeat == $seat->id ? 'selected' : '' }}"
+                                                @if (!$seat->is_occupied) wire:contextmenu.prevent="toggleSeatBlock({{ $seat->id }})"
+                                                    wire:click="{{ !$seat->is_blocked ? 'selectSeat(' . $seat->id . ')' : '' }}" @endif
+                                                title="{{ $seat->is_blocked ? 'Right click to unblock' : 'Right click to block' }}">
                                                 {{ $seat->designation }}
                                             </div>
                                         @endforeach
                                     </div>
                                 @endforeach
+                            </div>
+                            <div class="text-muted small mt-2">
+                                <i class="bi bi-info-circle"></i> Right click on a seat to block/unblock it
                             </div>
                         </div>
                     </div>
