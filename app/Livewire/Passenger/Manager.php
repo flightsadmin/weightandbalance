@@ -35,9 +35,9 @@ class Manager extends Component
     public $form = [
         'name' => '',
         'ticket_number' => '',
+        'reservation_number' => '',
         'type' => '',
         'attributes' => [
-            'wheelchair' => false,
             'wchr' => false,
             'wchs' => false,
             'wchc' => false,
@@ -48,6 +48,7 @@ class Manager extends Component
             'dpna' => false,
             'meda' => false,
             'infant' => false,
+            'infant_name' => '',
         ]
     ];
 
@@ -65,9 +66,11 @@ class Manager extends Component
 
     protected $rules = [
         'form.name' => 'required|string|max:255',
-        'form.ticket_number' => 'nullable|string|max:255',
+        'form.ticket_number' => 'nullable|string|max:14',
+        'form.reservation_number' => 'nullable|string|max:6',
         'form.type' => 'required|in:male,female,child,infant',
         'form.attributes' => 'array',
+        'form.attributes.infant_name' => 'required_if:form.attributes.infant,true|string|max:50',
         'seatForm.seat_id' => 'nullable|exists:seats,id',
     ];
 
@@ -110,8 +113,7 @@ class Manager extends Component
                                 }
                             ]);
                     }
-                ])
-                ->get()
+                ])->get()
                 ->map(function ($zone) {
                     $zone->seats = $zone->seats->map(function ($seat) {
                         return $seat;
@@ -126,8 +128,7 @@ class Manager extends Component
     public function edit(Passenger $passenger)
     {
         $this->passenger = $passenger;
-        dd($passenger);
-        $this->form = $passenger->only(['name', 'ticket_number', 'type', 'attributes']);
+        $this->form = $passenger->only(['name', 'ticket_number', 'reservation_number', 'type', 'attributes']);
         $this->showForm = true;
     }
 
@@ -142,6 +143,7 @@ class Manager extends Component
             [
                 'name' => $this->form['name'],
                 'ticket_number' => $this->form['ticket_number'],
+                'reservation_number' => $this->form['reservation_number'],
                 'type' => $this->form['type'],
                 'acceptance_status' => 'pending',
                 'boarding_status' => 'unboarded',
@@ -268,7 +270,6 @@ class Manager extends Component
 
     public function blockSeat($seatId)
     {
-        // Check if the relationship doesn't exist before attaching
         if (!$this->flight->seats()->where('seat_id', $seatId)->exists()) {
             $this->flight->seats()->attach($seatId, [
                 'is_blocked' => true,

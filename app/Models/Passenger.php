@@ -19,6 +19,7 @@ class Passenger extends Model
         'name',
         'type',
         'ticket_number',
+        'reservation_number',
         'acceptance_status',
         'boarding_status',
         'attributes',
@@ -29,7 +30,19 @@ class Passenger extends Model
     ];
 
     protected $attributes = [
-        'attributes' => '{"wheelchair": false, "wchr": false, "wchs": false, "wchc": false, "exst": false, "stcr": false, "deaf": false, "blind": false, "dpna": false, "meda": false, "infant": false}'
+        'attributes' => [
+            'wchr' => false,
+            'wchs' => false,
+            'wchc' => false,
+            'exst' => false,
+            'stcr' => false,
+            'deaf' => false,
+            'blind' => false,
+            'dpna' => false,
+            'meda' => false,
+            'infant' => false,
+            'infant_name' => '',
+        ],
     ];
 
     public function flight(): BelongsTo

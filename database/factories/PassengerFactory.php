@@ -22,10 +22,24 @@ class PassengerFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'ticket_number' => strtoupper(fake()->bothify('??#####')),
+            'ticket_number' => strtoupper(fake()->bothify('###-##########')),
+            'reservation_number' => strtoupper(fake()->bothify('#?##?#')),
             'type' => fake()->randomElement(['male', 'female', 'child', 'infant']),
             'acceptance_status' => 'pending',
             'boarding_status' => 'unboarded',
+            'attributes' => [
+                'wchr' => fake()->boolean(),
+                'wchs' => fake()->boolean(),
+                'wchc' => fake()->boolean(),
+                'exst' => fake()->boolean(),
+                'stcr' => fake()->boolean(),
+                'deaf' => fake()->boolean(),
+                'blind' => fake()->boolean(),
+                'dpna' => fake()->boolean(),
+                'meda' => fake()->boolean(),
+                'infant' => fake()->boolean(),
+                'infant_name' => fake()->name(),
+            ],
         ];
     }
 
@@ -33,7 +47,6 @@ class PassengerFactory extends Factory
     {
         return $this->afterCreating(function (Passenger $passenger) {
             if ($passenger->flight) {
-                // Get an available seat for this flight
                 $availableSeat = $passenger->flight->aircraft->type->seats()
                     ->whereDoesntHave('passenger', function ($query) use ($passenger) {
                         $query->where('flight_id', $passenger->flight_id);
@@ -41,17 +54,13 @@ class PassengerFactory extends Factory
                     ->whereDoesntHave('flights', function ($query) use ($passenger) {
                         $query->where('flights.id', $passenger->flight_id)
                             ->where('flight_seats.is_blocked', true);
-                    })
-                    ->inRandomOrder()
-                    ->first();
+                    })->inRandomOrder()->first();
 
                 if ($availableSeat) {
-                    // Create flight_seats entry if needed
                     $passenger->flight->seats()->firstOrCreate(
                         ['seat_id' => $availableSeat->id],
                         ['is_blocked' => false]
                     );
-
                     $passenger->update(['seat_id' => $availableSeat->id]);
                 }
             }

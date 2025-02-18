@@ -24,9 +24,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Type</th>
-                        @unless ($flight)
-                            <th>Flight</th>
-                        @endunless
+                        <th class="text-center">Specials</th>
                         <th>Ticket Number</th>
                         <th>Seat</th>
                         <th>Baggage</th>
@@ -46,34 +44,27 @@
                             </td>
                             <td>
                                 {{ ucfirst($passenger->type ?? 'N/A') }}
+                            </td>
+                            <td class="text-center">
                                 @if ($passenger->attributes)
                                     @foreach ($passenger->attributes as $key => $value)
-                                        @if ($value)
+                                        @if ($value && $key !== 'infant_name')
                                             <i class="bi bi-{{ match ($key) {
-                                                'wheelchair', 'wchr', 'wchs', 'wchc' => 'person-wheelchair',
+                                                'wchr', 'wchs', 'wchc' => 'person-wheelchair',
                                                 'exst' => 'door-open',
                                                 'stcr' => 'h-circle-fill',
                                                 'deaf' => 'ear',
-                                                'blind' => 'eye',
+                                                'blind' => 'eye-fill',
                                                 'dpna' => 'person-arms-up',
                                                 'meda' => 'heart-pulse-fill',
                                                 'infant' => 'person-standing-dress',
                                                 default => 'person-check',
                                             } }}"
-                                                title="{{ strtoupper($key) }}"></i>
+                                                title="{{ strtoupper($key) }}{{ $key === 'infant' ? ' - ' . $passenger->attributes['infant_name'] : '' }}"></i>
                                         @endif
                                     @endforeach
                                 @endif
                             </td>
-                            @unless ($flight)
-                                <td>
-                                    @if ($passenger->flight)
-                                        {{ $passenger->flight->flight_number }}
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
-                            @endunless
                             <td>{{ $passenger->ticket_number }}</td>
                             <td>
                                 <button class="btn btn-sm btn-primary"
@@ -194,11 +185,6 @@
                                 <div class="row g-2">
                                     <div class="col-md-3">
                                         <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.wheelchair"
-                                                id="wheelchair">
-                                            <label class="form-check-label" for="wheelchair">Wheelchair</label>
-                                        </div>
-                                        <div class="form-check">
                                             <input type="checkbox" class="form-check-input" wire:model="form.attributes.wchr"
                                                 id="wchr">
                                             <label class="form-check-label" for="wchr">WCHR</label>
@@ -247,10 +233,20 @@
                                                 id="meda">
                                             <label class="form-check-label" for="meda">MEDA</label>
                                         </div>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.infant"
-                                                id="infant">
-                                            <label class="form-check-label" for="infant">Infant</label>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" wire:model="form.attributes.infant"
+                                                    id="infant">
+                                                <label class="form-check-label" for="infant">Infant</label>
+                                            </div>
+                                            @if ($form['attributes']['infant'])
+                                                <div class="mt-2">
+                                                    <input type="text"
+                                                        class="form-control form-control-sm"
+                                                        wire:model="form.attributes.infant_name"
+                                                        placeholder="Infant name">
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -391,8 +387,13 @@
                                 <h6 class="text-decoration-underline">Special Requirements</h6>
                                 <div class="d-flex flex-wrap gap-2">
                                     @foreach ($selectedPassenger->attributes as $key => $value)
-                                        @if ($value)
-                                            <span class="badge bg-info">{{ strtoupper($key) }}</span>
+                                        @if ($value && $key !== 'infant_name')
+                                            <span class="badge bg-info">
+                                                {{ strtoupper($key) }}
+                                                @if ($key === 'infant')
+                                                    - {{ $selectedPassenger->attributes['infant_name'] }}
+                                                @endif
+                                            </span>
                                         @endif
                                     @endforeach
                                 </div>
