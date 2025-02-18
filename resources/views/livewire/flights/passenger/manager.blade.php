@@ -429,29 +429,6 @@
             color: white;
             border-color: #0d6efd;
         }
-
-        .seat-legend {
-            display: flex;
-            gap: 0.75rem;
-            justify-content: center;
-            margin-top: 0.75rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid #dee2e6;
-            font-size: 0.75rem;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .legend-item .seat-cell {
-            width: 24px;
-            height: 24px;
-            min-width: 24px;
-            cursor: default;
-        }
     </style>
 
     @script

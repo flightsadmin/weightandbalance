@@ -143,12 +143,12 @@
                             :class="{ 'unplanned-area': true, 'highlight': selectedContainer || selectedPosition }">
                             <div class="container-list row g-2" x-on:click.stop>
                                 @forelse ($availableContainers as $container)
-                                    <div class="container-item col-md-4 {{ $container->pivot->type }}"
+                                    <div class="container-item col-md-4 {{ str($container->pivot->type)->lower() }}"
                                         x-on:click.stop="selectContainer({{ $container->id }})"
                                         :class="{ 'selected': selectedContainer === {{ $container->id }} }">
-                                        <div class="card">
+                                        <div class="card container-card">
                                             <div class="card-body">
-                                                <div class="text-center fw-bold">{{ $container->container_number }}</div>
+                                                <div class="fw-bold">{{ $container->container_number }}</div>
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <span
                                                         class="badge bg-{{ $container->pivot->type === 'baggage' ? 'primary' : 'warning' }}">

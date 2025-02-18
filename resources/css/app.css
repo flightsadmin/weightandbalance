@@ -257,6 +257,14 @@
     background-color: rgba(13, 110, 253, 0.05);
 }
 
+
+.unplanned-area .container-card {
+    font-size: 0.70rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 0.1rem;
+}
+
 .container-list:empty + .text-center {
     width: 100%;
     display: flex;
@@ -269,6 +277,7 @@
 .container-item {
     flex: 0 0 calc(50% - 0.25rem);
     cursor: pointer;
+    height: 80px;
 }
 
 .container-item .card {
@@ -293,14 +302,4 @@
 .container-item.cargo .card {
     border-left: 4px solid #ffc107;
     background-color: rgba(255, 193, 7, 0.05);
-}
-
-.bulk-container-item.baggage {
-    background-color: rgba(13, 110, 253, 0.5);
-    font-size: 0.70rem;
-}
-
-.bulk-container-item.cargo {
-    background-color: rgba(255, 193, 7, 0.5);
-    font-size: 0.70rem;
 }
