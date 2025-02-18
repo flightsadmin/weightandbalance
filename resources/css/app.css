@@ -124,12 +124,10 @@
 
 .card.baggage { 
     background-color: rgba(13, 110, 253, 0.5);
-    font-size: 0.70rem;
 }
 
 .card.cargo { 
     background-color: rgba(255, 193, 7, 0.5);
-    font-size: 0.70rem;
 }
 
 .position-code {
@@ -173,11 +171,6 @@
     font-size: 0.65rem;
     color: #6c757d;
 }
-
-.card-body .container-number {
-    font-size: 0.60rem;
-    color: #6c757d;
-}   
 
 .position-card.selected .card {
     border: 1px solid #0d6efd;

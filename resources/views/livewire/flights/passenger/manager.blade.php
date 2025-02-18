@@ -235,20 +235,24 @@
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-check">
-                                                <input type="checkbox" class="form-check-input" wire:model="form.attributes.infant"
+                                                <input type="checkbox"
+                                                    class="form-check-input"
+                                                    wire:model.live="form.attributes.infant"
                                                     id="infant">
                                                 <label class="form-check-label" for="infant">Infant</label>
                                             </div>
-                                            @if ($form['attributes']['infant'])
-                                                <div class="mt-2">
-                                                    <input type="text"
-                                                        class="form-control form-control-sm"
-                                                        wire:model="form.attributes.infant_name"
-                                                        placeholder="Infant name">
-                                                </div>
-                                            @endif
                                         </div>
                                     </div>
+                                    @if ($form['attributes']['infant'])
+                                        <div class="col-md-12 mt-2">
+                                            <label class="form-label">Infant Name</label>
+                                            <input type="text"
+                                                class="form-control form-control-sm"
+                                                wire:model="form.attributes.infant_name"
+                                                placeholder="Enter infant name"
+                                                autofocus>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
