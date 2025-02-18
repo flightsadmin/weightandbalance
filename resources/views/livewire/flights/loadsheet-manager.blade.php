@@ -21,7 +21,7 @@
                         @if (!$loadsheet || $loadsheet->status === 'revoked')
                             <button class="btn btn-primary btn-sm m-0" wire:click="generateLoadsheet"
                                 {{ !$flight->fuel || !$loadplan || $loadplan->status !== 'released' ? 'disabled' : '' }}>
-                                <i class="bi bi-plus-circle"></i> Generate New Loadsheet
+                                <i class="bi bi-plus-circle"></i> Generate Loadsheet
                             </button>
                         @endif
                     </div>

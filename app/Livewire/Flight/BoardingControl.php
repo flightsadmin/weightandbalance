@@ -4,6 +4,7 @@ namespace App\Livewire\Flight;
 
 use App\Models\Flight;
 use Livewire\Component;
+use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 
 class BoardingControl extends Component
@@ -14,7 +15,8 @@ class BoardingControl extends Component
 
     public Flight $flight;
 
-    public $activeTab = 'seat';
+    #[Url]
+    public $tab = 'seat';
 
     public $seatNumber = '';
 
@@ -31,7 +33,7 @@ class BoardingControl extends Component
 
     public function setTab($tab)
     {
-        $this->activeTab = $tab;
+        $this->tab = $tab;
         $this->resetPage();
         $this->reset(['selectedPassengers', 'selectAll', 'search']);
     }
@@ -104,13 +106,13 @@ class BoardingControl extends Component
             ->with('seat')
             ->where('acceptance_status', 'accepted');
 
-        if ($this->activeTab === 'list' || $this->activeTab === 'seat') {
+        if ($this->tab === 'list' || $this->tab === 'seat') {
             $query->where('boarding_status', '!=', 'boarded');
-        } elseif ($this->activeTab === 'boarded') {
+        } elseif ($this->tab === 'boarded') {
             $query->where('boarding_status', 'boarded');
         }
 
-        if ($this->activeTab === 'list') {
+        if ($this->tab === 'list') {
             $query->when(
                 $this->search,
                 fn($q) =>
