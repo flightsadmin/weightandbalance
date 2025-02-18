@@ -142,7 +142,7 @@
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Passenger Form Modal -->
     <div class="modal fade" id="passengerFormModal" tabindex="-1" wire:ignore.self>
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -262,6 +262,7 @@
         </div>
     </div>
 
+    <!-- Baggage Modal -->
     <div class="modal fade" id="baggageModal" tabindex="-1" wire:ignore.self>
         <div class="modal-dialog">
             <div class="modal-content">
@@ -290,6 +291,7 @@
         </div>
     </div>
 
+    <!-- Passenger Details Modal -->
     <div class="modal fade" id="passengerDetailsModal" tabindex="-1" wire:ignore.self>
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -440,7 +442,7 @@
                                                 {{ $seat->is_blocked ? 'blocked' : '' }}
                                                 {{ $selectedSeat == $seat->id ? 'selected' : '' }}"
                                                 @if (!$seat->is_occupied) wire:contextmenu.prevent="toggleSeatBlock({{ $seat->id }})"
-                                                    wire:click="{{ !$seat->is_blocked ? 'selectSeat(' . $seat->id . ')' : '' }}" @endif
+                                                    wire:click="selectSeat({{ $seat->id }})" @endif
                                                 title="{{ $seat->is_blocked ? 'Right click to unblock' : 'Right click to block' }}">
                                                 {{ $seat->designation }}
                                             </div>
@@ -448,16 +450,18 @@
                                     </div>
                                 @endforeach
                             </div>
-                            <div class="text-muted small mt-2">
-                                <i class="bi bi-info-circle"></i> Right click on a seat to block/unblock it
-                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-sm btn-primary" @if (!$selectedSeat) disabled @endif>
-                            Assign Seat
-                        </button>
+                    <div class="modal-footer d-flex justify-content-between align-items-center">
+                        <div class="text-muted small text-start">
+                            <i class="bi bi-info-circle"></i> Right click on a seat to block/unblock it
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-sm btn-primary" @if (!$selectedSeat) disabled @endif>
+                                Assign Seat
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

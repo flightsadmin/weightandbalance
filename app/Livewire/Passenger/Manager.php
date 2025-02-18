@@ -296,25 +296,37 @@ class Manager extends Component
 
     public function toggleSeatBlock($seatId)
     {
-        $seat = Seat::findOrFail($seatId);
+        $seat = Seat::find($seatId);
+        if (!$seat) {
+            $this->dispatch('alert', icon: 'error', message: 'Seat not found');
+            return;
+        }
 
         if ($seat->passenger()->where('flight_id', $this->flight->id)->exists()) {
             $this->dispatch('alert', icon: 'error', message: 'Cannot block an occupied seat');
             return;
         }
 
-        $flightSeat = $this->flight->seats()->firstOrCreate(
-            ['seat_id' => $seatId],
-            ['is_blocked' => false]
+        $flightSeat = $this->flight->seats()->wherePivot('seat_id', $seatId)->first();
+
+        if (!$flightSeat) {
+            $this->flight->seats()->attach($seatId, ['is_blocked' => true, 'blocked_reason' => 'Blocked by staff']);
+            $isBlocked = true;
+        } else {
+            $isBlocked = !$flightSeat->pivot->is_blocked;
+            $this->flight->seats()->updateExistingPivot($seatId, [
+                'is_blocked' => $isBlocked,
+                'blocked_reason' => $isBlocked ? 'Blocked by staff' : null
+            ]);
+        }
+
+        $this->dispatch(
+            'alert',
+            icon: 'success',
+            message: $isBlocked ? 'Seat blocked successfully' : 'Seat unblocked successfully'
         );
-
-        $flightSeat->pivot->update([
-            'is_blocked' => !$flightSeat->pivot->is_blocked,
-            'blocked_reason' => !$flightSeat->pivot->is_blocked ? 'Blocked by staff' : null
-        ]);
-
-        $this->dispatch('alert', icon: 'success', message: $flightSeat->pivot->is_blocked ? 'Seat blocked successfully' : 'Seat unblocked successfully');
     }
+
 
     #[On('passenger-saved')]
     public function render()
