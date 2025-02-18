@@ -36,6 +36,19 @@ class Manager extends Component
         'name' => '',
         'ticket_number' => '',
         'type' => '',
+        'attributes' => [
+            'wheelchair' => false,
+            'wchr' => false,
+            'wchs' => false,
+            'wchc' => false,
+            'exst' => false,
+            'stcr' => false,
+            'deaf' => false,
+            'blind' => false,
+            'dpna' => false,
+            'meda' => false,
+            'infant' => false,
+        ]
     ];
 
     public $selectedPassenger = null;
@@ -54,6 +67,7 @@ class Manager extends Component
         'form.name' => 'required|string|max:255',
         'form.ticket_number' => 'nullable|string|max:255',
         'form.type' => 'required|in:male,female,child,infant',
+        'form.attributes' => 'array',
         'seatForm.seat_id' => 'nullable|exists:seats,id',
     ];
 
@@ -112,7 +126,8 @@ class Manager extends Component
     public function edit(Passenger $passenger)
     {
         $this->passenger = $passenger;
-        $this->form = $passenger->only(['name', 'ticket_number', 'type']);
+        dd($passenger);
+        $this->form = $passenger->only(['name', 'ticket_number', 'type', 'attributes']);
         $this->showForm = true;
     }
 
@@ -120,26 +135,22 @@ class Manager extends Component
     {
         $this->validate();
 
-        $this->flight->passengers()->create([
-            'name' => $this->form['name'],
-            'ticket_number' => $this->form['ticket_number'],
-            'type' => $this->form['type'],
-            'acceptance_status' => 'pending',
-            'boarding_status' => 'unboarded',
-        ]);
+        $this->flight->passengers()->updateOrCreate(
+            [
+                'id' => $this->passenger->id,
+            ],
+            [
+                'name' => $this->form['name'],
+                'ticket_number' => $this->form['ticket_number'],
+                'type' => $this->form['type'],
+                'acceptance_status' => 'pending',
+                'boarding_status' => 'unboarded',
+                'attributes' => $this->form['attributes'],
+            ]
+        );
 
         $this->reset('form', 'showForm');
         $this->dispatch('alert', icon: 'success', message: 'Passenger added successfully.');
-        $this->dispatch('passenger-saved');
-    }
-
-    public function update()
-    {
-        $this->validate();
-
-        $this->passenger->update($this->form);
-        $this->reset('form', 'showForm', 'passenger');
-        $this->dispatch('alert', icon: 'success', message: 'Passenger updated successfully.');
         $this->dispatch('passenger-saved');
     }
 

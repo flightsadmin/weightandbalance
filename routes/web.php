@@ -31,10 +31,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('containers', App\Livewire\Container\Manager::class)->name('containers.index');
     Route::get('crews', App\Livewire\Crew\Manager::class)->name('crews.index');
     Route::get('admin', App\Livewire\Admin\Manager::class)->name('admin')->middleware('role:super-admin|admin');
+    Route::get('pnl', App\Livewire\PnlParser::class)->name('pnl');
 });
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Auth::routes([
-    'register' => false,
-    'verify' => false,
-]);
+Auth::routes();

@@ -44,7 +44,27 @@
                                     {{ $passenger->name }}
                                 </a>
                             </td>
-                            <td>{{ ucfirst($passenger->type ?? 'N/A') }}</td>
+                            <td>
+                                {{ ucfirst($passenger->type ?? 'N/A') }}
+                                @if ($passenger->attributes)
+                                    @foreach ($passenger->attributes as $key => $value)
+                                        @if ($value)
+                                            <i class="bi bi-{{ match ($key) {
+                                                'wheelchair', 'wchr', 'wchs', 'wchc' => 'person-wheelchair',
+                                                'exst' => 'door-open',
+                                                'stcr' => 'h-circle-fill',
+                                                'deaf' => 'ear',
+                                                'blind' => 'eye',
+                                                'dpna' => 'person-arms-up',
+                                                'meda' => 'heart-pulse-fill',
+                                                'infant' => 'person-standing-dress',
+                                                default => 'person-check',
+                                            } }}"
+                                                title="{{ strtoupper($key) }}"></i>
+                                        @endif
+                                    @endforeach
+                                @endif
+                            </td>
                             @unless ($flight)
                                 <td>
                                     @if ($passenger->flight)
@@ -168,6 +188,72 @@
                                 @error('form.ticket_number')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Special Requirements</label>
+                                <div class="row g-2">
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.wheelchair"
+                                                id="wheelchair">
+                                            <label class="form-check-label" for="wheelchair">Wheelchair</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.wchr"
+                                                id="wchr">
+                                            <label class="form-check-label" for="wchr">WCHR</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.wchs"
+                                                id="wchs">
+                                            <label class="form-check-label" for="wchs">WCHS</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.wchc"
+                                                id="wchc">
+                                            <label class="form-check-label" for="wchc">WCHC</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.exst"
+                                                id="exst">
+                                            <label class="form-check-label" for="exst">EXST</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.stcr"
+                                                id="stcr">
+                                            <label class="form-check-label" for="stcr">STCR</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.deaf"
+                                                id="deaf">
+                                            <label class="form-check-label" for="deaf">Deaf</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.blind"
+                                                id="blind">
+                                            <label class="form-check-label" for="blind">Blind</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.dpna"
+                                                id="dpna">
+                                            <label class="form-check-label" for="dpna">DPNA</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.meda"
+                                                id="meda">
+                                            <label class="form-check-label" for="meda">MEDA</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.infant"
+                                                id="infant">
+                                            <label class="form-check-label" for="infant">Infant</label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -300,10 +386,16 @@
                                 @endif
                             </div>
                         </div>
-                        @if ($selectedPassenger->notes)
+                        @if ($selectedPassenger->attributes)
                             <div class="mt-3">
-                                <h6 class="text-decoration-underline">Notes</h6>
-                                <p class="mb-0">{{ $selectedPassenger->notes }}</p>
+                                <h6 class="text-decoration-underline">Special Requirements</h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach ($selectedPassenger->attributes as $key => $value)
+                                        @if ($value)
+                                            <span class="badge bg-info">{{ strtoupper($key) }}</span>
+                                        @endif
+                                    @endforeach
+                                </div>
                             </div>
                         @endif
                     @endif

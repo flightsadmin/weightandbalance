@@ -21,6 +21,15 @@ class Passenger extends Model
         'ticket_number',
         'acceptance_status',
         'boarding_status',
+        'attributes',
+    ];
+
+    protected $casts = [
+        'attributes' => 'array',
+    ];
+
+    protected $attributes = [
+        'attributes' => '{"wheelchair": false, "wchr": false, "wchs": false, "wchc": false, "exst": false, "stcr": false, "deaf": false, "blind": false, "dpna": false, "meda": false, "infant": false}'
     ];
 
     public function flight(): BelongsTo
