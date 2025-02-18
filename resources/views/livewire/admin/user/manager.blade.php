@@ -155,9 +155,6 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                @error('selectedRoles')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
                             </div>
                         @endcan
 
