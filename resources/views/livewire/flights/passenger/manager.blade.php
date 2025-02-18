@@ -25,6 +25,7 @@
                         <th>Name</th>
                         <th>Type</th>
                         <th class="text-center">Specials</th>
+                        <th>PNR</th>
                         <th>Ticket Number</th>
                         <th>Seat</th>
                         <th>Baggage</th>
@@ -65,6 +66,7 @@
                                     @endforeach
                                 @endif
                             </td>
+                            <td>{{ $passenger->pnr }}</td>
                             <td>{{ $passenger->ticket_number }}</td>
                             <td>
                                 <button class="btn btn-sm btn-primary"

@@ -52,8 +52,8 @@ return new class extends Migration {
             $table->foreignId('seat_id')->nullable()->constrained()->nullOnDelete();
             $table->string('name');
             $table->enum('type', ['male', 'female', 'child', 'infant'])->nullable();
+            $table->string('pnr')->nullable();
             $table->string('ticket_number')->nullable();
-            $table->string('reservation_number')->nullable();
             $table->string('acceptance_status')->default('booked');
             $table->string('boarding_status')->default('boarding');
             $table->json('attributes')->nullable();

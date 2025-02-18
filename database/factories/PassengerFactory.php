@@ -23,14 +23,14 @@ class PassengerFactory extends Factory
         return [
             'name' => fake()->name(),
             'ticket_number' => strtoupper(fake()->bothify('###-##########')),
-            'reservation_number' => strtoupper(fake()->bothify('#?##?#')),
+            'pnr' => strtoupper(fake()->bothify('#?##?#')),
             'type' => fake()->randomElement(['male', 'female', 'child', 'infant']),
             'acceptance_status' => 'pending',
             'boarding_status' => 'unboarded',
             'attributes' => [
-                'wchr' => fake()->boolean(),
-                'wchs' => fake()->boolean(),
-                'wchc' => fake()->boolean(),
+                'wchr' => fake()->boolean(5),
+                'wchs' => fake()->boolean(5),
+                'wchc' => fake()->boolean(5),
                 'exst' => fake()->boolean(10),
                 'stcr' => fake()->boolean(5),
                 'deaf' => fake()->boolean(5),
