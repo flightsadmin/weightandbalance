@@ -20,9 +20,10 @@ class Show extends Component
 
     // Form fields
     public $form = [
+        'category' => '',
         'key' => '',
         'value' => '',
-        'type' => 'string',
+        'type' => '',
         'description' => '',
     ];
 
@@ -54,12 +55,14 @@ class Show extends Component
         ],
     ];
 
+    public $showSettingModal = false;
+
     public function mount(Airline $airline)
     {
         $this->airline = $airline->load([
             'settings',
             'aircraft.type',
-            'flights' => fn ($q) => $q->latest('scheduled_departure_time')->take(5),
+            'flights' => fn($q) => $q->latest('scheduled_departure_time')->take(5),
         ]);
     }
 
@@ -73,18 +76,20 @@ class Show extends Component
         return $this->defaultSettings[$this->settingCategory] ?? [];
     }
 
-    public function editSetting($key, $config)
+    public function editSetting($category, $key, $config)
     {
-        $setting = $this->airline->settings()->where('key', $key)->first();
+        $settings = $this->airline->getSettings($category);
 
         $this->form = [
+            'category' => $category,
             'key' => $key,
-            'value' => $setting?->value ?? '',
+            'value' => $settings[$key] ?? '',
             'type' => $config['type'],
             'description' => $config['description'],
         ];
 
-        $this->editingSetting = $setting;
+        $this->editingSetting = true;
+        $this->showSettingModal = true;
     }
 
     public function saveSetting()
@@ -94,18 +99,23 @@ class Show extends Component
             'form.type' => 'required|in:string,float,integer,boolean',
         ]);
 
-        $this->airline->settings()->updateOrCreate(
-            ['key' => $this->form['key']],
-            [
-                'value' => $this->form['value'],
-                'type' => $this->form['type'],
-                'description' => $this->form['description'],
-            ]
+        $value = match ($this->form['type']) {
+            'float' => (float) $this->form['value'],
+            'integer' => (int) $this->form['value'],
+            'boolean' => (bool) $this->form['value'],
+            default => $this->form['value']
+        };
+
+        $this->airline->updateSettings(
+            $this->form['category'],
+            $this->form['key'],
+            $value
         );
 
-        $this->dispatch('alert', icon: 'success', message: 'Setting saved successfully.');
+        $this->showSettingModal = false;
+        $this->editingSetting = false;
         $this->dispatch('setting-saved');
-        $this->reset('form', 'editingSetting');
+        $this->dispatch('alert', icon: 'success', message: 'Setting saved successfully.');
     }
 
     public function deleteSetting($key)
@@ -116,7 +126,7 @@ class Show extends Component
 
     public function toggleStatus()
     {
-        $this->airline->active = ! $this->airline->active;
+        $this->airline->active = !$this->airline->active;
         $this->airline->save();
 
         $this->dispatch('alert', icon: 'success', message: 'Airline status updated successfully.');
@@ -125,7 +135,7 @@ class Show extends Component
     public function render()
     {
         return view('livewire.airline.show', [
-            'settings' => $this->airline->settings,
+            'settings' => $this->airline->getSettings(),
             'defaultSettings' => $this->defaultSettings,
             'currentSettings' => $this->getCurrentCategorySettings(),
         ])->layout('components.layouts.app');

@@ -47,6 +47,42 @@ class AircraftConfigSeeder extends Seeder
             ['value' => json_encode($pantries), 'type' => 'json', 'description' => 'Aircraft Type Pantry Configurations']
         );
 
+        $settings = [
+            'general' => [
+                'standard_passenger_weight' => 84,
+                'standard_crew_weight' => 85,
+                'standard_baggage_weight' => 13,
+                'standard_fuel_density' => 0.89,
+            ],
+            'operations' => [
+                'checkin_open_time' => 180,
+                'checkin_close_time' => 45,
+                'boarding_open_time' => 60,
+                'boarding_close_time' => 15,
+            ],
+            'cargo' => [
+                'dangerous_goods_allowed' => false,
+                'live_animals_allowed' => false,
+                'max_cargo_piece_weight' => 150,
+                'max_baggage_piece_weight' => 32,
+            ],
+            'notifications' => [
+                'enable_email_notifications' => true,
+                'enable_sms_notifications' => false,
+                'notification_email' => '',
+                'notification_phone' => '',
+            ]
+        ];
+
+        $airline->settings()->updateOrCreate(
+            ['key' => 'airline_settings', 'airline_id' => $airline->id],
+            [
+                'value' => json_encode($settings),
+                'type' => 'json',
+                'description' => 'Airline Configuration Settings',
+            ]
+        );
+
         $zones = [
             ['name' => 'A', 'max_capacity' => 54, 'arm' => -6.971, 'index' => -0.00697],
             ['name' => 'B', 'max_capacity' => 60, 'arm' => +0.281, 'index' => +0.00028],

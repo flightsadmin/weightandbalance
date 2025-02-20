@@ -187,7 +187,7 @@ class LoadsheetManager extends Component
 
     private function calculateDryOperatingWeight()
     {
-        return $this->flight->aircraft->basic_weight + $this->calculateCrewWeight();
+        return $this->flight->aircraft->basic_weight + $this->calculateCrewWeight() + $this->calculatePantryIndex()['weight'];
     }
 
     private function calculateZeroFuelWeight()

@@ -166,45 +166,38 @@
                                             <tr>
                                                 <th>Setting</th>
                                                 <th>Value</th>
+                                                <th>Type</th>
                                                 <th>Description</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($currentSettings as $key => $config)
-                                                @php
-                                                    $setting = $settings->where('key', $key)->first();
-                                                @endphp
                                                 <tr>
                                                     <td>{{ str_replace('_', ' ', ucfirst($key)) }}</td>
                                                     <td>
-                                                        @if ($setting)
+                                                        @if (isset($settings[$settingCategory][$key]))
                                                             @if ($config['type'] === 'boolean')
-                                                                <span class="badge bg-{{ $setting->value ? 'success' : 'danger' }}">
-                                                                    {{ $setting->value ? 'Yes' : 'No' }}
+                                                                <span
+                                                                    class="badge bg-{{ $settings[$settingCategory][$key] ? 'success' : 'danger' }}">
+                                                                    {{ $settings[$settingCategory][$key] ? 'Yes' : 'No' }}
                                                                 </span>
                                                             @else
-                                                                {{ $setting->value }}
+                                                                {{ $settings[$settingCategory][$key] }}
                                                             @endif
                                                         @else
                                                             <span class="text-muted">Not set</span>
                                                         @endif
                                                     </td>
+                                                    <td>{{ $config['type'] }}</td>
                                                     <td>{{ $config['description'] }}</td>
                                                     <td>
-                                                        <button class="btn btn-sm btn-link"
-                                                            wire:click="editSetting('{{ $key }}', {{ json_encode($config) }})"
+                                                        <button class="btn btn-sm btn-primary"
+                                                            wire:click="editSetting('{{ $settingCategory }}', '{{ $key }}', {{ json_encode($config) }})"
                                                             data-bs-toggle="modal"
                                                             data-bs-target="#settingModal">
-                                                            <i class="bi bi-pencil"></i>
+                                                            <i class="bi bi-pencil"></i> Edit
                                                         </button>
-                                                        @if ($setting)
-                                                            <button class="btn btn-sm btn-link text-danger"
-                                                                wire:click="deleteSetting('{{ $key }}')"
-                                                                wire:confirm="Are you sure you want to delete this setting?">
-                                                                <i class="bi bi-trash"></i>
-                                                            </button>
-                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -222,7 +215,7 @@
                         <div class="modal-content">
                             <form wire:submit="saveSetting">
                                 <div class="modal-header">
-                                    <h5 class="modal-title">{{ $editingSetting ? 'Edit' : 'Add' }} Setting</h5>
+                                    <h5 class="modal-title">Edit Setting</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
@@ -243,10 +236,17 @@
                                             <div class="text-danger small">{{ $message }}</div>
                                         @enderror
                                     </div>
+                                    <div class="text-muted small">
+                                        {{ $form['description'] }}
+                                    </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    <button type="submit" class="btn btn-sm btn-primary">Save Setting</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        Save Changes
+                                    </button>
                                 </div>
                             </form>
                         </div>

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Airline extends Model
 {
@@ -54,9 +55,9 @@ class Airline extends Model
         return $this->hasMany(Flight::class);
     }
 
-    public function settings(): HasMany
+    public function settings(): MorphMany
     {
-        return $this->hasMany(Setting::class);
+        return $this->morphMany(Setting::class, 'settingable');
     }
 
     public function aircraftTypes(): HasMany
@@ -71,27 +72,88 @@ class Airline extends Model
 
     public function getStandardPassengerWeight($type)
     {
+        $settings = $this->getSettings('general');
+        
         return match ($type) {
-            'male' => (int) ($this->settings()->where('key', self::STANDARD_MALE_PASSENGER_WEIGHT)->first()->value ?? 88),
-            'female' => (int) ($this->settings()->where('key', self::STANDARD_FEMALE_PASSENGER_WEIGHT)->first()->value ?? 70),
-            'child' => (int) ($this->settings()->where('key', self::STANDARD_CHILD_PASSENGER_WEIGHT)->first()->value ?? 35),
-            'infant' => (int) ($this->settings()->where('key', self::STANDARD_INFANT_PASSENGER_WEIGHT)->first()->value ?? 10),
-            default => (int) ($this->settings()->where('key', self::STANDARD_PASSENGER_WEIGHT)->first()->value ?? 84),
+            'male' => (int) ($settings['standard_male_passenger_weight'] ?? 88),
+            'female' => (int) ($settings['standard_female_passenger_weight'] ?? 70),
+            'child' => (int) ($settings['standard_child_passenger_weight'] ?? 35),
+            'infant' => (int) ($settings['standard_infant_passenger_weight'] ?? 10),
+            default => (int) ($settings['standard_passenger_weight'] ?? 84),
         };
     }
 
     public function getStandardCockpitCrewWeight(): int
     {
-        return (int) ($this->settings()->where('key', self::STANDARD_COCKPIT_CREW_WEIGHT)->first()->value ?? 85);
+        $settings = $this->getSettings('general');
+        return (int) ($settings['standard_cockpit_crew_weight'] ?? 85);
     }
 
     public function getStandardCabinCrewWeight(): int
     {
-        return (int) ($this->settings()->where('key', self::STANDARD_CABIN_CREW_WEIGHT)->first()->value ?? 75);
+        $settings = $this->getSettings('general');
+        return (int) ($settings['standard_cabin_crew_weight'] ?? 75);
     }
 
     public function getStandardPantryWeight(): int
     {
-        return (int) ($this->settings()->where('key', self::STANDARD_PANTRY_WEIGHT)->first()->value ?? 250);
+        $settings = $this->getSettings('general');
+        return (int) ($settings['standard_pantry_weight'] ?? 250);
+    }
+
+    public function getSettings($category = null)
+    {
+        $settings = $this->getSetting('airline_settings', [
+            'general' => [
+                'standard_passenger_weight' => 84,
+                'standard_crew_weight' => 85,
+                'standard_baggage_weight' => 13,
+                'standard_fuel_density' => 0.89,
+            ],
+            'operations' => [
+                'checkin_open_time' => 180,
+                'checkin_close_time' => 45,
+                'boarding_open_time' => 60,
+                'boarding_close_time' => 15,
+            ],
+            'cargo' => [
+                'dangerous_goods_allowed' => false,
+                'live_animals_allowed' => false,
+                'max_cargo_piece_weight' => 150,
+                'max_baggage_piece_weight' => 32,
+            ],
+            'notifications' => [
+                'enable_email_notifications' => true,
+                'enable_sms_notifications' => false,
+                'notification_email' => '',
+                'notification_phone' => '',
+            ]
+        ]);
+
+        return $category ? ($settings[$category] ?? []) : $settings;
+    }
+
+    public function updateSettings($category, $key, $value)
+    {
+        $settings = $this->getSettings();
+        $settings[$category][$key] = $value;
+
+        return $this->settings()->updateOrCreate(
+            [
+                'key' => 'airline_settings',
+                'airline_id' => $this->id
+            ],
+            [
+                'value' => json_encode($settings),
+                'type' => 'json',
+                'description' => 'Airline Configuration Settings'
+            ]
+        );
+    }
+
+    public function getSetting($key, $default = null)
+    {
+        $setting = $this->settings()->where('key', $key)->first();
+        return $setting ? $setting->typed_value : $default;
     }
 }
