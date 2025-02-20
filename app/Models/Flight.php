@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Flight extends Model
 {
@@ -27,7 +28,6 @@ class Flight extends Model
         'scheduled_arrival_time' => 'datetime',
     ];
 
-    // Relationships
     public function baggage()
     {
         return $this->hasMany(Baggage::class);
@@ -141,5 +141,21 @@ class Flight extends Model
         return $this->belongsToMany(Seat::class, 'flight_seats')
             ->withPivot('is_blocked', 'blocked_reason')
             ->withTimestamps();
+    }
+
+    public function settings(): MorphMany
+    {
+        return $this->morphMany(Setting::class, 'settingable');
+    }
+
+    public function getSetting(string $key, $default = null)
+    {
+        $setting = $this->settings()->where('key', $key)->first();
+        if ($setting) {
+            return $setting->typed_value;
+        }
+
+        $setting = $this->airline->settings()->where('key', $key)->first();
+        return $setting ? $setting->typed_value : $default;
     }
 }

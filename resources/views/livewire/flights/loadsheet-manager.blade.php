@@ -285,14 +285,90 @@
                     </div>
                 </div>
                 <div class="col-md-12">
-                    <div class="card">
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title">Passenger Distribution</h3>
+                            <button class="btn btn-sm btn-warning" wire:click="resetDistribution"
+                                wire:confirm="This will reset to actual checked-in passenger distribution. Continue?">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset to Actual
+                            </button>
+                        </div>
                         <div class="card-body">
-                            <div>
-                                @if ($loadsheet)
-                                    <pre> {{ json_encode($distribution['indices'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
-                                @else
-                                    <p class="text-muted m-0">No loadsheet generated yet.</p>
-                                @endif
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Zone</th>
+                                            <th>Male</th>
+                                            <th>Female</th>
+                                            <th>Child</th>
+                                            <th>Infant</th>
+                                            <th>Total</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($paxDistribution as $zoneName => $counts)
+                                            <tr>
+                                                <td>{{ $zoneName }} (Max {{ $counts['max_pax'] }}) Pax</td>
+                                                @if ($editingZone === $zoneName)
+                                                    <td>
+                                                        <input type="number" class="form-control form-control-sm"
+                                                            wire:model="zoneForm.male">
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control form-control-sm"
+                                                            wire:model="zoneForm.female">
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control form-control-sm"
+                                                            wire:model="zoneForm.child">
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control form-control-sm"
+                                                            wire:model="zoneForm.infant">
+                                                    </td>
+                                                    <td>
+                                                        {{ array_sum($zoneForm) }}
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-success" wire:click="saveZoneDistribution">
+                                                            <i class="bi bi-check"></i> Save
+                                                        </button>
+                                                        <button class="btn btn-sm btn-secondary" wire:click="$set('editingZone', null)">
+                                                            <i class="bi bi-x"></i> Cancel
+                                                        </button>
+                                                    </td>
+                                                @else
+                                                    <td>{{ $counts['male'] }}</td>
+                                                    <td>{{ $counts['female'] }}</td>
+                                                    <td>{{ $counts['child'] }}</td>
+                                                    <td>{{ $counts['infant'] }}</td>
+                                                    <td>{{ array_sum(array_intersect_key($counts, array_flip(['male', 'female', 'child', 'infant']))) }}
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-primary"
+                                                            wire:click="editZone('{{ $zoneName }}')">
+                                                            <i class="bi bi-pencil"></i> Edit
+                                                        </button>
+                                                    </td>
+                                                @endif
+                                            </tr>
+                                        @endforeach
+                                        <tr class="fw-bold">
+                                            <td>Total</td>
+                                            <td>{{ array_sum(array_column($paxDistribution, 'male')) }}</td>
+                                            <td>{{ array_sum(array_column($paxDistribution, 'female')) }}</td>
+                                            <td>{{ array_sum(array_column($paxDistribution, 'child')) }}</td>
+                                            <td>{{ array_sum(array_column($paxDistribution, 'infant')) }}</td>
+                                            <td colspan="2">
+                                                {{ array_sum(
+                                                    array_map(fn($zone) => array_sum(array_intersect_key($zone, array_flip(['male', 'female', 'child', 'infant']))), $paxDistribution),
+                                                ) }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

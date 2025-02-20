@@ -3,6 +3,7 @@
 namespace App\Livewire\Flight;
 
 use App\Models\Flight;
+use App\Models\Setting;
 use Livewire\Component;
 
 class LoadsheetManager extends Component
@@ -14,6 +15,16 @@ class LoadsheetManager extends Component
     public $loadplan;
 
     public $showModal = false;
+
+    public $paxDistribution = [];
+    public $editingZone = null;
+
+    public $zoneForm = [
+        'male' => 0,
+        'female' => 0,
+        'child' => 0,
+        'infant' => 0
+    ];
 
     public function mount(Flight $flight)
     {
@@ -29,6 +40,134 @@ class LoadsheetManager extends Component
 
         $this->loadsheet = $this->flight->loadsheets()->latest()->first();
         $this->loadplan = $this->flight->loadplans()->latest()->first();
+
+        // Check for persisted manual distribution first
+        $this->initializePaxDistribution();
+    }
+
+    protected function initializePaxDistribution()
+    {
+        // First check for persisted manual distribution
+        $manualDistribution = $this->flight->settings()
+            ->where('key', 'manual_pax_distribution')
+            ->first();
+
+        if ($manualDistribution) {
+            $this->paxDistribution = $manualDistribution->typed_value;
+            return;
+        }
+
+        // Fallback to loadsheet or actual passenger data
+        if ($this->loadsheet && isset($this->loadsheet->payload_distribution['load_data']['pax_by_zone'])) {
+            $this->paxDistribution = $this->loadsheet->payload_distribution['load_data']['pax_by_zone'];
+        } else {
+            $this->initializeEmptyDistribution();
+            $this->updatePaxDistributionFromPassengers();
+        }
+    }
+
+    protected function initializeEmptyDistribution()
+    {
+        $zones = $this->flight->aircraft->type->cabinZones;
+
+        foreach ($zones as $zone) {
+            $this->paxDistribution[$zone->name] = [
+                'male' => 0,
+                'female' => 0,
+                'child' => 0,
+                'infant' => 0,
+                'max_pax' => $zone->max_capacity
+            ];
+        }
+    }
+
+    protected function updatePaxDistributionFromPassengers()
+    {
+        $passengers = $this->flight->passengers()
+            ->with('seat.cabinZone')
+            ->get();
+
+        foreach ($passengers as $passenger) {
+            if ($passenger->seat && $passenger->seat->cabinZone) {
+                $zoneName = $passenger->seat->cabinZone->name;
+                $this->paxDistribution[$zoneName][$passenger->type]++;
+            }
+        }
+    }
+
+    public function editZone($zoneName)
+    {
+        $this->editingZone = $zoneName;
+        $this->zoneForm = [
+            'male' => $this->paxDistribution[$zoneName]['male'],
+            'female' => $this->paxDistribution[$zoneName]['female'],
+            'child' => $this->paxDistribution[$zoneName]['child'],
+            'infant' => $this->paxDistribution[$zoneName]['infant']
+        ];
+    }
+
+    public function saveZoneDistribution()
+    {
+        $this->validate([
+            'zoneForm.male' => 'required|integer|min:0',
+            'zoneForm.female' => 'required|integer|min:0',
+            'zoneForm.child' => 'required|integer|min:0',
+            'zoneForm.infant' => 'required|integer|min:0'
+        ]);
+
+        $total = array_sum($this->zoneForm);
+        $maxPax = $this->paxDistribution[$this->editingZone]['max_pax'];
+
+        if ($total - $this->zoneForm['infant'] > $maxPax) {
+            $this->dispatch('alert', icon: 'error', message: "Total passengers exceeds zone capacity of {$maxPax}");
+            return;
+        }
+
+        $this->paxDistribution[$this->editingZone] = array_merge(
+            $this->paxDistribution[$this->editingZone],
+            $this->zoneForm
+        );
+
+        // Persist the manual distribution to flight settings
+        $this->flight->settings()->updateOrCreate(
+            [
+                'key' => 'manual_pax_distribution',
+                'airline_id' => $this->flight->airline_id
+            ],
+            [
+                'value' => json_encode($this->paxDistribution),
+                'type' => 'json',
+                'description' => 'Actual PAX distribution - ' . $this->flight->flight_number
+            ]
+        );
+
+        if ($this->loadsheet) {
+            $distribution = $this->loadsheet->payload_distribution;
+            $distribution['load_data']['pax_by_zone'] = $this->paxDistribution;
+            $this->loadsheet->update(['payload_distribution' => $distribution]);
+        }
+
+        $this->editingZone = null;
+        $this->dispatch('alert', icon: 'success', message: 'Passenger distribution updated and persisted.');
+    }
+
+    public function resetDistribution()
+    {
+        // Delete the persisted manual distribution
+        $this->flight->settings()->where('key', 'manual_pax_distribution')->delete();
+
+        // Reset to actual passenger distribution
+        $this->initializeEmptyDistribution();
+        $this->updatePaxDistributionFromPassengers();
+
+        // Update loadsheet if exists
+        if ($this->loadsheet) {
+            $distribution = $this->loadsheet->payload_distribution;
+            $distribution['load_data']['pax_by_zone'] = $this->paxDistribution;
+            $this->loadsheet->update(['payload_distribution' => $distribution]);
+        }
+
+        $this->dispatch('alert', icon: 'success', message: 'Distribution reset to actual passenger data.');
     }
 
     private function calculateTotalDeadload()
@@ -132,29 +271,158 @@ class LoadsheetManager extends Component
         $this->dispatch('alert', icon: 'success', message: 'Loadsheet revoked successfully.');
     }
 
-    public function generateLoadsheet()
+    private function getPassengerDistribution()
     {
-        $distribution = [
-            'trim_data' => $this->generateTrimData(),
-            'flight' => $this->generateFlightData(),
-            'load_data' => $this->generateLoadData(),
-            'fuel' => $this->calculateFuel(),
-            'weights' => [
-                'dry_operating_weight' => $this->calculateDryOperatingWeight(),
-                'zero_fuel_weight' => $this->calculateZeroFuelWeight(),
-                'takeoff_weight' => $this->calculateTakeoffWeight(),
-                'landing_weight' => $this->calculateLandingWeight(),
-            ],
-            'indices' => $this->calculateIndices(),
+        // Check for persisted manual distribution first
+        $manualDistribution = $this->flight->settings()
+            ->where('key', 'manual_pax_distribution')
+            ->first();
+
+        if ($manualDistribution) {
+            return $manualDistribution->typed_value;
+        }
+
+        // Otherwise calculate from actual passengers
+        $distribution = [];
+        $zones = $this->flight->aircraft->type->cabinZones;
+
+        foreach ($zones as $zone) {
+            $distribution[$zone->name] = [
+                'male' => 0,
+                'female' => 0,
+                'child' => 0,
+                'infant' => 0,
+                'max_pax' => $zone->max_capacity
+            ];
+        }
+
+        $passengers = $this->flight->passengers()
+            ->with('seat.cabinZone')
+            ->get();
+
+        foreach ($passengers as $passenger) {
+            if ($passenger->seat && $passenger->seat->cabinZone) {
+                $zoneName = $passenger->seat->cabinZone->name;
+                $distribution[$zoneName][$passenger->type]++;
+            }
+        }
+        return $distribution;
+    }
+
+    private function generateLoadData()
+    {
+        $paxDistribution = $this->getPassengerDistribution();
+
+        // Calculate totals by passenger type
+        $paxByType = [
+            'male' => ['count' => 0, 'weight' => 0],
+            'female' => ['count' => 0, 'weight' => 0],
+            'child' => ['count' => 0, 'weight' => 0],
+            'infant' => ['count' => 0, 'weight' => 0]
         ];
 
-        $this->loadsheet = $this->flight->loadsheets()->create([
-            'payload_distribution' => $distribution,
-            'edition' => $this->flight->loadsheets()->count() + 1,
-            'created_by' => auth()->id(),
-        ]);
+        foreach ($paxDistribution as $zone) {
+            foreach (['male', 'female', 'child', 'infant'] as $type) {
+                $paxByType[$type]['count'] += $zone[$type];
+                $paxByType[$type]['weight'] += $zone[$type] * $this->flight->airline->getStandardPassengerWeight($type);
+            }
+        }
 
-        $this->dispatch('loadsheet-updated');
+        $orderedWeightsUsed = collect(['male', 'female', 'child', 'infant'])->mapWithKeys(fn($type) => [
+            $type => $this->flight->airline->getStandardPassengerWeight($type),
+        ])->toArray();
+
+        return [
+            'pax_by_zone' => $paxDistribution,
+            'pax_by_type' => $paxByType,
+            'passenger_weights_used' => $orderedWeightsUsed,
+            'hold_breakdown' => $this->flight->aircraft->type->holds()
+                ->with('positions')
+                ->get()
+                ->map(function ($hold) {
+                    $containers = $this->flight->containers()
+                        ->whereIn('position_id', $hold->positions->pluck('id'))->get();
+
+                    $weight = $containers->sum('weight');
+
+                    return [
+                        'hold_no' => $hold->code,
+                        'weight' => $weight,
+                        'index' => round($weight * $hold->index, 2),
+                    ];
+                })->filter(fn($hold) => $hold['weight'] > 0)->values()->toArray(),
+            'deadload_by_type' => [
+                'C' => [
+                    'pieces' => $this->flight->cargo->where('status', 'loaded')->whereNotNull('container_id')->sum('pieces'),
+                    'weight' => $this->flight->cargo->where('status', 'loaded')->whereNotNull('container_id')->sum('weight'),
+                ],
+                'B' => [
+                    'pieces' => $this->flight->baggage->where('status', 'loaded')->whereNotNull('container_id')->count(),
+                    'weight' => $this->flight->baggage->where('status', 'loaded')->whereNotNull('container_id')->sum('weight'),
+                ],
+                'M' => [
+                    'pieces' => 0,
+                    'weight' => 0,
+                ],
+                'O' => [
+                    'pieces' => 0,
+                    'weight' => 0,
+                ],
+            ],
+        ];
+    }
+
+    private function generateTrimData()
+    {
+        $envelopes = $this->flight->aircraft->type->envelopes()
+            ->where('is_active', true)
+            ->where('name', '!=', 'FUEL')
+            ->get()->mapWithKeys(function ($envelope) {
+                $points = collect($envelope->points)->map(function ($point) {
+                    return [
+                        'x' => $point['index'],
+                        'y' => $point['weight'],
+                    ];
+                })->values()->toArray();
+
+                return [strtolower($envelope->name) . 'Envelope' => $points];
+            })
+            ->toArray();
+
+        return $envelopes;
+    }
+
+    public function generateLoadsheet()
+    {
+        if (!$this->flight->fuel) {
+            $this->dispatch('alert', icon: 'error', message: 'Fuel data must be added before generating loadsheet.');
+            return;
+        }
+
+        if (!$this->loadplan || $this->loadplan->status !== 'released') {
+            $this->dispatch('alert', icon: 'error', message: 'Load plan must be released before generating loadsheet.');
+            return;
+        }
+
+        $loadData = $this->generateLoadData();
+
+        $this->loadsheet = $this->flight->loadsheets()->create([
+            'version' => ($this->loadsheet?->version ?? 0) + 1,
+            'payload_distribution' => [
+                'load_data' => $loadData,
+                'trim_data' => $this->generateTrimData(),
+                'flight' => $this->generateFlightData(),
+                'fuel' => $this->calculateFuel(),
+                'weights' => [
+                    'dry_operating_weight' => $this->calculateDryOperatingWeight(),
+                    'zero_fuel_weight' => $this->calculateZeroFuelWeight(),
+                    'takeoff_weight' => $this->calculateTakeoffWeight(),
+                    'landing_weight' => $this->calculateLandingWeight(),
+                ],
+                'indices' => $this->calculateIndices(),
+            ],
+            'status' => 'draft'
+        ]);
 
         $this->dispatch('alert', icon: 'success', message: 'Loadsheet generated successfully.');
         return redirect()->route('flights.show', $this->flight->id);
@@ -216,112 +484,6 @@ class LoadsheetManager extends Component
         unset($value);
 
         return $indices;
-    }
-
-    private function generateLoadData()
-    {
-        $passengerTypes = ['male', 'female', 'child', 'infant'];
-
-        $paxByType = $this->flight->passengers->groupBy('type')
-            ->map(fn($group) => $group->count());
-
-        $orderedPaxByType = collect($passengerTypes)->mapWithKeys(function ($type) {
-            $zones = $this->flight->aircraft->type->cabinZones()
-                ->with([
-                    'seats.passenger' => function ($query) use ($type) {
-                        $query->where('flight_id', $this->flight->id)
-                            ->where('type', $type);
-                    },
-                ])->get();
-
-            $zoneData = $zones->map(function ($zone) use ($type) {
-                $passengerCount = $zone->seats->filter(fn($seat) => $seat->passenger)->count();
-                $weight = $passengerCount * $this->flight->airline->getStandardPassengerWeight($type);
-
-                return [
-                    'zone' => $zone->name,
-                    'count' => $passengerCount,
-                    'weight' => $weight,
-                    'index' => round($weight * $zone->index, 2),
-                ];
-            })->filter(fn($zone) => $zone['count'] > 0)->values();
-
-            $totalCount = $zoneData->sum('count');
-            $totalWeight = $zoneData->sum('weight');
-            $totalIndex = $zoneData->sum('index');
-
-            return [
-                $type => [
-                    'count' => $totalCount,
-                    'weight' => $totalWeight,
-                    'index' => round($totalIndex, 2),
-                    'zones' => $zoneData,
-                ],
-            ];
-        })->toArray();
-
-        $orderedWeightsUsed = collect($passengerTypes)->mapWithKeys(fn($type) => [
-            $type => $this->flight->airline->getStandardPassengerWeight($type),
-        ])->toArray();
-
-        return [
-            'pax_by_type' => $orderedPaxByType,
-            'pax_by_type_count' => $paxByType,
-            'passenger_weights_used' => $orderedWeightsUsed,
-            'hold_breakdown' => $this->flight->aircraft->type->holds()
-                ->with('positions')
-                ->get()
-                ->map(function ($hold) {
-                    $containers = $this->flight->containers()
-                        ->whereIn('position_id', $hold->positions->pluck('id'))->get();
-
-                    $weight = $containers->sum('weight');
-
-                    return [
-                        'hold_no' => $hold->code,
-                        'weight' => $weight,
-                        'index' => round($weight * $hold->index, 2),
-                    ];
-                })->filter(fn($hold) => $hold['weight'] > 0)->values()->toArray(),
-            'deadload_by_type' => [
-                'C' => [
-                    'pieces' => $this->flight->cargo->where('status', 'loaded')->whereNotNull('container_id')->sum('pieces'),
-                    'weight' => $this->flight->cargo->where('status', 'loaded')->whereNotNull('container_id')->sum('weight'),
-                ],
-                'B' => [
-                    'pieces' => $this->flight->baggage->where('status', 'loaded')->whereNotNull('container_id')->count(),
-                    'weight' => $this->flight->baggage->where('status', 'loaded')->whereNotNull('container_id')->sum('weight'),
-                ],
-                'M' => [
-                    'pieces' => 0,
-                    'weight' => 0,
-                ],
-                'O' => [
-                    'pieces' => 0,
-                    'weight' => 0,
-                ],
-            ],
-        ];
-    }
-
-    private function generateTrimData()
-    {
-        $envelopes = $this->flight->aircraft->type->envelopes()
-            ->where('is_active', true)
-            ->where('name', '!=', 'FUEL')
-            ->get()->mapWithKeys(function ($envelope) {
-                $points = collect($envelope->points)->map(function ($point) {
-                    return [
-                        'x' => $point['index'],
-                        'y' => $point['weight'],
-                    ];
-                })->values()->toArray();
-
-                return [strtolower($envelope->name) . 'Envelope' => $points];
-            })
-            ->toArray();
-
-        return $envelopes;
     }
 
     public function render()
