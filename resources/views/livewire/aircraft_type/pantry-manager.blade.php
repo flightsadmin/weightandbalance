@@ -1,7 +1,8 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h3 class="card-title">Pantry Configuration</h3>
-        <button class="btn btn-sm btn-primary" wire:click="$toggle('showPantryModal')" data-bs-toggle="modal" data-bs-target="#pantryModal">
+        <h3 class="card-title">Pantries</h3>
+        <button class="btn btn-sm btn-primary" wire:click="$toggle('showPantryModal')" data-bs-toggle="modal"
+            data-bs-target="#pantryModal">
             <i class="bi bi-plus-lg"></i> Add Pantry
         </button>
     </div>
@@ -11,30 +12,26 @@
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Code</th>
-                        <th>Weight</th>
+                        <th>Weight (kg)</th>
                         <th>Index</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($pantries as $pantry)
+                    @forelse($pantries as $code => $pantry)
                         <tr>
                             <td>{{ $pantry['name'] }}</td>
-                            <td>{{ strtoupper($pantry['code']) }}</td>
-                            <td>{{ number_format($pantry['weight']) }} kg</td>
+                            <td>{{ number_format($pantry['weight']) }}</td>
                             <td>{{ number_format($pantry['index'], 4) }}</td>
                             <td>
-                                <button class="btn btn-sm btn-primary"
-                                    wire:click="editPantry('{{ $pantry['code'] }}')"
+                                <button class="btn btn-sm btn-primary" wire:click="editPantry('{{ $code }}')"
                                     data-bs-toggle="modal" data-bs-target="#pantryModal">
-                                    <i class="bi bi-pencil"></i>
+                                    <i class="bi bi-pencil"></i> Edit
                                 </button>
                                 <button class="btn btn-sm btn-danger"
-
-                                    wire:click="deletePantry('{{ $pantry['code'] }}')"
+                                    wire:click="deletePantry('{{ $code }}')"
                                     wire:confirm="Are you sure you want to delete this pantry?">
-                                    <i class="bi bi-trash"></i>
+                                    <i class="bi bi-trash"></i> Delete
                                 </button>
                             </td>
                         </tr>

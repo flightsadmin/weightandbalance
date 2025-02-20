@@ -163,16 +163,15 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label class="form-label">Pantry</label>
-                                            <select wire:model="pantry" class="form-select form-select-sm" required>
-                                                <option value="" selected>Select Pantry</option>
-                                                @foreach ($pantryOptions as $key => $pantry)
-                                                    <option value="{{ $key }}">
-                                                        {{ $pantry['name'] }} ({{ number_format($pantry['weight']) }} kg)
+                                            <select class="form-select form-select-sm" wire:model="pantry">
+                                                <option value="">Select Pantry</option>
+                                                @foreach ($pantryOptions as $code => $pantry)
+                                                    <option value="{{ $code }}">{{ $pantry['name'] }} ({{ $pantry['weight'] }}kg)
                                                     </option>
                                                 @endforeach
                                             </select>
                                             @error('pantry')
-                                                <span class="text-danger small">{{ $message }}</span>
+                                                <div class="text-danger small">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>

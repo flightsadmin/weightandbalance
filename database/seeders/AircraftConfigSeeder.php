@@ -45,27 +45,15 @@ class AircraftConfigSeeder extends Seeder
         }
 
         $pantries = [
-            'a' => ['name' => 'Pantry A', 'weight' => 497, 'index' => +1.59],
-            'e' => ['name' => 'Pantry E', 'weight' => 45, 'index' => +0.18],
-            'empty' => ['name' => 'Empty', 'weight' => 0, 'index' => 0],
+            'A' => ['name' => 'Pantry A', 'code' => 'A', 'weight' => 497, 'index' => +1.59],
+            'E' => ['name' => 'Pantry E', 'code' => 'E', 'weight' => 45, 'index' => +0.18],
+            'EMPTY' => ['name' => 'Empty', 'code' => 'EMPTY', 'weight' => 0, 'index' => 0],
         ];
 
-        foreach ($pantries as $code => $data) {
-            $aircraftType->settings()->updateOrCreate(
-                ['key' => "pantry_{$code}_name", 'airline_id' => $airline->id],
-                ['value' => $data['name'], 'type' => 'string', 'description' => 'Name for ' . $data['name']]
-            );
-
-            $aircraftType->settings()->updateOrCreate(
-                ['key' => "pantry_{$code}_weight", 'airline_id' => $airline->id],
-                ['value' => $data['weight'], 'type' => 'integer', 'description' => 'Weight for ' . $data['name']]
-            );
-
-            $aircraftType->settings()->updateOrCreate(
-                ['key' => "pantry_{$code}_index", 'airline_id' => $airline->id],
-                ['value' => $data['index'], 'type' => 'float', 'description' => 'Index for ' . $data['name']]
-            );
-        }
+        $aircraftType->settings()->updateOrCreate(
+            ['key' => 'pantries', 'airline_id' => $airline->id],
+            ['value' => json_encode($pantries), 'type' => 'json', 'description' => 'Aircraft Type Pantry Configurations']
+        );
 
         $zones = [
             ['name' => 'A', 'max_capacity' => 54, 'arm' => -6.971, 'index' => -0.00697],

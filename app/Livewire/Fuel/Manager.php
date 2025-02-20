@@ -62,19 +62,29 @@ class Manager extends Component
         $this->dispatch('close-modal');
     }
 
-    public function getPantryOptions()
+    protected function getPantryOptions()
     {
-        return $this->flight->aircraft->type->getAllPantries()
-            ->mapWithKeys(function ($pantry) {
-                return [
-                    $pantry['code'] => [
-                        'name' => $pantry['name'],
-                        'code' => $pantry['code'],
-                        'weight' => $pantry['weight'],
-                        'index' => $pantry['index'],
-                    ],
-                ];
-            });
+        return $this->flight->aircraft->type->getAllPantries();
+    }
+
+    public function calculatePantryWeight()
+    {
+        if (!$this->pantry) {
+            return 0;
+        }
+
+        $pantryDetails = $this->flight->aircraft->type->getPantryDetails($this->pantry);
+        return $pantryDetails['weight'] ?? 0;
+    }
+
+    public function calculatePantryIndex()
+    {
+        if (!$this->pantry) {
+            return 0;
+        }
+
+        $pantryDetails = $this->flight->aircraft->type->getPantryDetails($this->pantry);
+        return $pantryDetails['index'] ?? 0;
     }
 
     public function getCrewOptions()
@@ -85,7 +95,7 @@ class Manager extends Component
         $crewOptions = [];
         for ($deck = 2; $deck <= $maxDeckCrew; $deck++) {
             for ($cabin = 1; $cabin <= $maxCabinCrew; $cabin++) {
-                $crewOptions[] = $deck.'/'.$cabin;
+                $crewOptions[] = $deck . '/' . $cabin;
             }
         }
 

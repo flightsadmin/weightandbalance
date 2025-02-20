@@ -60,7 +60,7 @@ class AircraftType extends Model
     {
         return $this->holds
             ->where('is_active', true)
-            ->flatMap(fn ($hold) => $hold->getPositions())
+            ->flatMap(fn($hold) => $hold->getPositions())
             ->values();
     }
 
@@ -109,29 +109,20 @@ class AircraftType extends Model
 
     public function getPantryDetails($pantryCode)
     {
-        $pantryCode = strtolower($pantryCode);
+        $pantries = $this->getSetting('pantries', []);
+        $pantryCode = strtoupper($pantryCode);
 
-        return [
-            'name' => $this->getSetting("pantry_{$pantryCode}_name", ''),
-            'code' => strtoupper($pantryCode),
-            'weight' => $this->getSetting("pantry_{$pantryCode}_weight", 0),
-            'index' => number_format($this->getSetting("pantry_{$pantryCode}_index", 0), 2),
+        return $pantries[$pantryCode] ?? [
+            'name' => '',
+            'code' => $pantryCode,
+            'weight' => 0,
+            'index' => 0
         ];
     }
 
     public function getAllPantries()
     {
-        return collect($this->settings()
-            ->where('key', 'like', 'pantry_%_name')
-            ->get())
-            ->map(function ($setting) {
-                $code = str_replace(['pantry_', '_name'], '', $setting->key);
-
-                return array_merge(
-                    ['code' => $code],
-                    $this->getPantryDetails($code)
-                );
-            });
+        return collect($this->getSetting('pantries', []));
     }
 
     public function seats(): HasMany
@@ -143,7 +134,7 @@ class AircraftType extends Model
     {
         $envelope = $this->envelopes()->where('name', 'FUEL')->first();
 
-        if (! $envelope || ! $envelope->points) {
+        if (!$envelope || !$envelope->points) {
             return 0;
         }
 
@@ -203,7 +194,7 @@ class AircraftType extends Model
 
         $distribution = $this->crewDistributions()->where('crew_count', $cabinCrewCount)->first();
 
-        if (! $distribution) {
+        if (!$distribution) {
             return $deckCrewIndex;
         }
 

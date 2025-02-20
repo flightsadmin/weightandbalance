@@ -216,11 +216,16 @@ class LoadsheetManager extends Component
 
     private function calculatePantryIndex()
     {
-        if (!$this->flight->fuel) {
-            return;
+        if (!$this->flight->fuel?->pantry) {
+            return ['index' => 0, 'weight' => 0];
         }
 
-        return $this->flight->aircraft->type->getPantryDetails($this->flight->fuel->pantry);
+        $pantryDetails = $this->flight->aircraft->type->getPantryDetails($this->flight->fuel->pantry);
+
+        return [
+            'index' => $pantryDetails['index'] ?? 0,
+            'weight' => $pantryDetails['weight'] ?? 0
+        ];
     }
 
     private function calculateFuel()
