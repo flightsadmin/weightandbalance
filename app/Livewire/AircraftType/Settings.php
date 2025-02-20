@@ -18,20 +18,8 @@ class Settings extends Component
     public $settingForm = [
         'key' => '',
         'value' => '',
-        'type' => 'string',
+        'type' => '',
         'description' => '',
-    ];
-
-    // Default settings structure
-    protected $defaultSettings = [
-        'weight_and_balance' => [
-            'ref_sta_at' => ['type' => 'float', 'description' => 'Reference station (meters)'],
-            'k_constant' => ['type' => 'float', 'description' => 'K constant for index calculation'],
-            'c_constant' => ['type' => 'float', 'description' => 'C constant for index calculation'],
-            'length_of_mac' => ['type' => 'float', 'description' => 'Length of MAC (meters)'],
-            'lemac_at' => ['type' => 'float', 'description' => 'Leading Edge MAC (meters)'],
-            'fuel_density' => ['type' => 'float', 'description' => 'Fuel density (kg/L)'],
-        ],
     ];
 
     public function mount(AircraftType $aircraftType)
@@ -39,66 +27,45 @@ class Settings extends Component
         $this->aircraftType = $aircraftType;
     }
 
-    public function createSetting($key, $config)
+    public function editSetting($key)
     {
+        $macSettings = $this->aircraftType->getMacSettings();
+        $this->editingSetting = $key;
         $this->settingForm = [
             'key' => $key,
-            'value' => '',
-            'type' => $config['type'],
-            'description' => $config['description'],
+            'value' => $macSettings[$key]
         ];
-        $this->showSettingModal = true;
-    }
-
-    public function editSetting(Setting $setting)
-    {
-        $this->editingSetting = $setting;
-        $this->settingForm = [
-            'key' => $setting->key,
-            'value' => $setting->value,
-            'type' => $setting->type,
-            'description' => $setting->description,
-        ];
-        $this->showSettingModal = true;
     }
 
     public function saveSetting()
     {
         $this->validate([
-            'settingForm.key' => 'required|string',
-            'settingForm.value' => 'required',
-            'settingForm.type' => 'required|in:string,float,integer,boolean',
-            'settingForm.description' => 'nullable|string',
+            'settingForm.value' => 'required|numeric'
         ]);
+
+        $macSettings = $this->aircraftType->getMacSettings();
+        $macSettings[$this->settingForm['key']] = (float) $this->settingForm['value'];
 
         $this->aircraftType->settings()->updateOrCreate(
             [
-                'key' => $this->settingForm['key'],
-                'airline_id' => $this->aircraftType->airline_id,
+                'key' => 'mac_settings',
+                'airline_id' => $this->aircraftType->airline_id
             ],
             [
-                'value' => $this->settingForm['value'],
-                'type' => $this->settingForm['type'],
-                'description' => $this->settingForm['description'],
+                'value' => json_encode($macSettings),
+                'type' => 'json',
+                'description' => 'MAC Calculation Settings'
             ]
         );
 
-        $this->dispatch('alert', icon: 'success', message: 'Setting saved successfully.');
-        $this->dispatch('setting-saved');
-        $this->reset('settingForm', 'editingSetting', 'showSettingModal');
-    }
-
-    public function deleteSetting(Setting $setting)
-    {
-        $setting->delete();
-        $this->dispatch('alert', icon: 'success', message: 'Setting deleted successfully.');
+        $this->editingSetting = null;
+        $this->dispatch('alert', icon: 'success', message: 'Setting updated successfully.');
     }
 
     public function render()
     {
         return view('livewire.aircraft_type.settings', [
-            'settings' => $this->aircraftType->settings,
-            'defaultSettings' => $this->defaultSettings,
+            'macSettings' => $this->aircraftType->getMacSettings()
         ]);
     }
 }

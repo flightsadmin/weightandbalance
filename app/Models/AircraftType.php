@@ -113,7 +113,7 @@ class AircraftType extends Model
         $pantryCode = strtoupper($pantryCode);
 
         return $pantries[$pantryCode] ?? [
-            'name' => '',
+            'name' => '-',
             'code' => $pantryCode,
             'weight' => 0,
             'index' => 0
@@ -160,15 +160,27 @@ class AircraftType extends Model
 
     public function calculateMac($weight, $index)
     {
-        $K = $this->getSetting('k_constant', 50);
-        $C = $this->getSetting('c_constant', 1000);
-        $MAC = $this->getSetting('length_of_mac', 4.194);
-        $LEMAC = $this->getSetting('lemac_at', 17.8015);
-        $REF_STA = $this->getSetting('ref_sta_at', 18.850);
+        $macSettings = $this->getMacSettings();
 
         // Formula: %MAC = ((C * (I-K))/W + Ref.Sta - LEMAC) / (MAC/100)
         return
-            (($C * ($index - $K)) / $weight + $REF_STA - $LEMAC) / ($MAC / 100);
+            (($macSettings['c_constant'] * ($index - $macSettings['k_constant'])) / $weight
+                + $macSettings['ref_sta_at']
+                - $macSettings['lemac_at'])
+            / ($macSettings['length_of_mac'] / 100);
+    }
+
+    public function getMacSettings()
+    {
+        $macSettings = $this->getSetting('mac_settings', [
+            'k_constant' => 50,
+            'c_constant' => 1000,
+            'length_of_mac' => 4.194,
+            'lemac_at' => 17.8015,
+            'ref_sta_at' => 18.850
+        ]);
+
+        return $macSettings;
     }
 
     public function getZfwMac($weight, $index)

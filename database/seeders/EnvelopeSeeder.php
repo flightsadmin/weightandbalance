@@ -115,7 +115,7 @@ class EnvelopeSeeder extends Seeder
                         ['weight' => 18500, 'index' => -10.83],
                         ['weight' => 18632, 'index' => -11.08],
                     ],
-                    'is_active' => true,
+                    'is_active' => false,
                 ]
             );
         }
