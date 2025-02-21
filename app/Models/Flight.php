@@ -164,12 +164,7 @@ class Flight extends Model
     {
         return [
             'notoc_required' => false,
-            'passenger_weights' => [
-                'male' => 88,
-                'female' => 70,
-                'child' => 35,
-                'infant' => 0,
-            ],
+            'passenger_weights' => 'Standard (88/70/35/0)',
             'trim_settings' => [
                 'type' => 'Trim by Zone',
             ],
