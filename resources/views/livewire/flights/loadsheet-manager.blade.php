@@ -3,15 +3,15 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title m-0">Load Sheet</h3>
-                    <div class="d-flex gap-2 m-0">
+                    <h5 class="card-title mb-0">Load Sheet</h5>
+                    <div class="d-flex gap-2 mb-0">
                         @if ($loadsheet)
                             @if (!$loadsheet->final && $loadsheet->status !== 'revoked')
-                                <button class="btn btn-success btn-sm m-0" wire:click="finalizeLoadsheet">
+                                <button class="btn btn-success btn-sm mb-0" wire:click="finalizeLoadsheet">
                                     <i class="bi bi-check2-circle"></i> Finalize Loadsheet
                                 </button>
                             @elseif($loadsheet->status === 'released')
-                                <button class="btn btn-secondary btn-sm m-0" wire:click="revokeLoadsheet"
+                                <button class="btn btn-secondary btn-sm mb-0" wire:click="revokeLoadsheet"
                                     wire:confirm="Are you sure you want to revoke this loadsheet?">
                                     <i class="bi bi-trash-fill"></i> Revoke Loadsheet
                                 </button>
@@ -19,7 +19,7 @@
                         @endif
 
                         @if (!$loadsheet || $loadsheet->status === 'revoked')
-                            <button class="btn btn-primary btn-sm m-0" wire:click="generateLoadsheet"
+                            <button class="btn btn-primary btn-sm mb-0" wire:click="generateLoadsheet"
                                 {{ !$flight->fuel || !$loadplan || $loadplan->status !== 'released' ? 'disabled' : '' }}>
                                 <i class="bi bi-plus-circle"></i> Generate Loadsheet
                             </button>
@@ -275,7 +275,7 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title m-0">Trim Sheet</h3>
+                            <h5 class="card-title mb-2">Trim Sheet</h5>
                         </div>
                         <div class="card-body">
                             <div class="py-4">
@@ -287,8 +287,8 @@
                 <div class="col-md-12">
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3 class="card-title">Passenger Distribution</h3>
-                            <button class="btn btn-sm btn-warning" wire:click="resetDistribution"
+                            <h5 class="card-title mb-0">Passenger Distribution</h5>
+                            <button class="btn btn-sm btn-warning mb-0" wire:click="resetDistribution"
                                 wire:confirm="This will reset to actual checked-in passenger distribution. Continue?">
                                 <i class="bi bi-arrow-counterclockwise"></i> Reset to Actual
                             </button>
@@ -372,6 +372,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="col-md-12">
+                    <livewire:flight.settings :flight="$flight" />
                 </div>
             </div>
         </div>

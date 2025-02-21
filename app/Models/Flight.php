@@ -159,4 +159,45 @@ class Flight extends Model
 
         return $setting ? $setting->typed_value : $default;
     }
+
+    public function getDefaultSettings(): array
+    {
+        return [
+            'notoc_required' => false,
+            'passenger_weights' => [
+                'male' => 88,
+                'female' => 70,
+                'child' => 35,
+                'infant' => 0,
+            ],
+            'trim_settings' => [
+                'type' => 'Trim by Zone',
+            ],
+            'fuel_density' => 0.785,
+        ];
+    }
+
+    public function getSettings(): array
+    {
+        $settings = $this->settings()
+            ->where('key', 'flight_settings')
+            ->first();
+
+        return $settings ? $settings->typed_value : $this->getDefaultSettings();
+    }
+
+    public function updateSettings(array $settings): void
+    {
+        $this->settings()->updateOrCreate(
+            [
+                'key' => 'flight_settings',
+                'airline_id' => $this->airline_id,
+            ],
+            [
+                'value' => json_encode($settings),
+                'type' => 'json',
+                'description' => 'Flight Configuration Settings',
+            ]
+        );
+    }
 }
