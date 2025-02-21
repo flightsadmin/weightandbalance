@@ -30,10 +30,14 @@ class Show extends Component
     // Grouped settings
     protected $defaultSettings = [
         'general' => [
-            'standard_passenger_weight' => ['type' => 'float', 'description' => 'Standard passenger weight (kg)'],
-            'standard_cockpit_crew_weight' => ['type' => 'float', 'description' => 'Standard cockpit crew weight (kg)'],
-            'standard_cabin_crew_weight' => ['type' => 'float', 'description' => 'Standard cabin crew weight (kg)'],
-            'standard_baggage_weight' => ['type' => 'float', 'description' => 'Standard baggage weight (kg)'],
+            'standard_passenger_weight' => ['type' => 'integer', 'description' => 'Standard passenger weight (kg)'],
+            'standard_male_passenger_weight' => ['type' => 'integer', 'description' => 'Standard male passenger weight (kg)'],
+            'standard_female_passenger_weight' => ['type' => 'integer', 'description' => 'Standard female passenger weight (kg)'],
+            'standard_child_passenger_weight' => ['type' => 'integer', 'description' => 'Standard child passenger weight (kg)'],
+            'standard_infant_passenger_weight' => ['type' => 'integer', 'description' => 'Standard infant passenger weight (kg)'],
+            'standard_cockpit_crew_weight' => ['type' => 'integer', 'description' => 'Standard cockpit crew weight (kg)'],
+            'standard_cabin_crew_weight' => ['type' => 'integer', 'description' => 'Standard cabin crew weight (kg)'],
+            'standard_baggage_weight' => ['type' => 'integer', 'description' => 'Standard baggage weight (kg)'],
             'standard_fuel_density' => ['type' => 'float', 'description' => 'Standard fuel density (kg/L)'],
         ],
         'operations' => [
@@ -45,8 +49,8 @@ class Show extends Component
         'cargo' => [
             'dangerous_goods_allowed' => ['type' => 'boolean', 'description' => 'Allow dangerous goods'],
             'live_animals_allowed' => ['type' => 'boolean', 'description' => 'Allow live animals'],
-            'max_cargo_piece_weight' => ['type' => 'float', 'description' => 'Maximum cargo piece weight (kg)'],
-            'max_baggage_piece_weight' => ['type' => 'float', 'description' => 'Maximum baggage piece weight (kg)'],
+            'max_cargo_piece_weight' => ['type' => 'integer', 'description' => 'Maximum cargo piece weight (kg)'],
+            'max_baggage_piece_weight' => ['type' => 'integer', 'description' => 'Maximum baggage piece weight (kg)'],
         ],
         'notifications' => [
             'enable_email_notifications' => ['type' => 'boolean', 'description' => 'Enable email notifications'],

@@ -46,6 +46,10 @@ class AircraftConfigSeeder extends Seeder
         $settings = [
             'general' => [
                 'standard_passenger_weight' => 84,
+                'standard_male_passenger_weight' => 88,
+                'standard_female_passenger_weight' => 70,
+                'standard_child_passenger_weight' => 35,
+                'standard_infant_passenger_weight' => 10,
                 'standard_cockpit_crew_weight' => 85,
                 'standard_cabin_crew_weight' => 75,
                 'standard_baggage_weight' => 13,

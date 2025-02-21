@@ -155,14 +155,11 @@ class LoadsheetManager extends Component
 
     public function resetDistribution()
     {
-        // Delete the persisted manual distribution
         $this->flight->settings()->where('key', 'manual_pax_distribution')->delete();
 
-        // Reset to actual passenger distribution
         $this->initializeEmptyDistribution();
         $this->updatePaxDistributionFromPassengers();
 
-        // Update loadsheet if exists
         if ($this->loadsheet) {
             $distribution = $this->loadsheet->distribution;
             $distribution['load_data']['pax_by_zone'] = $this->paxDistribution;
@@ -174,12 +171,15 @@ class LoadsheetManager extends Component
 
     private function calculateTotalDeadload()
     {
-        return array_sum(array_column($this->generateLoadData()['hold_breakdown'], 'weight'));
+        return $this->flight->containers()->where('container_flight.status', 'loaded')->sum('container_flight.weight');
     }
 
     private function calculateTotalTrafficLoad()
     {
-        return $this->calculateTotalDeadload() + array_sum(array_column($this->generateLoadData()['pax_by_type'], 'weight'));
+        $paxByType = array_sum(array_column($this->generateLoadData()['pax_by_type'], 'weight'));
+        $deadloadWeight = $this->calculateTotalDeadload();
+
+        return $paxByType + $deadloadWeight;
     }
 
     private function calculateDryOperatingWeight()
@@ -296,9 +296,7 @@ class LoadsheetManager extends Component
             ];
         }
 
-        $passengers = $this->flight->passengers()
-            ->with('seat.cabinZone')
-            ->get();
+        $passengers = $this->flight->passengers()->with('seat.cabinZone')->get();
 
         foreach ($passengers as $passenger) {
             if ($passenger->seat && $passenger->seat->cabinZone) {
@@ -333,32 +331,42 @@ class LoadsheetManager extends Component
             $type => $this->flight->airline->getStandardPassengerWeight($type),
         ])->toArray();
 
+        $holdBreakdown = $this->flight->aircraft->type->holds()
+            ->where('is_active', true)
+            ->get()
+            ->map(function ($hold) {
+                $containers = $this->flight->containers()
+                    ->whereIn('position_id', $hold->positions->pluck('id'))
+                    ->withPivot('weight')
+                    ->get();
+                $weight = $containers->sum('pivot.weight');
+
+                return [
+                    'hold_no' => $hold->code,
+                    'weight' => $weight,
+                    'index' => round($weight * $hold->index, 2),
+                ];
+            })->filter(fn ($hold) => $hold['weight'] > 0)->values()->toArray();
+
         return [
             'pax_by_zone' => $paxDistribution,
             'pax_by_type' => $paxByType,
             'passenger_weights_used' => $orderedWeightsUsed,
-            'hold_breakdown' => $this->flight->aircraft->type->holds()
-                ->with('positions')->get()
-                ->map(function ($hold) {
-                    $containers = $this->flight->containers()
-                        ->whereIn('position_id', $hold->positions->pluck('id'))->get();
-
-                    $weight = $containers->sum('weight');
-
-                    return [
-                        'hold_no' => $hold->code,
-                        'weight' => $weight,
-                        'index' => round($weight * $hold->index, 2),
-                    ];
-                })->filter(fn ($hold) => $hold['weight'] > 0)->values()->toArray(),
+            'hold_breakdown' => $holdBreakdown,
             'deadload_by_type' => [
                 'C' => [
-                    'pieces' => $this->flight->cargo->where('status', 'loaded')->whereNotNull('container_id')->sum('pieces'),
-                    'weight' => $this->flight->cargo->where('status', 'loaded')->whereNotNull('container_id')->sum('weight'),
+                    'pieces' => $this->flight->cargo->where('status', 'loaded')->count(),
+                    'weight' => $this->flight->containers()
+                        ->where('container_flight.type', 'cargo')
+                        ->where('container_flight.status', 'loaded')
+                        ->sum('container_flight.weight'), // Use pivot weight for cargo
                 ],
                 'B' => [
-                    'pieces' => $this->flight->baggage->where('status', 'loaded')->whereNotNull('container_id')->count(),
-                    'weight' => $this->flight->baggage->where('status', 'loaded')->whereNotNull('container_id')->sum('weight'),
+                    'pieces' => $this->flight->baggage->where('status', 'loaded')->count(),
+                    'weight' => $this->flight->containers()
+                        ->where('container_flight.type', 'baggage')
+                        ->where('container_flight.status', 'loaded')
+                        ->sum('container_flight.weight'), // Use pivot weight for baggage
                 ],
                 'M' => [
                     'pieces' => 0,

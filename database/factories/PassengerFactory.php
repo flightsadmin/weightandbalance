@@ -82,7 +82,7 @@ class PassengerFactory extends Factory
                     ->first();
 
                 // If no adult found, create one
-                if (!$adult) {
+                if (! $adult) {
                     $adult = Passenger::factory()->state([
                         'flight_id' => $passenger->flight_id,
                         'type' => fake()->randomElement(['male', 'female']),
@@ -98,7 +98,7 @@ class PassengerFactory extends Factory
             // If this is an adult, randomly assign an infant
             elseif (in_array($passenger->type, ['male', 'female']) && fake()->boolean(20)) {
                 // Only create infant if adult doesn't already have one
-                if (!($passenger->attributes['infant'] ?? false)) {
+                if (! ($passenger->attributes['infant'] ?? false)) {
                     Passenger::factory()->infant()->create([
                         'flight_id' => $passenger->flight_id,
                     ]);
