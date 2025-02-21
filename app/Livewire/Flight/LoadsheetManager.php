@@ -453,6 +453,7 @@ class LoadsheetManager extends Component
             'underload' => $this->calculateUnderload(),
             'total_deadload' => $this->calculateTotalDeadload(),
             'total_traffic_load' => $this->calculateTotalTrafficLoad(),
+            'notoc_required' => $this->flight->getSettings()['notoc_required'],
         ];
     }
 

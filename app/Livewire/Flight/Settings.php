@@ -45,17 +45,8 @@ class Settings extends Component
 
     public function updateFlightVariation($value)
     {
-        // Parse the weights from the selected variation
-        preg_match('/\((\d+)\/(\d+)\/(\d+)\/(\d+)\)/', $value, $matches);
-        if (count($matches) === 5) {
-            $this->settings['passenger_weights'] = [
-                'male' => (int) $matches[1],
-                'female' => (int) $matches[2],
-                'child' => (int) $matches[3],
-                'infant' => (int) $matches[4],
-            ];
-            $this->saveSettings();
-        }
+        $this->settings['passenger_weights'] = $value;
+        $this->saveSettings();
     }
 
     public function updateTrimType($value)

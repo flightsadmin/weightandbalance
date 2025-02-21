@@ -230,7 +230,7 @@
                                 </div>
                                 <br>
                                 <div>AIRCRAFT TYPE: {{ $flight->aircraft->type->name }}</div>
-                                <div>NOTOC: NO</div>
+                                <div>NOTOC: {{ $distribution['flight']['notoc_required'] ? 'YES' : 'NO' }}</div>
                                 <br>
                                 <div>
                                     {{ $distribution['flight']['destination'] }} &nbsp;&nbsp;
