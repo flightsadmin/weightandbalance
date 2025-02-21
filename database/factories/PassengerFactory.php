@@ -22,15 +22,15 @@ class PassengerFactory extends Factory
     {
         $type = fake()->randomElement(['male', 'female', 'child']);
         $attributes = [
-            'wchr' => false,
-            'wchs' => false,
-            'wchc' => false,
-            'exst' => false,
-            'stcr' => false,
-            'deaf' => false,
-            'blind' => false,
-            'dpna' => false,
-            'meda' => false,
+            'wchr' => fake()->boolean(5),
+            'wchs' => fake()->boolean(5),
+            'wchc' => fake()->boolean(5),
+            'exst' => fake()->boolean(5),
+            'stcr' => fake()->boolean(5),
+            'deaf' => fake()->boolean(5),
+            'blind' => fake()->boolean(5),
+            'dpna' => fake()->boolean(5),
+            'meda' => fake()->boolean(5),
             'infant' => false,
             'infant_name' => null,
         ];
@@ -52,10 +52,19 @@ class PassengerFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'type' => 'infant',
-                'attributes' => array_merge($attributes['attributes'] ?? [], [
-                    'infant' => true,
-                    'infant_name' => fake()->name(),
-                ]),
+                'attributes' => [
+                    'wchr' => false,
+                    'wchs' => false,
+                    'wchc' => false,
+                    'exst' => false,
+                    'stcr' => false,
+                    'deaf' => false,
+                    'blind' => false,
+                    'dpna' => false,
+                    'meda' => false,
+                    'infant' => false,
+                    'infant_name' => null,
+                ],
             ];
         });
     }
@@ -88,9 +97,12 @@ class PassengerFactory extends Factory
             }
             // If this is an adult, randomly assign an infant
             elseif (in_array($passenger->type, ['male', 'female']) && fake()->boolean(20)) {
-                Passenger::factory()->infant()->create([
-                    'flight_id' => $passenger->flight_id,
-                ]);
+                // Only create infant if adult doesn't already have one
+                if (!($passenger->attributes['infant'] ?? false)) {
+                    Passenger::factory()->infant()->create([
+                        'flight_id' => $passenger->flight_id,
+                    ]);
+                }
             }
         });
     }
