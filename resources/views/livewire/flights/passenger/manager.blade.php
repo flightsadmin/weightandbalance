@@ -325,7 +325,7 @@
                                     </tr>
                                     <tr>
                                         <th>Seat Number:</th>
-                                        <td>{{ $selectedPassenger->seat_number }}</td>
+                                        <td>{{ $selectedPassenger->seat->designation }}</td>
                                     </tr>
                                     <tr>
                                         <th>Acceptance Status:</th>
