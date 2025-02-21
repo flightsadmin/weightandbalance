@@ -64,7 +64,7 @@ class Manager extends Component
         if ($value) {
             $this->selected = $this->getCargoQuery()
                 ->pluck('id')
-                ->map(fn ($id) => (string) $id)
+                ->map(fn($id) => (string) $id)
                 ->toArray();
         } else {
             $this->selected = [];
@@ -87,18 +87,18 @@ class Manager extends Component
 
         foreach ($cargo as $item) {
             $oldContainer = $item->container;
-            
+
             // Update container_id
             $item->update([
                 'container_id' => $this->bulkContainer,
                 'status' => 'loaded'
             ]);
-            
+
             // Case 1: Moving from one container to another
             if ($oldContainer && $oldContainer->id != $this->bulkContainer) {
                 $oldContainer->flights()->where('flight_id', $this->flight->id)
                     ->decrement('weight', $item->weight);
-                    
+
                 $newContainer->flights()->where('flight_id', $this->flight->id)
                     ->increment('weight', $item->weight);
             }
@@ -124,7 +124,7 @@ class Manager extends Component
     {
         $query = Cargo::query();
         if ($this->search) {
-            $query->whereAny(['awb_number'], 'like', '%'.$this->search.'%');
+            $query->whereAny(['awb_number'], 'like', '%' . $this->search . '%');
         }
         if ($this->type) {
             $query->where('type', $this->type);
@@ -170,7 +170,7 @@ class Manager extends Component
             // Decrement old container
             $oldContainer->flights()->where('flight_id', $this->flight->id)
                 ->decrement('weight', $weight);
-            
+
             // Increment new container
             Container::find($containerId)->flights()
                 ->where('flight_id', $this->flight->id)
