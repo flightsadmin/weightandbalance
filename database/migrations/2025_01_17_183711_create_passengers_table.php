@@ -68,9 +68,9 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('seats');
         Schema::dropIfExists('cabin_zones');
-        Schema::dropIfExists('passengers');
+        Schema::dropIfExists('seats');
         Schema::dropIfExists('flight_seats');
+        Schema::dropIfExists('passengers');
     }
 };

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -21,7 +20,6 @@ return new class extends Migration
             $table->nullableMorphs('settingable');
             $table->timestamps();
 
-            // Composite unique constraint
             $table->unique(['key', 'airline_id', 'settingable_type', 'settingable_id'], 'settings_composite_unique');
         });
     }

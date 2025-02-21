@@ -180,14 +180,9 @@ class LoadsheetManager extends Component
         return $this->calculateTotalDeadload() + array_sum(array_column($this->generateLoadData()['pax_by_type'], 'weight'));
     }
 
-    private function calculateCrewWeight()
-    {
-        return $this->flight->aircraft->type->getCrewIndexes($this->flight->fuel->crew)['weight'];
-    }
-
     private function calculateDryOperatingWeight()
     {
-        return $this->flight->aircraft->basic_weight + $this->calculateCrewWeight() + $this->calculatePantryIndex()['weight'];
+        return $this->flight->aircraft->basic_weight + $this->calculateCrewIndexes()['weight'] + $this->calculatePantryIndex()['weight'];
     }
 
     private function calculateZeroFuelWeight()
@@ -275,9 +270,7 @@ class LoadsheetManager extends Component
     private function getPassengerDistribution()
     {
         // Check for persisted manual distribution first
-        $manualDistribution = $this->flight->settings()
-            ->where('key', 'manual_pax_distribution')
-            ->first();
+        $manualDistribution = $this->flight->settings()->where('key', 'manual_pax_distribution')->first();
 
         if ($manualDistribution) {
             return $manualDistribution->typed_value;
@@ -312,9 +305,9 @@ class LoadsheetManager extends Component
 
     private function generateLoadData()
     {
+        $pax = ['male', 'female', 'child', 'infant'];
         $paxDistribution = $this->getPassengerDistribution();
 
-        // Calculate totals by passenger type
         $paxByType = [
             'male' => ['count' => 0, 'weight' => 0],
             'female' => ['count' => 0, 'weight' => 0],
@@ -323,13 +316,13 @@ class LoadsheetManager extends Component
         ];
 
         foreach ($paxDistribution as $zone) {
-            foreach (['male', 'female', 'child', 'infant'] as $type) {
+            foreach ($pax as $type) {
                 $paxByType[$type]['count'] += $zone[$type];
                 $paxByType[$type]['weight'] += $zone[$type] * $this->flight->airline->getStandardPassengerWeight($type);
             }
         }
 
-        $orderedWeightsUsed = collect(['male', 'female', 'child', 'infant'])->mapWithKeys(fn($type) => [
+        $orderedWeightsUsed = collect($pax)->mapWithKeys(fn($type) => [
             $type => $this->flight->airline->getStandardPassengerWeight($type),
         ])->toArray();
 
@@ -338,8 +331,7 @@ class LoadsheetManager extends Component
             'pax_by_type' => $paxByType,
             'passenger_weights_used' => $orderedWeightsUsed,
             'hold_breakdown' => $this->flight->aircraft->type->holds()
-                ->with('positions')
-                ->get()
+                ->with('positions')->get()
                 ->map(function ($hold) {
                     $containers = $this->flight->containers()
                         ->whereIn('position_id', $hold->positions->pluck('id'))->get();
@@ -439,7 +431,7 @@ class LoadsheetManager extends Component
             'destination' => $this->flight->arrival_airport,
             'sector' => $this->flight->departure_airport . '/' . $this->flight->arrival_airport,
             'version' => $this->flight->aircraft->type->code,
-            'release_time' => now('Asia/Qatar')->format('H:i'),
+            'release_time' => now('Asia/Qatar')->format('Hi'),
             'underload' => $this->calculateUnderload(),
             'total_deadload' => $this->calculateTotalDeadload(),
             'total_traffic_load' => $this->calculateTotalTrafficLoad(),
@@ -452,7 +444,7 @@ class LoadsheetManager extends Component
         $type = $aircraft->type;
         $fuel = $this->flight->fuel;
 
-        $crewIndexes = $type->getCrewIndexes($fuel->crew);
+        $crewIndexes = $this->calculateCrewIndexes();
         $fuelIndexes = $type->getFuelIndexes($fuel->take_off_fuel, $fuel->take_off_fuel - $fuel->trip_fuel);
 
         $paxData = $this->generateLoadData()['pax_by_type'];
@@ -485,6 +477,29 @@ class LoadsheetManager extends Component
         unset($value);
 
         return $indices;
+    }
+
+    public function calculateCrewIndexes()
+    {
+        $crewConfig = $this->flight->fuel->crew;
+        if (!$crewConfig) {
+            $this->dispatch('alert', icon: 'error', message: 'No crew configuration found.');
+            return ['index' => 0, 'weight' => 0];
+        }
+        [$deckCrew, $cabinCrew] = explode('/', $crewConfig);
+        $deckCrewCount = (int) $deckCrew;
+        $cabinCrewCount = (int) $cabinCrew;
+
+        $crewCalculation = $this->flight->aircraft->type->calculateCrewIndex($deckCrewCount, $cabinCrewCount);
+
+        if (isset($crewCalculation['error'])) {
+            $this->dispatch('alert', icon: 'error', message: $crewCalculation['error']);
+            return;
+        }
+        return [
+            'index' => $crewCalculation['index'],
+            'weight' => $crewCalculation['weight']
+        ];
     }
 
     public function render()

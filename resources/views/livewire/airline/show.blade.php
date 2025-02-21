@@ -52,7 +52,7 @@
                                     </tr>
                                     <tr>
                                         <th>Phone</th>
-                                        <td>{{ $airline->phone ?: 'Not s et' }}</td>
+                                        <td>{{ $airline->phone ?: 'Not set' }}</td>
                                     </tr>
                                     <tr>
                                         <th>Email</th>

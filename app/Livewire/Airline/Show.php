@@ -31,7 +31,8 @@ class Show extends Component
     protected $defaultSettings = [
         'general' => [
             'standard_passenger_weight' => ['type' => 'float', 'description' => 'Standard passenger weight (kg)'],
-            'standard_crew_weight' => ['type' => 'float', 'description' => 'Standard crew weight (kg)'],
+            'standard_cockpit_crew_weight' => ['type' => 'float', 'description' => 'Standard cockpit crew weight (kg)'],
+            'standard_cabin_crew_weight' => ['type' => 'float', 'description' => 'Standard cabin crew weight (kg)'],
             'standard_baggage_weight' => ['type' => 'float', 'description' => 'Standard baggage weight (kg)'],
             'standard_fuel_density' => ['type' => 'float', 'description' => 'Standard fuel density (kg/L)'],
         ],

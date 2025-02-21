@@ -28,8 +28,8 @@ class AircraftFactory extends Factory
             ],
             [
                 'registration_number' => strtoupper(fake()->unique()->lexify('??-????')),
-                'basic_weight' => 43523,
-                'basic_index' => 51.51,
+                'basic_weight' => 43516,
+                'basic_index' => 51.38,
             ],
         ];
         $registrationNumber = fake()->randomElement($registrationNumbers);
