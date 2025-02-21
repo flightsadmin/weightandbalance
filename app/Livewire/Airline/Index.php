@@ -81,6 +81,6 @@ class Index extends Component
                     ->orWhere('iata_code', 'like', "%{$this->search}%"))
                 ->orderBy('name')
                 ->paginate(10),
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

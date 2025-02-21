@@ -143,6 +143,6 @@ class Show extends Component
             'settings' => $this->airline->getSettings(),
             'defaultSettings' => $this->defaultSettings,
             'currentSettings' => $this->getCurrentCategorySettings(),
-        ])->layout('components.layouts.app');
+        ]);
     }
 }
