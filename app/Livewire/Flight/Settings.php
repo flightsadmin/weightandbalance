@@ -15,7 +15,7 @@ class Settings extends Component
         'Yes' => true,
     ];
 
-    public $flightVariations = [
+    public $weightVariations = [
         'Standard (88/70/35/0)',
         'Alternate (84/84/35/0)',
     ];
