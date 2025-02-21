@@ -44,7 +44,7 @@
                                     {{ ucfirst($container->pivot->status) }}
                                 </span>
                             </td>
-                            <td>{{ number_format($container->weight) }} kg</td>
+                            <td>{{ number_format($container->pivot->weight) }} kg</td>
                             <td>
                                 <button class="btn btn-sm btn-danger"
                                     wire:click="unassignContainer({{ $container->id }})"

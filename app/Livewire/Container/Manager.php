@@ -42,6 +42,7 @@ class Manager extends Component
         foreach ($containers as $container) {
             $this->flight->containers()->attach($container->id, [
                 'type' => $this->assignmentType,
+                'weight' => $container->tare_weight,
                 'status' => 'unloaded',
             ]);
         }
