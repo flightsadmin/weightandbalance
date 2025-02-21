@@ -28,6 +28,8 @@ class Manager extends Component
 
     public $search = '';
 
+    public $type = '';
+
     public $pieces = '';
 
     public $weight = '';
@@ -335,11 +337,20 @@ class Manager extends Component
     #[On('passenger-saved')]
     public function render()
     {
+        $query = $this->flight->passengers()
+            ->with('seat')
+            ->withCount('baggage');
+
+        if ($this->search) {
+            $query->where('name', 'like', '%' . $this->search . '%');
+        }
+
+        if ($this->type) {
+            $query->where('type', $this->type);
+        }
+
         return view('livewire.flights.passenger.manager', [
-            'passengers' => $this->flight->passengers()
-                ->with('seat')
-                ->withCount('baggage')
-                ->paginate(10),
+            'passengers' => $query->paginate(10),
             'seats' => $this->loadSeats(),
         ]);
     }

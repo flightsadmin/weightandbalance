@@ -1,8 +1,17 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <div class="col-md-4">
+        <div>
             <input type="search" wire:model.live="search" class="form-control form-control-sm"
                 placeholder="Search by name, ticket or seat number...">
+        </div>
+        <div>
+            <select wire:model.live="type" class="form-select form-select-sm">
+                <option value="">All Types</option>
+                <option value="male">Adult Male</option>
+                <option value="female">Adult Female</option>
+                <option value="child">Child</option>
+                <option value="infant">Infant</option>
+            </select>
         </div>
         <div class="d-flex gap-2">
             <span class="badge bg-primary">{{ $flight->passengers_count }} Passengers</span>

@@ -20,49 +20,77 @@ class PassengerFactory extends Factory
      */
     public function definition(): array
     {
-        return [
-            'name' => fake()->name(),
-            'ticket_number' => strtoupper(fake()->bothify('###-##########')),
-            'pnr' => strtoupper(fake()->bothify('#?##?#')),
-            'type' => fake()->randomElement(['male', 'female', 'child', 'infant']),
-            'acceptance_status' => 'pending',
-            'boarding_status' => 'unboarded',
-            'attributes' => [
-                'wchr' => fake()->boolean(5),
-                'wchs' => fake()->boolean(5),
-                'wchc' => fake()->boolean(5),
-                'exst' => fake()->boolean(10),
-                'stcr' => fake()->boolean(5),
-                'deaf' => fake()->boolean(5),
-                'blind' => fake()->boolean(2),
-                'dpna' => fake()->boolean(5),
-                'meda' => fake()->boolean(10),
-                'infant' => fake()->boolean(15),
-                'infant_name' => fake()->boolean(15) ? fake()->name() : null,
-            ],
+        $type = fake()->randomElement(['male', 'female', 'child']);
+        $attributes = [
+            'wchr' => false,
+            'wchs' => false,
+            'wchc' => false,
+            'exst' => false,
+            'stcr' => false,
+            'deaf' => false,
+            'blind' => false,
+            'dpna' => false,
+            'meda' => false,
+            'infant' => false,
+            'infant_name' => null,
         ];
+
+        return [
+            'flight_id' => null,
+            'name' => fake()->name(),
+            'type' => $type,
+            'pnr' => strtoupper(fake()->bothify('??###?')),
+            'ticket_number' => fake()->numerify('###-##########'),
+            'acceptance_status' => fake()->randomElement(['pending', 'accepted', 'rejected']),
+            'boarding_status' => 'pending',
+            'attributes' => $attributes,
+        ];
+    }
+
+    public function infant(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => 'infant',
+                'attributes' => array_merge($attributes['attributes'] ?? [], [
+                    'infant' => true,
+                    'infant_name' => fake()->name(),
+                ]),
+            ];
+        });
     }
 
     public function configure()
     {
         return $this->afterCreating(function (Passenger $passenger) {
-            if ($passenger->flight) {
-                $availableSeat = $passenger->flight->aircraft->type->seats()
-                    ->whereDoesntHave('passenger', function ($query) use ($passenger) {
-                        $query->where('flight_id', $passenger->flight_id);
-                    })
-                    ->whereDoesntHave('flights', function ($query) use ($passenger) {
-                        $query->where('flights.id', $passenger->flight_id)
-                            ->where('flight_seats.is_blocked', true);
-                    })->inRandomOrder()->first();
+            // If this is an infant, find or create an adult on the same flight
+            if ($passenger->type === 'infant') {
+                // Try to find an existing adult passenger without an infant
+                $adult = Passenger::where('flight_id', $passenger->flight_id)
+                    ->whereIn('type', ['male', 'female'])
+                    ->whereJsonDoesntContain('attributes->infant', true)
+                    ->inRandomOrder()
+                    ->first();
 
-                if ($availableSeat) {
-                    $passenger->flight->seats()->firstOrCreate(
-                        ['seat_id' => $availableSeat->id],
-                        ['is_blocked' => false]
-                    );
-                    $passenger->update(['seat_id' => $availableSeat->id]);
+                // If no adult found, create one
+                if (!$adult) {
+                    $adult = Passenger::factory()->state([
+                        'flight_id' => $passenger->flight_id,
+                        'type' => fake()->randomElement(['male', 'female']),
+                    ])->create();
                 }
+
+                // Update adult's attributes to include infant info
+                $attributes = $adult->attributes;
+                $attributes['infant'] = true;
+                $attributes['infant_name'] = $passenger->name;
+                $adult->update(['attributes' => $attributes]);
+            }
+            // If this is an adult, randomly assign an infant
+            elseif (in_array($passenger->type, ['male', 'female']) && fake()->boolean(20)) {
+                Passenger::factory()->infant()->create([
+                    'flight_id' => $passenger->flight_id,
+                ]);
             }
         });
     }
