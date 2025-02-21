@@ -70,12 +70,12 @@ class Container extends Model
 
     public function getTotalWeightAttribute()
     {
-        return $this->baggage->sum('weight') + $this->cargo->sum('weight');
-    }
+        // Get weight from pivot if available
+        if ($this->pivot) {
+            return $this->pivot->weight;
+        }
 
-    public function updateWeight()
-    {
-        $this->weight = $this->total_weight;
-        $this->save();
+        // Otherwise calculate from contents
+        return $this->baggage->sum('weight') + $this->cargo->sum('weight');
     }
 }

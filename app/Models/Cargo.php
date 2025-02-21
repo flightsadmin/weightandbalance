@@ -38,19 +38,4 @@ class Cargo extends Model
     {
         return $this->belongsTo(Container::class);
     }
-
-    protected static function booted()
-    {
-        static::created(function ($cargo) {
-            $cargo->container?->updateWeight();
-        });
-
-        static::updated(function ($cargo) {
-            $cargo->container?->updateWeight();
-        });
-
-        static::deleted(function ($cargo) {
-            $cargo->container?->updateWeight();
-        });
-    }
 }

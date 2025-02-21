@@ -40,19 +40,4 @@ class Baggage extends Model
     {
         return $this->belongsTo(Flight::class);
     }
-
-    protected static function booted()
-    {
-        static::created(function ($baggage) {
-            $baggage->container?->updateWeight();
-        });
-
-        static::updated(function ($baggage) {
-            $baggage->container?->updateWeight();
-        });
-
-        static::deleted(function ($baggage) {
-            $baggage->container?->updateWeight();
-        });
-    }
 }
