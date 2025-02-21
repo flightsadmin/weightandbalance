@@ -24,7 +24,7 @@ class LoadplanManager extends Component
     {
         $this->flight = $flight->load([
             'aircraft.type.holds.positions',
-            'containers' => fn ($q) => $q->withPivot(['type', 'pieces', 'status', 'position_id']),
+            'containers' => fn($q) => $q->withPivot(['type', 'pieces', 'status', 'position_id']),
         ]);
         $this->loadplan = $flight->loadplans()->latest()->first()
             ?? $flight->loadplans()->create([
@@ -43,7 +43,7 @@ class LoadplanManager extends Component
             ->withPivot(['type', 'pieces', 'status', 'position_id'])
             ->find($containerId);
 
-        if (! $container) {
+        if (!$container) {
             return;
         }
 
@@ -61,7 +61,7 @@ class LoadplanManager extends Component
                 ->first()?->positions->first();
         }
 
-        if (! $fromPosition && isset($this->containerPositions[$containerId])) {
+        if (!$fromPosition && isset($this->containerPositions[$containerId])) {
             $fromPosition = $this->containerPositions[$containerId]['position_id'];
         }
 
@@ -76,7 +76,7 @@ class LoadplanManager extends Component
                 'hold_name' => $position->hold->name,
                 'container_number' => $container->container_number,
                 'content_type' => $container->pivot->type,
-                'weight' => $container->weight,
+                'weight' => $container->pivot->weight,
                 'pieces' => $container->pivot->pieces,
                 'destination' => $this->flight->arrival_airport,
                 'updated_at' => now()->toDateTimeString(),
@@ -100,7 +100,7 @@ class LoadplanManager extends Component
     public function releaseLoadplan()
     {
         $overweightHolds = $this->flight->aircraft->type->holds
-            ->filter(fn ($hold) => $hold->isOverweight(
+            ->filter(fn($hold) => $hold->isOverweight(
                 $hold->getCurrentWeight($this->containerPositions, $this->flight->containers)
             ));
 
@@ -188,11 +188,31 @@ class LoadplanManager extends Component
         ]);
     }
 
+    private function getContainerData()
+    {
+        return $this->flight->containers()
+            ->with(['baggage', 'cargo'])
+            ->get()
+            ->map(function ($container) {
+                return [
+                    'id' => $container->id,
+                    'container_number' => $container->container_number,
+                    'position_id' => $container->pivot->position_id,
+                    'content_type' => $container->pivot->type,
+                    'weight' => $container->pivot->weight,
+                    'pieces' => $container->pivot->pieces,
+                    'status' => $container->pivot->status,
+                ];
+            })
+            ->keyBy('id')
+            ->toArray();
+    }
+
     #[On('containerSaved')]
     public function render()
     {
         $containers = $this->flight->containers()
-            ->withPivot(['type', 'pieces', 'status', 'position_id'])
+            ->withPivot(['type', 'pieces', 'status', 'position_id', 'weight'])
             ->get();
 
         $availableContainers = $containers->whereNotIn('id', array_keys($this->containerPositions));
