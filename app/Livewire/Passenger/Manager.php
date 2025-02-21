@@ -49,7 +49,7 @@ class Manager extends Component
             'meda' => false,
             'infant' => false,
             'infant_name' => '',
-        ]
+        ],
     ];
 
     public $selectedPassenger = null;
@@ -78,19 +78,19 @@ class Manager extends Component
     {
         $this->flight = $flight->load([
             'passengers.seat',
-            'aircraft.type.cabinZones.seats'
+            'aircraft.type.cabinZones.seats',
         ])->loadCount([
-                    'passengers',
-                    'passengers as accepted_count' => function ($query) {
-                        $query->where('acceptance_status', 'accepted');
-                    },
-                    'passengers as standby_count' => function ($query) {
-                        $query->where('acceptance_status', 'standby');
-                    },
-                    'passengers as offloaded_count' => function ($query) {
-                        $query->where('acceptance_status', 'offloaded');
-                    }
-                ]);
+            'passengers',
+            'passengers as accepted_count' => function ($query) {
+                $query->where('acceptance_status', 'accepted');
+            },
+            'passengers as standby_count' => function ($query) {
+                $query->where('acceptance_status', 'standby');
+            },
+            'passengers as offloaded_count' => function ($query) {
+                $query->where('acceptance_status', 'offloaded');
+            },
+        ]);
     }
 
     public function loadSeats()
@@ -104,15 +104,15 @@ class Manager extends Component
                             ->withCount([
                                 'passenger as is_occupied' => function ($query) {
                                     $query->where('flight_id', $this->flight->id);
-                                }
+                                },
                             ])
                             ->withExists([
                                 'flights as is_blocked' => function ($query) {
                                     $query->where('flights.id', $this->flight->id)
                                         ->where('flight_seats.is_blocked', true);
-                                }
+                                },
                             ]);
-                    }
+                    },
                 ])
                 ->get();
         }
@@ -167,7 +167,7 @@ class Manager extends Component
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: ucfirst($status) . ' passenger successfully.'
+            message: ucfirst($status).' passenger successfully.'
         );
         $this->dispatch('passenger-saved');
     }
@@ -178,7 +178,7 @@ class Manager extends Component
         for ($i = 0; $i < $this->pieces; $i++) {
             $this->editingPassenger->baggage()->create([
                 'flight_id' => $this->editingPassenger->flight->id,
-                'tag_number' => $this->editingPassenger->flight->airline->iata_code . str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
+                'tag_number' => $this->editingPassenger->flight->airline->iata_code.str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
                 'weight' => $this->weight / $this->pieces,
             ]);
         }
@@ -218,24 +218,27 @@ class Manager extends Component
 
     public function assignSeat()
     {
-        if (!$this->editingPassenger) {
+        if (! $this->editingPassenger) {
             $this->dispatch('alert', icon: 'error', message: 'No passenger selected.');
+
             return;
         }
 
-        if (!$this->selectedSeat) {
+        if (! $this->selectedSeat) {
             $this->dispatch('alert', icon: 'error', message: 'Please select a seat.');
+
             return;
         }
 
         $seat = Seat::findOrFail($this->selectedSeat);
 
-        if (!$seat->isAvailable($this->flight)) {
+        if (! $seat->isAvailable($this->flight)) {
             $this->dispatch('alert', icon: 'error', message: 'This seat is not available.');
+
             return;
         }
 
-        if (!$this->flight->seats()->where('seat_id', $seat->id)->exists()) {
+        if (! $this->flight->seats()->where('seat_id', $seat->id)->exists()) {
             $this->flight->seats()->attach($seat->id, [
                 'is_blocked' => false,
                 'created_at' => now(),
@@ -245,7 +248,7 @@ class Manager extends Component
 
         $passenger = Passenger::findOrFail($this->editingPassenger['id']);
         $passenger->update([
-            'seat_id' => $seat->id
+            'seat_id' => $seat->id,
         ]);
 
         $this->reset(['seatForm', 'selectedSeat']);
@@ -265,7 +268,7 @@ class Manager extends Component
 
     public function blockSeat($seatId)
     {
-        if (!$this->flight->seats()->where('seat_id', $seatId)->exists()) {
+        if (! $this->flight->seats()->where('seat_id', $seatId)->exists()) {
             $this->flight->seats()->attach($seatId, [
                 'is_blocked' => true,
                 'blocked_reason' => 'Blocked by staff',
@@ -297,26 +300,28 @@ class Manager extends Component
     public function toggleSeatBlock($seatId)
     {
         $seat = Seat::find($seatId);
-        if (!$seat) {
+        if (! $seat) {
             $this->dispatch('alert', icon: 'error', message: 'Seat not found');
+
             return;
         }
 
         if ($seat->passenger()->where('flight_id', $this->flight->id)->exists()) {
             $this->dispatch('alert', icon: 'error', message: 'Cannot block an occupied seat');
+
             return;
         }
 
         $flightSeat = $this->flight->seats()->wherePivot('seat_id', $seatId)->first();
 
-        if (!$flightSeat) {
+        if (! $flightSeat) {
             $this->flight->seats()->attach($seatId, ['is_blocked' => true, 'blocked_reason' => 'Blocked by staff']);
             $isBlocked = true;
         } else {
-            $isBlocked = !$flightSeat->pivot->is_blocked;
+            $isBlocked = ! $flightSeat->pivot->is_blocked;
             $this->flight->seats()->updateExistingPivot($seatId, [
                 'is_blocked' => $isBlocked,
-                'blocked_reason' => $isBlocked ? 'Blocked by staff' : null
+                'blocked_reason' => $isBlocked ? 'Blocked by staff' : null,
             ]);
         }
 
@@ -326,7 +331,6 @@ class Manager extends Component
             message: $isBlocked ? 'Seat blocked successfully' : 'Seat unblocked successfully'
         );
     }
-
 
     #[On('passenger-saved')]
     public function render()

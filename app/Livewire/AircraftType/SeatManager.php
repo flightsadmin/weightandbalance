@@ -46,7 +46,7 @@ class SeatManager extends Component
                     'cabin_zone_id' => $this->bulkForm['cabin_zone_id'],
                     'row' => $row,
                     'column' => $column,
-                    'designation' => $row . $column,
+                    'designation' => $row.$column,
                     'type' => $this->bulkForm['type'],
                 ]);
             }

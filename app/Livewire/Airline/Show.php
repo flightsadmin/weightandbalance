@@ -63,7 +63,7 @@ class Show extends Component
         $this->airline = $airline->load([
             'settings',
             'aircraft.type',
-            'flights' => fn($q) => $q->latest('scheduled_departure_time')->take(5),
+            'flights' => fn ($q) => $q->latest('scheduled_departure_time')->take(5),
         ]);
     }
 
@@ -127,7 +127,7 @@ class Show extends Component
 
     public function toggleStatus()
     {
-        $this->airline->active = !$this->airline->active;
+        $this->airline->active = ! $this->airline->active;
         $this->airline->save();
 
         $this->dispatch('alert', icon: 'success', message: 'Airline status updated successfully.');

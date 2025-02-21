@@ -24,7 +24,7 @@ class LoadplanManager extends Component
     {
         $this->flight = $flight->load([
             'aircraft.type.holds.positions',
-            'containers' => fn($q) => $q->withPivot(['type', 'pieces', 'status', 'position_id']),
+            'containers' => fn ($q) => $q->withPivot(['type', 'pieces', 'status', 'position_id']),
         ]);
         $this->loadplan = $flight->loadplans()->latest()->first()
             ?? $flight->loadplans()->create([
@@ -43,7 +43,7 @@ class LoadplanManager extends Component
             ->withPivot(['type', 'pieces', 'status', 'position_id'])
             ->find($containerId);
 
-        if (!$container) {
+        if (! $container) {
             return;
         }
 
@@ -61,7 +61,7 @@ class LoadplanManager extends Component
                 ->first()?->positions->first();
         }
 
-        if (!$fromPosition && isset($this->containerPositions[$containerId])) {
+        if (! $fromPosition && isset($this->containerPositions[$containerId])) {
             $fromPosition = $this->containerPositions[$containerId]['position_id'];
         }
 
@@ -100,7 +100,7 @@ class LoadplanManager extends Component
     public function releaseLoadplan()
     {
         $overweightHolds = $this->flight->aircraft->type->holds
-            ->filter(fn($hold) => $hold->isOverweight(
+            ->filter(fn ($hold) => $hold->isOverweight(
                 $hold->getCurrentWeight($this->containerPositions, $this->flight->containers)
             ));
 

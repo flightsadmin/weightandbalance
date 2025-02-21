@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Seat extends Model
@@ -68,8 +67,8 @@ class Seat extends Model
 
     public function isAvailable($flight)
     {
-        return !$this->passenger($flight->id)->exists() &&
-            !$this->flights()
+        return ! $this->passenger($flight->id)->exists() &&
+            ! $this->flights()
                 ->where('flights.id', $flight->id)
                 ->where('flight_seats.is_blocked', true)
                 ->exists();

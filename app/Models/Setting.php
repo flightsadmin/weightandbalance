@@ -17,7 +17,7 @@ class Setting extends Model
         'description',
         'airline_id',
         'settingable_type',
-        'settingable_id'
+        'settingable_id',
     ];
 
     protected $casts = [
@@ -37,6 +37,7 @@ class Setting extends Model
     public static function get(string $key, $default = null)
     {
         $setting = static::where('key', $key)->first();
+
         return $setting ? $setting->value : $default;
     }
 

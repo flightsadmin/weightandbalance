@@ -8,12 +8,19 @@ use Livewire\Component;
 class CrewSettings extends Component
 {
     public AircraftType $aircraftType;
+
     public $settings;
+
     public $showSeatingModal = false;
+
     public $showDistributionModal = false;
+
     public $isEditing = false;
+
     public $selectedPosition = null;
+
     public $distribution = [];
+
     public $distributions = [];
 
     public $seatingForm = [
@@ -21,11 +28,11 @@ class CrewSettings extends Component
         'index_per_kg' => 0,
         'arm_length' => 0,
         'max_crew' => 1,
-        'is_deck_crew' => false
+        'is_deck_crew' => false,
     ];
 
     public $distributionForm = [
-        'distribution' => []
+        'distribution' => [],
     ];
 
     public function mount(AircraftType $aircraftType)
@@ -44,7 +51,7 @@ class CrewSettings extends Component
             'index_per_kg' => 0,
             'arm_length' => 0,
             'max_crew' => 1,
-            'is_deck_crew' => false
+            'is_deck_crew' => false,
         ];
         $this->showSeatingModal = true;
     }
@@ -58,7 +65,7 @@ class CrewSettings extends Component
             'index_per_kg' => $this->settings['seating'][$position]['index_per_kg'],
             'arm_length' => $this->settings['seating'][$position]['arm_length'],
             'max_crew' => $this->settings['seating'][$position]['max_crew'],
-            'is_deck_crew' => $this->settings['seating'][$position]['is_deck_crew'] ?? false
+            'is_deck_crew' => $this->settings['seating'][$position]['is_deck_crew'] ?? false,
         ];
         $this->showSeatingModal = true;
     }
@@ -73,9 +80,9 @@ class CrewSettings extends Component
     public function loadDistributions()
     {
         $this->distributions = collect(range(1, max(5, max(array_keys($this->settings['distributions'] ?? [])))))
-            ->mapWithKeys(fn($count) => [
+            ->mapWithKeys(fn ($count) => [
                 $count => $this->settings['distributions'][$count] ??
-                    array_fill(0, $this->getCabinCrewPositionsCount(), 0)
+                    array_fill(0, $this->getCabinCrewPositionsCount(), 0),
             ])
             ->toArray();
     }
@@ -83,9 +90,9 @@ class CrewSettings extends Component
     public function showDistributionModal()
     {
         $this->distributions = collect(range(1, max(5, max(array_keys($this->settings['distributions'] ?? [])))))
-            ->mapWithKeys(fn($count) => [
+            ->mapWithKeys(fn ($count) => [
                 $count => $this->settings['distributions'][$count] ??
-                    array_fill(0, $this->getCabinCrewPositionsCount(), 0)
+                    array_fill(0, $this->getCabinCrewPositionsCount(), 0),
             ])
             ->toArray();
 
@@ -112,7 +119,7 @@ class CrewSettings extends Component
     public function saveDistributions()
     {
         $this->validate([
-            'distributions.*.*' => 'required|integer|min:0'
+            'distributions.*.*' => 'required|integer|min:0',
         ]);
 
         $settings = $this->settings;
@@ -131,7 +138,7 @@ class CrewSettings extends Component
             'seatingForm.index_per_kg' => 'required|numeric',
             'seatingForm.arm_length' => 'required|numeric',
             'seatingForm.max_crew' => 'required|integer|min:1',
-            'seatingForm.is_deck_crew' => 'boolean'
+            'seatingForm.is_deck_crew' => 'boolean',
         ]);
 
         $settings = $this->settings;
@@ -144,7 +151,7 @@ class CrewSettings extends Component
             'index_per_kg' => (float) $this->seatingForm['index_per_kg'],
             'arm_length' => (float) $this->seatingForm['arm_length'],
             'max_crew' => (int) $this->seatingForm['max_crew'],
-            'is_deck_crew' => (bool) $this->seatingForm['is_deck_crew']
+            'is_deck_crew' => (bool) $this->seatingForm['is_deck_crew'],
         ];
 
         $this->updateSettings($settings);
@@ -159,21 +166,21 @@ class CrewSettings extends Component
         $this->updateSettings($settings);
         $this->dispatch('alert', [
             'icon' => 'success',
-            'message' => 'Crew position deleted successfully'
+            'message' => 'Crew position deleted successfully',
         ]);
     }
 
     protected function getCabinCrewPositionsCount()
     {
         return collect($this->settings['seating'])
-            ->filter(fn($config) => !($config['is_deck_crew'] ?? false))
+            ->filter(fn ($config) => ! ($config['is_deck_crew'] ?? false))
             ->count();
     }
 
     protected function getCabinCrewPositions()
     {
         return collect($this->settings['seating'])
-            ->filter(fn($config) => !($config['is_deck_crew'] ?? false));
+            ->filter(fn ($config) => ! ($config['is_deck_crew'] ?? false));
     }
 
     protected function updateSettings($settings)
@@ -181,12 +188,12 @@ class CrewSettings extends Component
         $this->aircraftType->settings()->updateOrCreate(
             [
                 'key' => 'crew_settings',
-                'airline_id' => $this->aircraftType->airline_id
+                'airline_id' => $this->aircraftType->airline_id,
             ],
             [
                 'value' => json_encode($settings),
                 'type' => 'json',
-                'description' => 'Aircraft Type Crew Configurations'
+                'description' => 'Aircraft Type Crew Configurations',
             ]
         );
 
@@ -196,7 +203,7 @@ class CrewSettings extends Component
     public function render()
     {
         return view('livewire.aircraft_type.crew-settings', [
-            'cabinCrewPositions' => $this->getCabinCrewPositions()
+            'cabinCrewPositions' => $this->getCabinCrewPositions(),
         ]);
     }
 }

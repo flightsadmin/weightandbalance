@@ -3,8 +3,8 @@
 namespace App\Livewire\Flight;
 
 use App\Models\Flight;
-use Livewire\Component;
 use Livewire\Attributes\Url;
+use Livewire\Component;
 use Livewire\WithPagination;
 
 class BoardingControl extends Component
@@ -46,11 +46,10 @@ class BoardingControl extends Component
                 ->where('boarding_status', '!=', 'boarded')
                 ->when(
                     $this->search,
-                    fn($q) =>
-                    $q->whereAny(['name', 'ticket_number'], 'like', "%{$this->search}%")
+                    fn ($q) => $q->whereAny(['name', 'ticket_number'], 'like', "%{$this->search}%")
                 )
                 ->pluck('id')
-                ->map(fn($id) => (string) $id)
+                ->map(fn ($id) => (string) $id)
                 ->toArray();
         } else {
             $this->selectedPassengers = [];
@@ -65,13 +64,14 @@ class BoardingControl extends Component
     public function boardBySeat()
     {
         $passenger = $this->flight->passengers()
-            ->whereHas('seat', fn($q) => $q->where('designation', strtoupper($this->seatNumber)))
+            ->whereHas('seat', fn ($q) => $q->where('designation', strtoupper($this->seatNumber)))
             ->where('acceptance_status', 'accepted')
             ->where('boarding_status', '!=', 'boarded')
             ->first();
 
-        if (!$passenger) {
-            $this->dispatch('alert', icon: 'error', message: 'No accepted passenger found for seat ' . $this->seatNumber);
+        if (! $passenger) {
+            $this->dispatch('alert', icon: 'error', message: 'No accepted passenger found for seat '.$this->seatNumber);
+
             return;
         }
 
@@ -89,7 +89,7 @@ class BoardingControl extends Component
 
         $this->selectedPassengers = [];
         $this->selectAll = false;
-        $this->dispatch('alert', icon: 'success', message: $count . ' passengers boarded successfully');
+        $this->dispatch('alert', icon: 'success', message: $count.' passengers boarded successfully');
         $this->dispatch('boarding-updated');
     }
 
@@ -118,8 +118,7 @@ class BoardingControl extends Component
         if ($this->tab === 'list') {
             $query->when(
                 $this->search,
-                fn($q) =>
-                $q->whereAny(['name', 'ticket_number'], 'like', "%{$this->search}%")
+                fn ($q) => $q->whereAny(['name', 'ticket_number'], 'like', "%{$this->search}%")
             );
         }
 

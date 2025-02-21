@@ -60,7 +60,7 @@ class AircraftType extends Model
     {
         return $this->holds
             ->where('is_active', true)
-            ->flatMap(fn($hold) => $hold->getPositions())
+            ->flatMap(fn ($hold) => $hold->getPositions())
             ->values();
     }
 
@@ -116,7 +116,7 @@ class AircraftType extends Model
             'name' => '-',
             'code' => $pantryCode,
             'weight' => 0,
-            'index' => 0
+            'index' => 0,
         ];
     }
 
@@ -134,7 +134,7 @@ class AircraftType extends Model
     {
         $envelope = $this->envelopes()->where('name', 'FUEL')->first();
 
-        if (!$envelope || !$envelope->points) {
+        if (! $envelope || ! $envelope->points) {
             return 0;
         }
 
@@ -177,7 +177,7 @@ class AircraftType extends Model
             'c_constant' => 1000,
             'length_of_mac' => 4.194,
             'lemac_at' => 17.8015,
-            'ref_sta_at' => 18.850
+            'ref_sta_at' => 18.850,
         ]);
 
         return $macSettings;
@@ -222,11 +222,11 @@ class AircraftType extends Model
 
         // Get cabin crew distribution for the given count
         $distribution = $settings['distributions'][$cabinCrewCount] ?? null;
-        if (!$distribution) {
+        if (! $distribution) {
             return [
                 'index' => $deckCrewIndex,
                 'weight' => $deckCrewWeight,
-                'error' => "No distribution found for {$cabinCrewCount} cabin crew"
+                'error' => "No distribution found for {$cabinCrewCount} cabin crew",
             ];
         }
 
@@ -245,12 +245,12 @@ class AircraftType extends Model
             'weight' => $deckCrewWeight + $cabinCrewWeight,
             'deck_crew' => [
                 'index' => $deckCrewIndex,
-                'weight' => $deckCrewWeight
+                'weight' => $deckCrewWeight,
             ],
             'cabin_crew' => [
                 'index' => $cabinCrewIndex,
-                'weight' => $cabinCrewWeight
-            ]
+                'weight' => $cabinCrewWeight,
+            ],
         ];
     }
 }

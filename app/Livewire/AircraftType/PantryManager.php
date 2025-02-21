@@ -17,7 +17,7 @@ class PantryManager extends Component
         'code' => '',
         'name' => '',
         'weight' => '',
-        'index' => ''
+        'index' => '',
     ];
 
     public function savePantry()
@@ -26,7 +26,7 @@ class PantryManager extends Component
             'pantryForm.code' => 'required|string|max:10',
             'pantryForm.name' => 'required|string|max:255',
             'pantryForm.weight' => 'required|numeric|min:0',
-            'pantryForm.index' => 'required|numeric'
+            'pantryForm.index' => 'required|numeric',
         ]);
 
         $pantries = $this->aircraftType->getSetting('pantries', []);
@@ -36,18 +36,18 @@ class PantryManager extends Component
             'name' => $this->pantryForm['name'],
             'code' => $code,
             'weight' => (float) $this->pantryForm['weight'],
-            'index' => (float) $this->pantryForm['index']
+            'index' => (float) $this->pantryForm['index'],
         ];
 
         $this->aircraftType->settings()->updateOrCreate(
             [
                 'key' => 'pantries',
-                'airline_id' => $this->aircraftType->airline_id
+                'airline_id' => $this->aircraftType->airline_id,
             ],
             [
                 'value' => json_encode($pantries),
                 'type' => 'json',
-                'description' => 'Aircraft Type Pantry Configurations'
+                'description' => 'Aircraft Type Pantry Configurations',
             ]
         );
 
@@ -72,12 +72,12 @@ class PantryManager extends Component
         $this->aircraftType->settings()->updateOrCreate(
             [
                 'key' => 'pantries',
-                'airline_id' => $this->aircraftType->airline_id
+                'airline_id' => $this->aircraftType->airline_id,
             ],
             [
                 'value' => json_encode($pantries),
                 'type' => 'json',
-                'description' => 'Aircraft Type Pantry Configurations'
+                'description' => 'Aircraft Type Pantry Configurations',
             ]
         );
 
@@ -87,7 +87,7 @@ class PantryManager extends Component
     public function render()
     {
         return view('livewire.aircraft_type.pantry-manager', [
-            'pantries' => $this->aircraftType->getAllPantries()
+            'pantries' => $this->aircraftType->getAllPantries(),
         ]);
     }
 }

@@ -68,12 +68,14 @@ class Hold extends Model
     public function isPositionOverweight($position, $weight)
     {
         $positionData = $this->positions->firstWhere('code', $position);
+
         return $positionData && $weight > $positionData['max_weight'];
     }
 
     public function getPositionMaxWeight($position)
     {
         $positionData = $this->positions->firstWhere('code', $position);
+
         return $positionData ? $positionData['max_weight'] : 0;
     }
 }

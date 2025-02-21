@@ -12,7 +12,7 @@ class AircraftConfigSeeder extends Seeder
 {
     public function run(): void
     {
-        $aircraftType = AircraftType::with(['aircraft.flights.passengers', 'cabinZones', 'seats',])->inRandomOrder()->first();
+        $aircraftType = AircraftType::with(['aircraft.flights.passengers', 'cabinZones', 'seats'])->inRandomOrder()->first();
         $airline = Airline::inRandomOrder()->first();
 
         $macSettings = [
@@ -20,7 +20,7 @@ class AircraftConfigSeeder extends Seeder
             'c_constant' => 1000,
             'length_of_mac' => 4.194,
             'lemac_at' => 17.8015,
-            'ref_sta_at' => 18.850
+            'ref_sta_at' => 18.850,
         ];
 
         $aircraftType->settings()->updateOrCreate(
@@ -28,7 +28,7 @@ class AircraftConfigSeeder extends Seeder
             [
                 'value' => json_encode($macSettings),
                 'type' => 'json',
-                'description' => 'MAC Calculation Settings'
+                'description' => 'MAC Calculation Settings',
             ]
         );
 
@@ -68,7 +68,7 @@ class AircraftConfigSeeder extends Seeder
                 'enable_sms_notifications' => false,
                 'notification_email' => '',
                 'notification_phone' => '',
-            ]
+            ],
         ];
 
         $airline->settings()->updateOrCreate(
@@ -109,7 +109,7 @@ class AircraftConfigSeeder extends Seeder
                         'cabin_zone_id' => $zone->id,
                         'row' => $actualRow,
                         'column' => $column,
-                        'designation' => $actualRow . $column,
+                        'designation' => $actualRow.$column,
                         'type' => 'economy',
                         'is_exit' => in_array($actualRow, [5, 13]),
                         'created_at' => now(),
@@ -128,7 +128,7 @@ class AircraftConfigSeeder extends Seeder
                     ->get();
 
                 foreach ($exitRowSeats as $seat) {
-                    if (!$flight->seats()->where('seat_id', $seat->id)->exists()) {
+                    if (! $flight->seats()->where('seat_id', $seat->id)->exists()) {
                         $flight->seats()->attach($seat->id, [
                             'is_blocked' => true,
                             'blocked_reason' => 'Exit Row',
@@ -153,7 +153,7 @@ class AircraftConfigSeeder extends Seeder
                     $seatId = $availableSeats[$randomIndex];
                     unset($availableSeats[$randomIndex]);
 
-                    if (!$flight->seats()->where('seat_id', $seatId)->exists()) {
+                    if (! $flight->seats()->where('seat_id', $seatId)->exists()) {
                         $flight->seats()->attach($seatId, [
                             'is_blocked' => false,
                             'created_at' => now(),

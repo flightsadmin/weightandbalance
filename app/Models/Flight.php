@@ -156,6 +156,7 @@ class Flight extends Model
         }
 
         $setting = $this->airline->settings()->where('key', $key)->first();
+
         return $setting ? $setting->typed_value : $default;
     }
 }

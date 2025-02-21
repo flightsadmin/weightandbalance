@@ -69,18 +69,21 @@ class Airline extends Model
     public function getStandardCockpitCrewWeight(): int
     {
         $settings = $this->getSettings('general');
+
         return (int) ($settings['standard_cockpit_crew_weight'] ?? 85);
     }
 
     public function getStandardCabinCrewWeight(): int
     {
         $settings = $this->getSettings('general');
+
         return (int) ($settings['standard_cabin_crew_weight'] ?? 75);
     }
 
     public function getStandardPantryWeight(): int
     {
         $settings = $this->getSettings('general');
+
         return (int) ($settings['standard_pantry_weight'] ?? 250);
     }
 
@@ -101,7 +104,7 @@ class Airline extends Model
             [
                 'value' => json_encode($settings),
                 'type' => 'json',
-                'description' => 'Airline Configuration Settings'
+                'description' => 'Airline Configuration Settings',
             ]
         );
     }
@@ -109,6 +112,7 @@ class Airline extends Model
     public function getSetting($key, $default = null)
     {
         $setting = $this->settings()->where('key', $key)->first();
+
         return $setting ? $setting->typed_value : $default;
     }
 }

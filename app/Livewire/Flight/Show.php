@@ -20,28 +20,28 @@ class Show extends Component
             'passengers',
             'baggage',
             'cargo',
-            'fuel'
+            'fuel',
         ])->loadCount([
-                    'baggage',
-                    'cargo',
-                    'passengers',
-                    'crew',
-                    'passengers as boarded_count' => function ($query) {
-                        $query->where('boarding_status', 'boarded');
-                    },
-                    'passengers as unboarded_count' => function ($query) {
-                        $query->where('boarding_status', 'unboarded');
-                    },
-                    'passengers as accepted_count' => function ($query) {
-                        $query->where('acceptance_status', 'accepted');
-                    },
-                    'passengers as standby_count' => function ($query) {
-                        $query->where('acceptance_status', 'standby');
-                    },
-                    'passengers as offloaded_count' => function ($query) {
-                        $query->where('acceptance_status', 'offloaded');
-                    }
-                ]);
+            'baggage',
+            'cargo',
+            'passengers',
+            'crew',
+            'passengers as boarded_count' => function ($query) {
+                $query->where('boarding_status', 'boarded');
+            },
+            'passengers as unboarded_count' => function ($query) {
+                $query->where('boarding_status', 'unboarded');
+            },
+            'passengers as accepted_count' => function ($query) {
+                $query->where('acceptance_status', 'accepted');
+            },
+            'passengers as standby_count' => function ($query) {
+                $query->where('acceptance_status', 'standby');
+            },
+            'passengers as offloaded_count' => function ($query) {
+                $query->where('acceptance_status', 'offloaded');
+            },
+        ]);
     }
 
     public function mount(Flight $flight)
@@ -69,7 +69,7 @@ class Show extends Component
         'baggage-saved' => 'refreshCounts',
         'cargo-saved' => 'refreshCounts',
         'crew-saved' => 'refreshCounts',
-        'boarding-updated' => 'refreshCounts'
+        'boarding-updated' => 'refreshCounts',
     ];
 
     public function refreshCounts()

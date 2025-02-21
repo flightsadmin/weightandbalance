@@ -33,14 +33,14 @@ class Settings extends Component
         $this->editingSetting = $key;
         $this->settingForm = [
             'key' => $key,
-            'value' => $macSettings[$key]
+            'value' => $macSettings[$key],
         ];
     }
 
     public function saveSetting()
     {
         $this->validate([
-            'settingForm.value' => 'required|numeric'
+            'settingForm.value' => 'required|numeric',
         ]);
 
         $macSettings = $this->aircraftType->getMacSettings();
@@ -49,12 +49,12 @@ class Settings extends Component
         $this->aircraftType->settings()->updateOrCreate(
             [
                 'key' => 'mac_settings',
-                'airline_id' => $this->aircraftType->airline_id
+                'airline_id' => $this->aircraftType->airline_id,
             ],
             [
                 'value' => json_encode($macSettings),
                 'type' => 'json',
-                'description' => 'MAC Calculation Settings'
+                'description' => 'MAC Calculation Settings',
             ]
         );
 
@@ -65,7 +65,7 @@ class Settings extends Component
     public function render()
     {
         return view('livewire.aircraft_type.settings', [
-            'macSettings' => $this->aircraftType->getMacSettings()
+            'macSettings' => $this->aircraftType->getMacSettings(),
         ]);
     }
 }

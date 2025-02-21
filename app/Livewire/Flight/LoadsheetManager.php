@@ -3,7 +3,6 @@
 namespace App\Livewire\Flight;
 
 use App\Models\Flight;
-use App\Models\Setting;
 use Livewire\Component;
 
 class LoadsheetManager extends Component
@@ -17,13 +16,14 @@ class LoadsheetManager extends Component
     public $showModal = false;
 
     public $paxDistribution = [];
+
     public $editingZone = null;
 
     public $zoneForm = [
         'male' => 0,
         'female' => 0,
         'child' => 0,
-        'infant' => 0
+        'infant' => 0,
     ];
 
     public function mount(Flight $flight)
@@ -54,6 +54,7 @@ class LoadsheetManager extends Component
 
         if ($manualDistribution) {
             $this->paxDistribution = $manualDistribution->typed_value;
+
             return;
         }
 
@@ -76,7 +77,7 @@ class LoadsheetManager extends Component
                 'female' => 0,
                 'child' => 0,
                 'infant' => 0,
-                'max_pax' => $zone->max_capacity
+                'max_pax' => $zone->max_capacity,
             ];
         }
     }
@@ -102,7 +103,7 @@ class LoadsheetManager extends Component
             'male' => $this->paxDistribution[$zoneName]['male'],
             'female' => $this->paxDistribution[$zoneName]['female'],
             'child' => $this->paxDistribution[$zoneName]['child'],
-            'infant' => $this->paxDistribution[$zoneName]['infant']
+            'infant' => $this->paxDistribution[$zoneName]['infant'],
         ];
     }
 
@@ -112,7 +113,7 @@ class LoadsheetManager extends Component
             'zoneForm.male' => 'required|integer|min:0',
             'zoneForm.female' => 'required|integer|min:0',
             'zoneForm.child' => 'required|integer|min:0',
-            'zoneForm.infant' => 'required|integer|min:0'
+            'zoneForm.infant' => 'required|integer|min:0',
         ]);
 
         $total = array_sum($this->zoneForm);
@@ -120,6 +121,7 @@ class LoadsheetManager extends Component
 
         if ($total - $this->zoneForm['infant'] > $maxPax) {
             $this->dispatch('alert', icon: 'error', message: "Total passengers exceeds zone capacity of {$maxPax}");
+
             return;
         }
 
@@ -132,12 +134,12 @@ class LoadsheetManager extends Component
         $this->flight->settings()->updateOrCreate(
             [
                 'key' => 'manual_pax_distribution',
-                'airline_id' => $this->flight->airline_id
+                'airline_id' => $this->flight->airline_id,
             ],
             [
                 'value' => json_encode($this->paxDistribution),
                 'type' => 'json',
-                'description' => 'Actual PAX distribution - ' . $this->flight->flight_number
+                'description' => 'Actual PAX distribution - '.$this->flight->flight_number,
             ]
         );
 
@@ -211,8 +213,9 @@ class LoadsheetManager extends Component
 
     private function calculatePantryIndex()
     {
-        if (!$this->flight->fuel?->pantry) {
+        if (! $this->flight->fuel?->pantry) {
             $this->dispatch('alert', icon: 'error', message: 'No pantry code found.');
+
             return;
         }
 
@@ -232,8 +235,9 @@ class LoadsheetManager extends Component
 
     public function finalizeLoadsheet()
     {
-        if (!$this->loadsheet) {
+        if (! $this->loadsheet) {
             $this->dispatch('alert', icon: 'error', message: 'No loadsheet found to finalize.');
+
             return;
         }
 
@@ -249,13 +253,15 @@ class LoadsheetManager extends Component
 
     public function revokeLoadsheet()
     {
-        if (!$this->loadsheet) {
+        if (! $this->loadsheet) {
             $this->dispatch('alert', icon: 'error', message: 'No loadsheet found to revoke.');
+
             return;
         }
 
-        if (!$this->loadsheet->final) {
+        if (! $this->loadsheet->final) {
             $this->dispatch('alert', icon: 'error', message: 'Only finalized loadsheets can be revoked.');
+
             return;
         }
 
@@ -286,7 +292,7 @@ class LoadsheetManager extends Component
                 'female' => 0,
                 'child' => 0,
                 'infant' => 0,
-                'max_pax' => $zone->max_capacity
+                'max_pax' => $zone->max_capacity,
             ];
         }
 
@@ -300,6 +306,7 @@ class LoadsheetManager extends Component
                 $distribution[$zoneName][$passenger->type]++;
             }
         }
+
         return $distribution;
     }
 
@@ -312,7 +319,7 @@ class LoadsheetManager extends Component
             'male' => ['count' => 0, 'weight' => 0],
             'female' => ['count' => 0, 'weight' => 0],
             'child' => ['count' => 0, 'weight' => 0],
-            'infant' => ['count' => 0, 'weight' => 0]
+            'infant' => ['count' => 0, 'weight' => 0],
         ];
 
         foreach ($paxDistribution as $zone) {
@@ -322,7 +329,7 @@ class LoadsheetManager extends Component
             }
         }
 
-        $orderedWeightsUsed = collect($pax)->mapWithKeys(fn($type) => [
+        $orderedWeightsUsed = collect($pax)->mapWithKeys(fn ($type) => [
             $type => $this->flight->airline->getStandardPassengerWeight($type),
         ])->toArray();
 
@@ -343,7 +350,7 @@ class LoadsheetManager extends Component
                         'weight' => $weight,
                         'index' => round($weight * $hold->index, 2),
                     ];
-                })->filter(fn($hold) => $hold['weight'] > 0)->values()->toArray(),
+                })->filter(fn ($hold) => $hold['weight'] > 0)->values()->toArray(),
             'deadload_by_type' => [
                 'C' => [
                     'pieces' => $this->flight->cargo->where('status', 'loaded')->whereNotNull('container_id')->sum('pieces'),
@@ -378,7 +385,7 @@ class LoadsheetManager extends Component
                     ];
                 })->values()->toArray();
 
-                return [strtolower($envelope->name) . 'Envelope' => $points];
+                return [strtolower($envelope->name).'Envelope' => $points];
             })
             ->toArray();
 
@@ -387,13 +394,15 @@ class LoadsheetManager extends Component
 
     public function generateLoadsheet()
     {
-        if (!$this->flight->fuel) {
+        if (! $this->flight->fuel) {
             $this->dispatch('alert', icon: 'error', message: 'Fuel data must be added before generating loadsheet.');
+
             return;
         }
 
-        if (!$this->loadplan || $this->loadplan->status !== 'released') {
+        if (! $this->loadplan || $this->loadplan->status !== 'released') {
             $this->dispatch('alert', icon: 'error', message: 'Load plan must be released before generating loadsheet.');
+
             return;
         }
 
@@ -414,10 +423,11 @@ class LoadsheetManager extends Component
                 ],
                 'indices' => $this->calculateIndices(),
             ],
-            'status' => 'draft'
+            'status' => 'draft',
         ]);
 
         $this->dispatch('alert', icon: 'success', message: 'Loadsheet generated successfully.');
+
         return redirect()->route('flights.show', $this->flight->id);
     }
 
@@ -429,7 +439,7 @@ class LoadsheetManager extends Component
             'short_flight_date' => $this->flight->scheduled_departure_time?->format('d'),
             'registration' => $this->flight->aircraft->registration_number,
             'destination' => $this->flight->arrival_airport,
-            'sector' => $this->flight->departure_airport . '/' . $this->flight->arrival_airport,
+            'sector' => $this->flight->departure_airport.'/'.$this->flight->arrival_airport,
             'version' => $this->flight->aircraft->type->code,
             'release_time' => now('Asia/Qatar')->format('Hi'),
             'underload' => $this->calculateUnderload(),
@@ -482,8 +492,9 @@ class LoadsheetManager extends Component
     public function calculateCrewIndexes()
     {
         $crewConfig = $this->flight->fuel->crew;
-        if (!$crewConfig) {
+        if (! $crewConfig) {
             $this->dispatch('alert', icon: 'error', message: 'No crew configuration found.');
+
             return ['index' => 0, 'weight' => 0];
         }
         [$deckCrew, $cabinCrew] = explode('/', $crewConfig);
@@ -494,11 +505,13 @@ class LoadsheetManager extends Component
 
         if (isset($crewCalculation['error'])) {
             $this->dispatch('alert', icon: 'error', message: $crewCalculation['error']);
+
             return;
         }
+
         return [
             'index' => $crewCalculation['index'],
-            'weight' => $crewCalculation['weight']
+            'weight' => $crewCalculation['weight'],
         ];
     }
 

@@ -31,7 +31,7 @@ class Passenger extends Model
 
     protected $attributes = [
         'attributes' => '{"wchr": false, "wchs": false, "wchc": false, "exst": false, "stcr": false, "deaf": false, "blind": false, "dpna": false, "meda": false, "infant": false
-        }'
+        }',
     ];
 
     public function flight(): BelongsTo
