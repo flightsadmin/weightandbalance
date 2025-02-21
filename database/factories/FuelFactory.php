@@ -21,7 +21,7 @@ class FuelFactory extends Factory
     public function definition(): array
     {
         $crew = fake()->randomElement(['2/4', '2/5', '3/4', '3/5']);
-        $pantry = fake()->randomElement(['A', 'B', 'Empty']);
+        $pantry = fake()->randomElement(['A', 'E', 'EMPTY']);
         $blockFuel = fake()->numberBetween(10000, 20000);
         $taxiFuel = fake()->numberBetween(200, 400);
         $tripFuel = $blockFuel - $taxiFuel / 0.4;

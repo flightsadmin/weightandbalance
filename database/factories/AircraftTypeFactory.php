@@ -28,8 +28,8 @@ class AircraftTypeFactory extends Factory
             'mzfw' => 64300,
             'mlw' => 67400,
             'empty' => 42600,
-            'cargo' => 16600,
-            'fuel' => 24210,
+            'cargo' => 14600,
+            'fuel' => 18900,
             'category' => 'Narrow-body',
         ];
 

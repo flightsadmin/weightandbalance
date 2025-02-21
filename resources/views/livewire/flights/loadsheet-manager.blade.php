@@ -29,7 +29,7 @@
                 @if ($loadsheet)
                     <div class="card-body p-2">
                         @php
-                            $distribution = $loadsheet->payload_distribution;
+                            $distribution = $loadsheet->distribution;
                             $pax = $distribution['load_data'];
                             $totalPax = array_sum(
                                 array_column(

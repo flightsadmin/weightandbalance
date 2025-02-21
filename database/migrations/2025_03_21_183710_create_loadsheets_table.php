@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('loadsheets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('flight_id')->constrained()->cascadeOnDelete();
-            $table->json('payload_distribution');
+            $table->json('distribution');
             $table->integer('edition')->default(1);
             $table->boolean('final')->default(false);
             $table->enum('status', ['draft', 'released', 'revoked'])->default('draft');

@@ -58,8 +58,8 @@ class LoadsheetManager extends Component
         }
 
         // Fallback to loadsheet or actual passenger data
-        if ($this->loadsheet && isset($this->loadsheet->payload_distribution['load_data']['pax_by_zone'])) {
-            $this->paxDistribution = $this->loadsheet->payload_distribution['load_data']['pax_by_zone'];
+        if ($this->loadsheet && isset($this->loadsheet->distribution['load_data']['pax_by_zone'])) {
+            $this->paxDistribution = $this->loadsheet->distribution['load_data']['pax_by_zone'];
         } else {
             $this->initializeEmptyDistribution();
             $this->updatePaxDistributionFromPassengers();
@@ -142,9 +142,9 @@ class LoadsheetManager extends Component
         );
 
         if ($this->loadsheet) {
-            $distribution = $this->loadsheet->payload_distribution;
+            $distribution = $this->loadsheet->distribution;
             $distribution['load_data']['pax_by_zone'] = $this->paxDistribution;
-            $this->loadsheet->update(['payload_distribution' => $distribution]);
+            $this->loadsheet->update(['distribution' => $distribution]);
         }
 
         $this->editingZone = null;
@@ -162,9 +162,9 @@ class LoadsheetManager extends Component
 
         // Update loadsheet if exists
         if ($this->loadsheet) {
-            $distribution = $this->loadsheet->payload_distribution;
+            $distribution = $this->loadsheet->distribution;
             $distribution['load_data']['pax_by_zone'] = $this->paxDistribution;
-            $this->loadsheet->update(['payload_distribution' => $distribution]);
+            $this->loadsheet->update(['distribution' => $distribution]);
         }
 
         $this->dispatch('alert', icon: 'success', message: 'Distribution reset to actual passenger data.');
@@ -401,7 +401,7 @@ class LoadsheetManager extends Component
 
         $this->loadsheet = $this->flight->loadsheets()->create([
             'version' => ($this->loadsheet?->version ?? 0) + 1,
-            'payload_distribution' => [
+            'distribution' => [
                 'load_data' => $loadData,
                 'trim_data' => $this->generateTrimData(),
                 'flight' => $this->generateFlightData(),

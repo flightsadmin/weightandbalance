@@ -9,7 +9,7 @@ class Loadsheet extends Model
 {
     protected $fillable = [
         'flight_id',
-        'payload_distribution',
+        'distribution',
         'edition',
         'final',
         'status',
@@ -19,7 +19,7 @@ class Loadsheet extends Model
     ];
 
     protected $casts = [
-        'payload_distribution' => 'array',
+        'distribution' => 'array',
         'final' => 'boolean',
         'released_at' => 'datetime',
     ];
