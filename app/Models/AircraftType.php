@@ -198,43 +198,78 @@ class AircraftType extends Model
         return $this->calculateMac($weight, $index);
     }
 
-    public function getCrewIndex($deckCrewCount, $cabinCrewCount, $deckCrewWeight, $cabinCrewWeight)
+    public function getCrewSettings()
     {
-        $deckCrewSeating = $this->crewSeating()->where('position', 'deck_crew')->first();
+        return $this->getSetting('crew_settings', [
+            'seating' => [
+                'deck_crew' => [
+                    'name' => 'Flight Deck',
+                    'index_per_kg' => 0.00324,
+                    'max_crew' => 2,
+                    'is_deck_crew' => true
+                ],
+                'cabin_crew_1' => [
+                    'name' => 'Forward Cabin',
+                    'index_per_kg' => 0.00324,
+                    'max_crew' => 2,
+                    'is_deck_crew' => false
+                ],
+                'cabin_crew_2' => [
+                    'name' => 'Mid Cabin',
+                    'index_per_kg' => 0.00401,
+                    'max_crew' => 2,
+                    'is_deck_crew' => false
+                ],
+                'cabin_crew_3' => [
+                    'name' => 'Aft Cabin',
+                    'index_per_kg' => 0.01048,
+                    'max_crew' => 2,
+                    'is_deck_crew' => false
+                ]
+            ],
+            'distributions' => [
+                2 => [1, 1, 0],  // 2 cabin crew: 1 forward, 1 mid
+                3 => [1, 1, 1],  // 3 cabin crew: distributed evenly
+                4 => [2, 1, 1],  // 4 cabin crew: 2 forward, 1 mid, 1 aft
+                5 => [2, 2, 1],  // 5 cabin crew: 2 forward, 2 mid, 1 aft
+                6 => [3, 2, 1]   // 6 cabin crew: 3 forward, 2 mid, 1 aft
+            ]
+        ]);
+    }
 
-        $deckCrewIndex = $deckCrewCount * $deckCrewWeight * $deckCrewSeating->index_per_kg;
-
-        $distribution = $this->crewDistributions()->where('crew_count', $cabinCrewCount)->first();
-
-        if (!$distribution) {
-            return $deckCrewIndex;
+    public function getCrewIndexes($crewConfig)
+    {
+        if (!$crewConfig) {
+            return ['index' => 0, 'weight' => 0];
         }
 
+        [$deckCrew, $cabinCrew] = explode('/', $crewConfig);
+        $settings = $this->getCrewSettings();
+        $airline = $this->airline;
+
+        // Calculate deck crew index and weight
+        $deckCrewWeight = $deckCrew * $airline->getStandardCockpitCrewWeight();
+        $deckCrewIndex = $deckCrewWeight * $settings['seating']['deck_crew']['index_per_kg'];
+
+        // Get distribution for cabin crew count
+        $distribution = $settings['distributions'][$cabinCrew] ?? [];
+
+        // Calculate cabin crew index and weight
+        $cabinCrewWeight = 0;
         $cabinCrewIndex = 0;
-        $cabinSeating = $this->crewSeating()->where('position', 'cabin_crew')->get();
-        foreach ($distribution->distribution as $index => $crewCount) {
-            if ($crewCount > 0 && isset($cabinSeating[$index])) {
-                $seating = $cabinSeating[$index];
-                $locationIndex = $crewCount * $cabinCrewWeight * $seating->index_per_kg;
-                $cabinCrewIndex += $locationIndex;
+
+        foreach ($distribution as $position => $count) {
+            if ($count > 0) {
+                $seating = array_values($settings['seating'])[min($position + 1, count($settings['seating']) - 1)];
+                $weight = $count * $airline->getStandardCabinCrewWeight();
+                $cabinCrewWeight += $weight;
+                $cabinCrewIndex += $weight * $seating['index_per_kg'];
             }
         }
 
-        return $deckCrewIndex + $cabinCrewIndex;
-    }
-
-    public function getCrewIndexes($crewMembers)
-    {
-        $crewMembers = explode('/', $crewMembers);
-        $deckCrewCount = (int) $crewMembers[0];
-        $cabinCrewCount = (int) $crewMembers[1];
-
-        $deckCrewWeight = $this->getSetting('standard_cockpit_crew_weight', 85);
-        $cabinCrewWeight = $this->getSetting('standard_cabin_crew_weight', 75);
-
         return [
-            'index' => $this->getCrewIndex($deckCrewCount, $cabinCrewCount, $deckCrewWeight, $cabinCrewWeight),
-            'weight' => ($deckCrewCount * $deckCrewWeight) + ($cabinCrewCount * $cabinCrewWeight),
+            'index' => $deckCrewIndex + $cabinCrewIndex,
+            'weight' => $deckCrewWeight + $cabinCrewWeight
         ];
     }
 }
