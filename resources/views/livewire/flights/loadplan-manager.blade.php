@@ -156,7 +156,7 @@
                                                         <i
                                                             class="bi bi-{{ $container->pivot->type === 'baggage' ? 'luggage' : 'box' }}"></i>
                                                     </span>
-                                                    <div class="fw-bold">{{ number_format($container->pivot->weight) }} kg</div>
+                                                    <div class="fw-bold">{{ number_format($container->pivot->weight) }}kg</div>
                                                 </div>
                                             </div>
                                         </div>

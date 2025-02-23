@@ -25,10 +25,7 @@
                     <div class="container-number">{{ $containerData['container_number'] }}</div>
                     <div class="container-details">
                         <i class="bi bi-{{ $containerData['content_type'] === 'baggage' ? 'luggage' : 'box-seam' }}"></i>
-                        {{ number_format($containerData['weight']) }} kg
-                        @if ($containerData['pieces'])
-                            <small class="text-muted">({{ $containerData['pieces'] }} pcs)</small>
-                        @endif
+                        {{ number_format($containerData['weight']) }}kg
                     </div>
                 </div>
             </div>

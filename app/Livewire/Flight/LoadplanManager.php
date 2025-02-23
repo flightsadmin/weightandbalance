@@ -24,7 +24,7 @@ class LoadplanManager extends Component
     {
         $this->flight = $flight->load([
             'aircraft.type.holds.positions',
-            'containers' => fn ($q) => $q->withPivot(['type', 'pieces', 'status', 'position_id']),
+            'containers' => fn($q) => $q->withPivot(['type', 'pieces', 'status', 'position_id']),
         ]);
         $this->loadplan = $flight->loadplans()->latest()->first()
             ?? $flight->loadplans()->create([
@@ -38,12 +38,10 @@ class LoadplanManager extends Component
 
     public function updateContainerPosition($containerId, $fromPosition, $toPosition)
     {
-        // Load container with pivot data
-        $container = $this->flight->containers()
-            ->withPivot(['type', 'pieces', 'status', 'position_id'])
-            ->find($containerId);
+        $container = $this->flight->containers()->withPivot(['type', 'pieces', 'status', 'position_id'])->find($containerId);
 
-        if (! $container) {
+        if (!$container) {
+            $this->dispatch('alert', icon: 'error', message: 'Container not found');
             return;
         }
 
@@ -61,7 +59,7 @@ class LoadplanManager extends Component
                 ->first()?->positions->first();
         }
 
-        if (! $fromPosition && isset($this->containerPositions[$containerId])) {
+        if (!$fromPosition && isset($this->containerPositions[$containerId])) {
             $fromPosition = $this->containerPositions[$containerId]['position_id'];
         }
 
@@ -93,14 +91,13 @@ class LoadplanManager extends Component
             'loading' => $this->containerPositions,
             'last_modified_by' => auth()->id(),
         ]);
-
         $this->dispatch('containerMoved');
     }
 
     public function releaseLoadplan()
     {
         $overweightHolds = $this->flight->aircraft->type->holds
-            ->filter(fn ($hold) => $hold->isOverweight(
+            ->filter(fn($hold) => $hold->isOverweight(
                 $hold->getCurrentWeight($this->containerPositions, $this->flight->containers)
             ));
 

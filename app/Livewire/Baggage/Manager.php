@@ -126,13 +126,13 @@ class Manager extends Component
                 ->increment('weight', $weight);
         }
         // Case 2: Loading into a container (no previous container)
-        elseif (! $oldContainer && $containerId) {
+        elseif (!$oldContainer && $containerId) {
             Container::find($containerId)->flights()
                 ->where('flight_id', $this->flight->id)
                 ->increment('weight', $weight);
         }
         // Case 3: Offloading from a container (no new container)
-        elseif ($oldContainer && ! $containerId) {
+        elseif ($oldContainer && !$containerId) {
             $oldContainer->flights()->where('flight_id', $this->flight->id)
                 ->decrement('weight', $weight);
         }
@@ -149,7 +149,7 @@ class Manager extends Component
         if ($value) {
             $this->selected = $this->getBaggageQuery()
                 ->pluck('id')
-                ->map(fn ($id) => (string) $id)
+                ->map(fn($id) => (string) $id)
                 ->toArray();
         } else {
             $this->selected = [];
@@ -163,7 +163,7 @@ class Manager extends Component
 
     public function loadSelectedToContainer()
     {
-        if (empty($this->selected) || ! $this->bulkContainer) {
+        if (empty($this->selected) || !$this->bulkContainer) {
             return;
         }
 
@@ -186,23 +186,25 @@ class Manager extends Component
 
             // Case 1: Moving from one container to another
             if ($oldContainer) {
-                $oldContainer->flights()->where('flight_id', $this->flight->id)
-                    ->decrement('weight', $item->weight);
+                $oldContainer->flights()->where('flight_id', $this->flight->id)->decrement('weight', $item->weight);
+                $oldContainer->flights()->where('flight_id', $this->flight->id)->decrement('pieces', 1);
 
-                $newContainer->flights()->where('flight_id', $this->flight->id)
-                    ->increment('weight', $item->weight);
+                $newContainer->flights()->where('flight_id', $this->flight->id)->increment('weight', $item->weight);
+                $newContainer->flights()->where('flight_id', $this->flight->id)->increment('pieces', 1);
             }
             // Case 2: New loading (no previous container)
-            elseif (! $oldContainer) {
+            elseif (!$oldContainer) {
                 $newContainer->flights()->where('flight_id', $this->flight->id)
                     ->increment('weight', $item->weight);
+                $newContainer->flights()->where('flight_id', $this->flight->id)
+                    ->increment('pieces', 1);
             }
         }
 
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: count($this->selected).' baggage items loaded to container.'
+            message: count($this->selected) . ' baggage items loaded to container.'
         );
 
         $this->selected = [];
@@ -215,9 +217,9 @@ class Manager extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('tag_number', 'like', '%'.$this->search.'%')
+                $q->where('tag_number', 'like', '%' . $this->search . '%')
                     ->orWhereHas('passenger', function ($q) {
-                        $q->whereAny(['name', 'ticket_number'], 'like', '%'.$this->search.'%');
+                        $q->whereAny(['name', 'ticket_number'], 'like', '%' . $this->search . '%');
                     });
             });
         }
