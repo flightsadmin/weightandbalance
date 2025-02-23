@@ -84,11 +84,12 @@
                                                 {{ $flight->aircraft->registration_number }}
                                             </button>
                                             <ul class="dropdown-menu">
-                                                @foreach ($flight->airline->aircraft as $reg)
+                                                @foreach ($flight->airline->aircraft as $registration)
                                                     <li>
                                                         <button class="dropdown-item"
-                                                            wire:click="updateRegistration('{{ $reg->id }}')">
-                                                            {{ ucfirst($reg->registration_number) }}
+                                                            wire:click="updateRegistration('{{ $registration->id }}')"
+                                                            wire:confirm="Are you sure you want to update the aircraft?">
+                                                            {{ ucfirst($registration->registration_number) }}
                                                         </button>
                                                     </li>
                                                 @endforeach
