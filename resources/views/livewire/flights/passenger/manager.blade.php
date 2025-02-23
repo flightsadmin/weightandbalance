@@ -100,11 +100,11 @@
                                 </button>
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-link" wire:click="editPassenger({{ $passenger->id }})"
+                                <button class="btn btn-sm btn-primary" wire:click="editPassenger({{ $passenger->id }})"
                                     data-bs-toggle="modal" data-bs-target="#passengerFormModal">
-                                    <i class="bi bi-pencil"></i>
+                                    <i class="bi bi-pencil-square"></i>
                                 </button>
-                                <button class="btn btn-sm btn-link text-danger" wire:click="deletePassenger({{ $passenger->id }})"
+                                <button class="btn btn-sm btn-danger" wire:click="deletePassenger({{ $passenger->id }})"
                                     wire:confirm="Are you sure you want to remove this passenger?">
                                     <i class="bi bi-trash"></i>
                                 </button>
@@ -174,6 +174,9 @@
                                     <input type="checkbox" class="form-check-input"
                                         wire:model.live="passengerForm.special_requirements.infant">
                                     <label class="form-check-label">Infant</label>
+                                    @error('passengerForm.special_requirements.infant')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             @if ($passengerForm['special_requirements']['infant'])
@@ -181,6 +184,9 @@
                                     <label class="form-label">Infant Name</label>
                                     <input type="text" class="form-control form-control-sm"
                                         wire:model.live="passengerForm.special_requirements.infant_name">
+                                    @error('passengerForm.special_requirements.infant_name')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             @endif
                         </div>

@@ -76,7 +76,6 @@
                                 <tr>
                                     <th>Aircraft</th>
                                     <td>{{ $flight->aircraft->registration_number }} ({{ $flight->aircraft->type->name }})
-
                                         <span class="dropdown d-inline float-end">
                                             <button
                                                 class="btn btn-sm btn-secondary dropdown-toggle"
@@ -99,7 +98,11 @@
                                 </tr>
                                 <tr>
                                     <th>Route</th>
-                                    <td>{{ $flight->departure_airport }} → {{ $flight->arrival_airport }}</td>
+                                    <td>{{ $flight->departure_airport }} → {{ $flight->arrival_airport }}
+                                        <span class="badge bg-secondary float-end">
+                                            {{ $flight->aircraft->type->max_passengers }} PAX
+                                        </span>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th>Schedule</th>
@@ -135,33 +138,149 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title m-0">Load Summary</h5>
+                            <h5 class="card-title m-0">Flight Details</h5>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Passengers</label>
-                                        <h4>{{ $flight->passengers->count() }} PAX</h4>
+                            <!-- Passenger Summary -->
+                            <div class="mb-4">
+                                <h6>Passenger Details</h6>
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Total Passengers:</span>
+                                            <strong>{{ $flight->passengers->count() }} PAX</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Adults:</span>
+                                            <strong>{{ $flight->passengers->whereIn('type', ['male', 'female'])->count() }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Children:</span>
+                                            <strong>{{ $flight->passengers->where('type', 'child')->count() }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Infants:</span>
+                                            <strong>{{ $flight->passengers->where('type', 'infant')->count() }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Accepted:</span>
+                                            <strong>{{ $flight->passengers->where('acceptance_status', 'accepted')->count() }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Standby:</span>
+                                            <strong>{{ $flight->passengers->where('acceptance_status', 'standby')->count() }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Pending:</span>
+                                            <strong>{{ $flight->passengers->where('acceptance_status', 'pending')->count() }}</strong>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Baggage</label>
-                                        <h4>{{ $flight->baggage->count() }} pcs / {{ number_format($flight->baggage->sum('weight')) }} kg
-                                        </h4>
+                            </div>
+
+                            <!-- Special Requirements -->
+                            <div class="mb-4">
+                                <h6>Special Requirements</h6>
+                                <div class="row g-2">
+                                    @php
+                                        $specials = [
+                                            'wchr' => ['icon' => 'person-wheelchair', 'count' => 0],
+                                            'wchs' => ['icon' => 'person-wheelchair', 'count' => 0],
+                                            'wchc' => ['icon' => 'person-wheelchair', 'count' => 0],
+                                            'exst' => ['icon' => 'door-open', 'count' => 0],
+                                            'stcr' => ['icon' => 'h-circle-fill', 'count' => 0],
+                                            'deaf' => ['icon' => 'ear', 'count' => 0],
+                                            'blind' => ['icon' => 'eye-slash-fill', 'count' => 0],
+                                            'dpna' => ['icon' => 'person-arms-up', 'count' => 0],
+                                            'meda' => ['icon' => 'heart-pulse-fill', 'count' => 0],
+                                        ];
+
+                                        foreach ($flight->passengers as $passenger) {
+                                            foreach ($specials as $code => &$data) {
+                                                if ($passenger->special_requirements[$code] ?? false) {
+                                                    $data['count']++;
+                                                }
+                                            }
+                                        }
+                                    @endphp
+
+                                    @foreach ($specials as $code => $data)
+                                        @if ($data['count'] > 0)
+                                            <div class="col-auto">
+                                                <span class="badge bg-primary">
+                                                    <i class="bi bi-{{ $data['icon'] }}"></i>
+                                                    {{ strtoupper($code) }}: {{ $data['count'] }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Load Details -->
+                            <div class="mb-4">
+                                <h6>Load Details</h6>
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Baggage Count:</span>
+                                            <strong>{{ $flight->baggage->count() }} pcs</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Baggage Weight:</span>
+                                            <strong>{{ number_format($flight->baggage->sum('weight')) }} kg</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Average Per Bag:</span>
+                                            <strong>
+                                                {{ $flight->baggage->count() ? number_format($flight->baggage->sum('weight') / $flight->baggage->count(), 1) : 0 }}
+                                                kg
+                                            </strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Cargo Count:</span>
+                                            <strong>{{ $flight->cargo->count() }} pcs</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Cargo Weight:</span>
+                                            <strong>{{ number_format($flight->cargo->sum('weight')) }} kg</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Total Deadload:</span>
+                                            <strong>{{ number_format($flight->baggage->sum('weight') + $flight->cargo->sum('weight')) }}
+                                                kg</strong>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Cargo</label>
-                                        <h4>{{ $flight->cargo->count() }} pcs / {{ number_format($flight->cargo->sum('weight')) }} kg</h4>
+                            </div>
+
+                            <!-- Container Summary -->
+                            <div class="mb-4">
+                                <h6>Container Summary</h6>
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Total Containers:</span>
+                                            <strong>{{ $flight->containers->count() }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Loaded:</span>
+                                            <strong>{{ $flight->containers->where('pivot.status', 'loaded')->count() }}</strong>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Total Deadload Weight</label>
-                                        <h4>{{ number_format($flight->baggage->sum('weight') + $flight->cargo->sum('weight')) }} kg</h4>
+                                    <div class="col-6">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Baggage ULDs:</span>
+                                            <strong>{{ $flight->containers->where('pivot.type', 'baggage')->count() }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Cargo ULDs:</span>
+                                            <strong>{{ $flight->containers->where('pivot.type', 'cargo')->count() }}</strong>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

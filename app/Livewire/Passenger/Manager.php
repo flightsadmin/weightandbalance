@@ -33,7 +33,6 @@ class Manager extends Component
     public $pieces = '';
 
     public $weight = '';
-    public $canAcceptPassenger = false;
 
     public $passengerForm = [
         'name' => '',
@@ -137,7 +136,7 @@ class Manager extends Component
                 'passengerForm.ticket_number' => 'nullable|string|max:14',
                 'passengerForm.type' => 'required|in:male,female,child,infant',
                 'passengerForm.special_requirements.infant' => 'nullable',
-                'passengerForm.special_requirements.infant_name' => 'nullable|string|max:255',
+                'passengerForm.special_requirements.infant_name' => 'required_if:passengerForm.special_requirements.infant,true|max:255',
             ]
         );
         if (!($this->passengerForm['special_requirements']['infant'] ?? false)) {
@@ -342,7 +341,6 @@ class Manager extends Component
         $this->validate([
             'acceptanceForm.documents.travel_documents' => 'required|array',
             'acceptanceForm.special_requirements' => 'nullable|array',
-            'acceptanceForm.special_requirements.*' => 'nullable|boolean',
         ]);
 
         if (!$this->acceptingPassenger) {

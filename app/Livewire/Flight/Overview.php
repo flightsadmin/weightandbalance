@@ -31,9 +31,16 @@ class Overview extends Component
     public function updateRegistration($registrationId)
     {
         $loadplan = $this->flight->loadplans()->latest()->first();
+        $containers = $this->flight->containers()->withPivot('type')->get();
 
         if ($loadplan) {
             $loadplan->update(['loading' => null]);
+            foreach ($containers as $container) {
+                $container->pivot->update([
+                    'position_id' => null,
+                    'status' => 'unloaded',
+                ]);
+            }
         }
 
         $this->flight->update(['aircraft_id' => $registrationId]);
