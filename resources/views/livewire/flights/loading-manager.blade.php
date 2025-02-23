@@ -310,11 +310,13 @@
             padding: 10px;
             width: 100%;
             min-height: 100px;
+            align-items: start;
             text-align: center;
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
+            grid-template-columns: repeat(12, 1fr);
             gap: 5px;
-            margin-bottom: 20px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .holds-wrapper-scroll {
@@ -346,18 +348,19 @@
 
         .holds-wrapper {
             display: inline-flex;
-            gap: 20px;
-            padding: 10px 20px;
+            gap: 5px;
             min-width: min-content;
         }
 
         .hold-container {
             border: 1px solid #0d6efd;
             border-radius: 2px;
-            padding: 10px;
+            padding: 5px;
             background: #f8f9fa;
             flex-shrink: 0;
             width: 360px;
+            min-width: 360px;
+            max-width: 360px;
             margin: 0 10px;
             display: flex;
             flex-direction: column;
@@ -367,7 +370,7 @@
             text-align: center;
             padding: 4px 0 8px;
             font-weight: bold;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid #0d77e0;
             margin-bottom: 8px;
         }
 
@@ -405,12 +408,6 @@
             cursor: pointer;
             position: relative;
             font-size: 11px;
-        }
-
-        .cargo-slot .fw-bold,
-        .container .fw-bold {
-            font-size: 12px;
-            margin-bottom: 2px;
         }
 
         .unit-number {
