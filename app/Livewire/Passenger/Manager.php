@@ -136,7 +136,7 @@ class Manager extends Component
                 'passengerForm.pnr' => 'nullable|string|max:6',
                 'passengerForm.ticket_number' => 'nullable|string|max:14',
                 'passengerForm.type' => 'required|in:male,female,child,infant',
-                'passengerForm.special_requirements.infant' => 'required|boolean',
+                'passengerForm.special_requirements.infant' => 'nullable',
                 'passengerForm.special_requirements.infant_name' => 'required_if:passengerForm.special_requirements.infant,true|string|max:255',
             ]
         );
@@ -278,7 +278,7 @@ class Manager extends Component
         if (!$flightSeat) {
             $this->flight->seats()->attach($seatId, [
                 'is_blocked' => true,
-                'blocked_reason' => 'Blocked by staff',
+                'blocked_reason' => 'OPS Reason',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -287,7 +287,7 @@ class Manager extends Component
             $isBlocked = !$flightSeat->pivot->is_blocked;
             $this->flight->seats()->updateExistingPivot($seatId, [
                 'is_blocked' => $isBlocked,
-                'blocked_reason' => $isBlocked ? 'Blocked by staff' : null,
+                'blocked_reason' => $isBlocked ? 'OPS Reason' : null,
             ]);
         }
 

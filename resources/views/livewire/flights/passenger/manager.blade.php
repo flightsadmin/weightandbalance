@@ -186,8 +186,12 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-sm btn-primary">Save Passenger</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="bi bi-check-lg"></i> Save Passenger
+                        </button>
                     </div>
                 </form>
             </div>
@@ -215,8 +219,12 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-sm btn-primary">Save Baggage</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="bi bi-check-lg"></i> Save Baggage
+                        </button>
                     </div>
                 </form>
             </div>
@@ -336,7 +344,9 @@
                     @endif
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-secondary float-end" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-sm btn-secondary float-end" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i> Close
+                    </button>
                 </div>
             </div>
         </div>
@@ -389,9 +399,11 @@
                             <i class="bi bi-info-circle"></i> Right click on a seat to block/unblock it
                         </div>
                         <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </button>
                             <button type="submit" class="btn btn-sm btn-primary" @if (!$selectedSeat) disabled @endif>
-                                Assign Seat
+                                <i class="bi bi-check-lg"></i> Assign Seat
                             </button>
                         </div>
                     </div>
@@ -411,157 +423,159 @@
                 <div class="modal-body">
                     @if ($acceptingPassenger)
                         <div class="passenger-info mb-2">
-                            <h6>Passenger Information</h6>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <table class="table table-sm">
-                                        <tr>
-                                            <th>Name:</th>
-                                            <td>{{ $acceptingPassenger->name }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>PNR:</th>
-                                            <td>{{ $acceptingPassenger->pnr }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Ticket:</th>
-                                            <td>{{ $acceptingPassenger->ticket_number }}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-md-6">
-                                    <table class="table table-sm">
-                                        <tr>
-                                            <th>Type:</th>
-                                            <td>{{ ucfirst($acceptingPassenger->type) }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Seat:</th>
-                                            <td>{{ $acceptingPassenger->flight_seat }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Baggage:</th>
-                                            <td>{{ $acceptingPassenger->baggage->count() }}
-                                                {{ $acceptingPassenger->baggage->count() > 1 ? 'bags' : 'bag' }}
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="documents-section mb-2">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h6>Travel Document</h6>
-                                @if (empty($acceptanceForm['documents']['travel_documents']))
-                                    <button type="button" class="btn btn-sm btn-secondary" wire:click="addTravelDocument">
-                                        <i class="bi bi-plus-lg"></i> Add Travel Document
-                                    </button>
-                                @else
-                                    <button type="button" class="btn btn-sm btn-danger" wire:click="removeTravelDocument">
-                                        <i class="bi bi-trash"></i> Remove Travel Document
-                                    </button>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6>Passenger Information</h6>
+                                @if ($acceptingPassenger->special_requirements['infant'])
+                                    <div class="text-muted">
+                                        <i class="bi bi-person-standing-dress"></i> Infant:
+                                        {{ $acceptingPassenger->special_requirements['infant_name'] }}
+                                    </div>
                                 @endif
                             </div>
-
-                            @forelse ($acceptanceForm['documents']['travel_documents'] as $index => $document)
-                                <div class="card mb-2">
-                                    <div class="card-body">
-                                        <div class="row g-2">
-                                            <div class="col-md-4">
-                                                <label class="form-label">Type</label>
-                                                <select class="form-select form-select-sm"
-                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.type">
-                                                    <option value="passport">Passport</option>
-                                                    <option value="national_id">National ID</option>
-                                                    <option value="residence_permit">Residence Permit</option>
-                                                </select>
-                                                @error('acceptanceForm.documents.travel_documents.{{ $index }}.type')
-                                                    <div class="text-danger small">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label">Number</label>
-                                                <input type="text" class="form-control form-control-sm"
-                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.number">
-                                                @error('acceptanceForm.documents.travel_documents.{{ $index }}.number')
-                                                    <div class="text-danger small">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label">Nationality</label>
-                                                <input type="text" class="form-control form-control-sm"
-                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.nationality">
-                                                @error('acceptanceForm.documents.travel_documents.{{ $index }}.nationality')
-                                                    <div class="text-danger small">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label">Issuing Country</label>
-                                                <input type="text" class="form-control form-control-sm"
-                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.issuing_country">
-                                                @error('acceptanceForm.documents.travel_documents.{{ $index }}.issuing_country')
-                                                    <div class="text-danger small">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label">Issue Date</label>
-                                                <input type="date" class="form-control form-control-sm"
-                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.issue_date">
-                                                @error('acceptanceForm.documents.travel_documents.{{ $index }}.issue_date')
-                                                    <div class="text-danger small">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label">Expiry Date</label>
-                                                <input type="date" class="form-control form-control-sm"
-                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.expiry_date">
-                                                @error('acceptanceForm.documents.travel_documents.{{ $index }}.expiry_date')
-                                                    <div class="text-danger small">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
+                            <div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <th>Name:</th>
+                                                <td>{{ $acceptingPassenger->name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>PNR:</th>
+                                                <td>{{ $acceptingPassenger->pnr }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Ticket:</th>
+                                                <td>{{ $acceptingPassenger->ticket_number }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <th>Type:</th>
+                                                <td>{{ ucfirst($acceptingPassenger->type) }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Seat:</th>
+                                                <td>{{ $acceptingPassenger->flight_seat }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Baggage:</th>
+                                                <td>{{ $acceptingPassenger->baggage->count() }}
+                                                    {{ $acceptingPassenger->baggage->count() > 1 ? 'bags' : 'bag' }}
+                                                </td>
+                                            </tr>
+                                        </table>
                                     </div>
                                 </div>
-                            @empty
-                                <div class="text-muted">No travel documents added</div>
-                            @endforelse
-                        </div>
+                            </div>
 
-                        <div class="special-requirements mb-2">
-                            <h6>Special Requirements</h6>
-                            <div class="row g-2">
-                                @foreach (['wchr', 'wchs', 'wchc', 'exst', 'stcr', 'deaf', 'blind', 'dpna', 'meda'] as $requirement)
-                                    <div class="col-md-4">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input"
-                                                wire:model.live="acceptanceForm.special_requirements.{{ $requirement }}">
-                                            <label class="form-check-label">
-                                                <i
-                                                    class="bi bi-{{ match ($requirement) {
-                                                        'wchr', 'wchs', 'wchc' => 'person-wheelchair',
-                                                        'exst' => 'door-open',
-                                                        'stcr' => 'h-circle-fill',
-                                                        'deaf' => 'ear',
-                                                        'blind' => 'eye-slash-fill',
-                                                        'dpna' => 'person-arms-up',
-                                                        'meda' => 'heart-pulse-fill',
-                                                        default => 'person-check',
-                                                    } }}"></i>
-                                                {{ strtoupper($requirement) }}
-                                            </label>
+                            <div class="documents-section mb-2">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6>Travel Document</h6>
+                                    @if (empty($acceptanceForm['documents']['travel_documents']))
+                                        <button type="button" class="btn btn-sm btn-secondary" wire:click="addTravelDocument">
+                                            <i class="bi bi-plus-lg"></i> Add Travel Document
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-sm btn-danger" wire:click="removeTravelDocument">
+                                            <i class="bi bi-trash"></i> Remove Travel Document
+                                        </button>
+                                    @endif
+                                </div>
+
+                                @forelse ($acceptanceForm['documents']['travel_documents'] as $index => $document)
+                                    <div class="card mb-2">
+                                        <div class="card-body">
+                                            <div class="row g-2">
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Type</label>
+                                                    <select class="form-select form-select-sm"
+                                                        wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.type">
+                                                        <option value="passport">Passport</option>
+                                                        <option value="national_id">National ID</option>
+                                                        <option value="residence_permit">Residence Permit</option>
+                                                    </select>
+                                                    @error('acceptanceForm.documents.travel_documents.{{ $index }}.type')
+                                                        <div class="text-danger small">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Number</label>
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.number">
+                                                    @error('acceptanceForm.documents.travel_documents.{{ $index }}.number')
+                                                        <div class="text-danger small">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Nationality</label>
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.nationality">
+                                                    @error('acceptanceForm.documents.travel_documents.{{ $index }}.nationality')
+                                                        <div class="text-danger small">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Issuing Country</label>
+                                                    <input type="text" class="form-control form-control-sm"
+                                                        wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.issuing_country">
+                                                    @error('acceptanceForm.documents.travel_documents.{{ $index }}.issuing_country')
+                                                        <div class="text-danger small">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Issue Date</label>
+                                                    <input type="date" class="form-control form-control-sm"
+                                                        wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.issue_date">
+                                                    @error('acceptanceForm.documents.travel_documents.{{ $index }}.issue_date')
+                                                        <div class="text-danger small">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Expiry Date</label>
+                                                    <input type="date" class="form-control form-control-sm"
+                                                        wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.expiry_date">
+                                                    @error('acceptanceForm.documents.travel_documents.{{ $index }}.expiry_date')
+                                                        <div class="text-danger small">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                @endforeach
+                                @empty
+                                    <div class="text-muted">No travel documents added</div>
+                                @endforelse
                             </div>
-                        </div>
 
-                        @if ($acceptingPassenger->special_requirements['infant'])
-                            <div class="infant-section mb-4">
-                                <h6>Infant Information</h6>
-                                <p><strong>Name:</strong> {{ $acceptingPassenger->special_requirements['infant_name'] }}</p>
+                            <div class="special-requirements mb-2">
+                                <h6>Special Requirements</h6>
+                                <div class="row g-2">
+                                    @foreach (['wchr', 'wchs', 'wchc', 'exst', 'stcr', 'deaf', 'blind', 'dpna', 'meda'] as $requirement)
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input"
+                                                    wire:model.live="acceptanceForm.special_requirements.{{ $requirement }}">
+                                                <label class="form-check-label">
+                                                    <i
+                                                        class="bi bi-{{ match ($requirement) {
+                                                            'wchr', 'wchs', 'wchc' => 'person-wheelchair',
+                                                            'exst' => 'door-open',
+                                                            'stcr' => 'h-circle-fill',
+                                                            'deaf' => 'ear',
+                                                            'blind' => 'eye-slash-fill',
+                                                            'dpna' => 'person-arms-up',
+                                                            'meda' => 'heart-pulse-fill',
+                                                            default => 'person-check',
+                                                        } }}"></i>
+                                                    {{ strtoupper($requirement) }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
-                        @endif
                     @endif
                 </div>
                 <div class="modal-footer d-flex justify-content-between align-items-center">
