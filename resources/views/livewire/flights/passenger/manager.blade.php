@@ -56,21 +56,21 @@
                                 {{ ucfirst($passenger->type ?? 'N/A') }}
                             </td>
                             <td class="text-center">
-                                @if ($passenger->attributes)
-                                    @foreach ($passenger->attributes as $key => $value)
+                                @if ($passenger->special_requirements)
+                                    @foreach ($passenger->special_requirements as $key => $value)
                                         @if ($value && $key !== 'infant_name')
                                             <i class="bi bi-{{ match ($key) {
                                                 'wchr', 'wchs', 'wchc' => 'person-wheelchair',
                                                 'exst' => 'door-open',
                                                 'stcr' => 'h-circle-fill',
                                                 'deaf' => 'ear',
-                                                'blind' => 'eye-fill',
+                                                'blind' => 'eye-slash-fill',
                                                 'dpna' => 'person-arms-up',
                                                 'meda' => 'heart-pulse-fill',
                                                 'infant' => 'person-standing-dress',
                                                 default => 'person-check',
                                             } }}"
-                                                title="{{ strtoupper($key) }}{{ $key === 'infant' ? ' - ' . $passenger->attributes['infant_name'] : '' }}"></i>
+                                                title="{{ strtoupper($key) }}{{ $key === 'infant' ? ' - ' . $passenger->special_requirements['infant_name'] : '' }}"></i>
                                         @endif
                                     @endforeach
                                 @endif
@@ -171,15 +171,16 @@
                             <div class="col-md-6">
                                 <label class="form-label">Special Requirements</label>
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" wire:model.live="passengerForm.attributes.infant">
+                                    <input type="checkbox" class="form-check-input"
+                                        wire:model.live="passengerForm.special_requirements.infant">
                                     <label class="form-check-label">Infant</label>
                                 </div>
                             </div>
-                            @if ($passengerForm['attributes']['infant'])
+                            @if ($passengerForm['special_requirements']['infant'])
                                 <div class="col-md-6">
                                     <label class="form-label">Infant Name</label>
                                     <input type="text" class="form-control form-control-sm"
-                                        wire:model.live="passengerForm.attributes.infant_name">
+                                        wire:model.live="passengerForm.special_requirements.infant_name">
                                 </div>
                             @endif
                         </div>
@@ -315,16 +316,16 @@
                                 @endif
                             </div>
                         </div>
-                        @if ($selectedPassenger->attributes)
+                        @if ($selectedPassenger->special_requirements)
                             <div class="mt-3">
                                 <h6 class="text-decoration-underline">Special Requirements</h6>
                                 <div class="d-flex flex-wrap gap-2">
-                                    @foreach ($selectedPassenger->attributes as $key => $value)
+                                    @foreach ($selectedPassenger->special_requirements as $key => $value)
                                         @if ($value && $key !== 'infant_name')
                                             <span class="badge bg-info">
                                                 {{ strtoupper($key) }}
                                                 @if ($key === 'infant')
-                                                    - {{ $selectedPassenger->attributes['infant_name'] }}
+                                                    - {{ $selectedPassenger->special_requirements['infant_name'] }}
                                                 @endif
                                             </span>
                                         @endif
@@ -475,31 +476,49 @@
                                                     <option value="national_id">National ID</option>
                                                     <option value="residence_permit">Residence Permit</option>
                                                 </select>
+                                                @error('acceptanceForm.documents.travel_documents.{{ $index }}.type')
+                                                    <div class="text-danger small">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="form-label">Number</label>
                                                 <input type="text" class="form-control form-control-sm"
                                                     wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.number">
+                                                @error('acceptanceForm.documents.travel_documents.{{ $index }}.number')
+                                                    <div class="text-danger small">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="form-label">Nationality</label>
                                                 <input type="text" class="form-control form-control-sm"
                                                     wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.nationality">
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label">Issue Date</label>
-                                                <input type="date" class="form-control form-control-sm"
-                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.issue_date">
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label">Expiry Date</label>
-                                                <input type="date" class="form-control form-control-sm"
-                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.expiry_date">
+                                                @error('acceptanceForm.documents.travel_documents.{{ $index }}.nationality')
+                                                    <div class="text-danger small">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="form-label">Issuing Country</label>
                                                 <input type="text" class="form-control form-control-sm"
                                                     wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.issuing_country">
+                                                @error('acceptanceForm.documents.travel_documents.{{ $index }}.issuing_country')
+                                                    <div class="text-danger small">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Issue Date</label>
+                                                <input type="date" class="form-control form-control-sm"
+                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.issue_date">
+                                                @error('acceptanceForm.documents.travel_documents.{{ $index }}.issue_date')
+                                                    <div class="text-danger small">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Expiry Date</label>
+                                                <input type="date" class="form-control form-control-sm"
+                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.expiry_date">
+                                                @error('acceptanceForm.documents.travel_documents.{{ $index }}.expiry_date')
+                                                    <div class="text-danger small">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>
@@ -512,11 +531,11 @@
                         <div class="special-requirements mb-2">
                             <h6>Special Requirements</h6>
                             <div class="row g-2">
-                                @foreach (['wchr', 'wchs', 'wchc', 'exst', 'stcr', 'deaf', 'blind', 'dpna', 'meda', 'infant'] as $requirement)
+                                @foreach (['wchr', 'wchs', 'wchc', 'exst', 'stcr', 'deaf', 'blind', 'dpna', 'meda'] as $requirement)
                                     <div class="col-md-4">
                                         <div class="form-check">
                                             <input type="checkbox" class="form-check-input"
-                                                wire:model.live="acceptanceForm.attributes.{{ $requirement }}">
+                                                wire:model.live="acceptanceForm.special_requirements.{{ $requirement }}">
                                             <label class="form-check-label">
                                                 <i
                                                     class="bi bi-{{ match ($requirement) {
@@ -524,7 +543,7 @@
                                                         'exst' => 'door-open',
                                                         'stcr' => 'h-circle-fill',
                                                         'deaf' => 'ear',
-                                                        'blind' => 'eye-fill',
+                                                        'blind' => 'eye-slash-fill',
                                                         'dpna' => 'person-arms-up',
                                                         'meda' => 'heart-pulse-fill',
                                                         default => 'person-check',
@@ -537,10 +556,10 @@
                             </div>
                         </div>
 
-                        @if ($acceptingPassenger->attributes['infant'])
+                        @if ($acceptingPassenger->special_requirements['infant'])
                             <div class="infant-section mb-4">
                                 <h6>Infant Information</h6>
-                                <p><strong>Name:</strong> {{ $acceptingPassenger->attributes['infant_name'] }}</p>
+                                <p><strong>Name:</strong> {{ $acceptingPassenger->special_requirements['infant_name'] }}</p>
                             </div>
                         @endif
                     @endif

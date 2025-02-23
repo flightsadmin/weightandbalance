@@ -56,7 +56,7 @@ return new class extends Migration {
             $table->string('ticket_number')->nullable();
             $table->string('acceptance_status')->default('booked');
             $table->string('boarding_status')->default('boarding');
-            $table->json('attributes')->nullable();
+            $table->json('special_requirements')->nullable();
             $table->json('documents')->nullable();
             $table->timestamps();
 

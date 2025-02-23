@@ -71,7 +71,7 @@ class PassengerFactory extends Factory
             'ticket_number' => fake()->numerify('###-##########'),
             'acceptance_status' => 'pending',
             'boarding_status' => 'pending',
-            'attributes' => $attributes,
+            'special_requirements' => $attributes,
             'documents' => $documents
         ];
     }
@@ -81,7 +81,7 @@ class PassengerFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'type' => 'infant',
-                'attributes' => [
+                'special_requirements' => [
                     'wchr' => false,
                     'wchs' => false,
                     'wchc' => false,
@@ -91,7 +91,7 @@ class PassengerFactory extends Factory
                     'blind' => false,
                     'dpna' => false,
                     'meda' => false,
-                    'infant' => false,
+                    'infant' => true,
                     'infant_name' => null,
                 ],
             ];
@@ -106,7 +106,7 @@ class PassengerFactory extends Factory
                 // Try to find an existing adult passenger without an infant
                 $adult = Passenger::where('flight_id', $passenger->flight_id)
                     ->whereIn('type', ['male', 'female'])
-                    ->whereJsonDoesntContain('attributes->infant', true)
+                    ->whereJsonDoesntContain('special_requirements->infant', true)
                     ->inRandomOrder()
                     ->first();
 
@@ -119,15 +119,15 @@ class PassengerFactory extends Factory
                 }
 
                 // Update adult's attributes to include infant info
-                $attributes = $adult->attributes;
+                $attributes = $adult->special_requirements;
                 $attributes['infant'] = true;
                 $attributes['infant_name'] = $passenger->name;
-                $adult->update(['attributes' => $attributes]);
+                $adult->update(['special_requirements' => $attributes]);
             }
             // If this is an adult, randomly assign an infant
             elseif (in_array($passenger->type, ['male', 'female']) && fake()->boolean(20)) {
                 // Only create infant if adult doesn't already have one
-                if (!($passenger->attributes['infant'] ?? false)) {
+                if (!($passenger->special_requirements['infant'] ?? false)) {
                     Passenger::factory()->infant()->create([
                         'flight_id' => $passenger->flight_id,
                     ]);

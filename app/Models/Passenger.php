@@ -22,16 +22,17 @@ class Passenger extends Model
         'ticket_number',
         'acceptance_status',
         'boarding_status',
-        'attributes',
+        'special_requirements',
+        'documents',
     ];
 
     protected $casts = [
-        'attributes' => 'array',
+        'special_requirements' => 'array',
         'documents' => 'array'
     ];
 
     protected $attributes = [
-        'attributes' => '{"wchr": false, "wchs": false, "wchc": false, "exst": false, "stcr": false, "deaf": false, "blind": false, "dpna": false, "meda": false, "infant": false}',
+        'special_requirements' => '{"wchr": false, "wchs": false, "wchc": false, "exst": false, "stcr": false, "deaf": false, "blind": false, "dpna": false, "meda": false, "infant": false}',
         'documents' => '{"travel_documents": [], "visas": []}'
     ];
 

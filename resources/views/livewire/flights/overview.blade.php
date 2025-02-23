@@ -21,7 +21,7 @@
                                         <button
                                             class="btn btn-sm btn-{{ $flight->status === 'cancelled' ? 'danger' : ($flight->status === 'arrived' ? 'success' : 'warning') }} dropdown-toggle"
                                             type="button" data-bs-toggle="dropdown">
-                                            {{ ucfirst($flight->status) }}
+                                            {{ str(str_replace('_', ' ', $flight->status))->title() }}
                                         </button>
                                         <ul class="dropdown-menu">
                                             <li>
@@ -52,6 +52,12 @@
                                                 <button class="dropdown-item"
                                                     wire:click="updateStatus('cancelled')">
                                                     <i class="bi bi-x-circle text-danger"></i> Cancelled
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item"
+                                                    wire:click="updateStatus('post_departure')">
+                                                    <i class="bi bi-clock-history text-warning"></i> Post Departure
                                                 </button>
                                             </li>
                                         </ul>
@@ -100,10 +106,24 @@
                                     <div>STA: {{ $flight->scheduled_arrival_time->format('d M Y H:i') }}</div>
                                 </td>
                             </tr>
-                            @if ($flight->notes)
+                            @if ($flight->status === 'departed')
                                 <tr>
-                                    <th>Notes</th>
-                                    <td>{{ $flight->notes }}</td>
+                                    <th>ATD</th>
+                                    <td>
+                                        <input type="datetime-local" class="form-control form-control-sm"
+                                            wire:change="updateActualDepartureTime"
+                                            wire:model.live="actual_departure_time">
+                                    </td>
+                                </tr>
+                            @endif
+                            @if ($flight->status === 'arrived')
+                                <tr>
+                                    <th>ATA</th>
+                                    <td>
+                                        <input type="datetime-local" class="form-control form-control-sm"
+                                            wire:change="updateActualArrivalTime"
+                                            wire:model.live="actual_arrival_time">
+                                    </td>
                                 </tr>
                             @endif
                         </table>

@@ -9,6 +9,10 @@ class Overview extends Component
 {
     public Flight $flight;
 
+    public $actual_departure_time;
+
+    public $actual_arrival_time;
+
     public function mount(Flight $flight)
     {
         $this->flight = $flight->load(['airline', 'aircraft', 'crew', 'passengers', 'baggage', 'cargo']);
@@ -17,6 +21,16 @@ class Overview extends Component
     public function updateStatus($status)
     {
         $this->flight->update(['status' => $status]);
+    }
+
+    public function updateActualDepartureTime()
+    {
+        $this->flight->update(['actual_departure_time' => $this->actual_departure_time]);
+    }
+
+    public function updateActualArrivalTime()
+    {
+        $this->flight->update(['actual_arrival_time' => $this->actual_arrival_time]);
     }
 
     public function updateRegistration($reg)

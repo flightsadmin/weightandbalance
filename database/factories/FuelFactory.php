@@ -22,10 +22,10 @@ class FuelFactory extends Factory
     {
         $crew = fake()->randomElement(['2/4', '2/5', '3/4', '3/5']);
         $pantry = fake()->randomElement(['A', 'E', 'EMPTY']);
-        $blockFuel = fake()->numberBetween(10000, 20000);
+        $blockFuel = fake()->numberBetween(10000, 18900);
         $taxiFuel = fake()->numberBetween(200, 400);
-        $tripFuel = $blockFuel - $taxiFuel / 0.4;
         $takeOffFuel = $blockFuel - $taxiFuel;
+        $tripFuel = $blockFuel * 0.6;
 
         return [
             'flight_id' => null,

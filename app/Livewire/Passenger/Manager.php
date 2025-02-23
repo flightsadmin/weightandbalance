@@ -40,7 +40,7 @@ class Manager extends Component
         'type' => '',
         'pnr' => '',
         'ticket_number' => '',
-        'attributes' => [
+        'special_requirements' => [
             'infant' => false,
             'infant_name' => null
         ],
@@ -64,7 +64,7 @@ class Manager extends Component
             'travel_documents' => [],
             'visas' => []
         ],
-        'attributes' => [
+        'special_requirements' => [
             'wchr' => false,
             'wchs' => false,
             'wchc' => false,
@@ -124,7 +124,7 @@ class Manager extends Component
     public function editPassenger(Passenger $passenger)
     {
         $this->passenger = $passenger;
-        $this->passengerForm = $passenger->only(['name', 'ticket_number', 'pnr', 'type', 'attributes']);
+        $this->passengerForm = $passenger->only(['name', 'ticket_number', 'pnr', 'type', 'special_requirements']);
         $this->showForm = true;
     }
 
@@ -136,8 +136,8 @@ class Manager extends Component
                 'passengerForm.pnr' => 'nullable|string|max:6',
                 'passengerForm.ticket_number' => 'nullable|string|max:14',
                 'passengerForm.type' => 'required|in:male,female,child,infant',
-                'passengerForm.attributes.infant' => 'required|boolean',
-                'passengerForm.attributes.infant_name' => 'required_if:passengerForm.attributes.infant,true|string|max:255',
+                'passengerForm.special_requirements.infant' => 'required|boolean',
+                'passengerForm.special_requirements.infant_name' => 'required_if:passengerForm.special_requirements.infant,true|string|max:255',
             ]
         );
 
@@ -150,7 +150,7 @@ class Manager extends Component
                 'ticket_number' => $this->passengerForm['ticket_number'],
                 'pnr' => $this->passengerForm['pnr'],
                 'type' => $this->passengerForm['type'],
-                'attributes' => $this->passengerForm['attributes'],
+                'special_requirements' => $this->passengerForm['special_requirements'],
             ]
         );
 
@@ -303,7 +303,7 @@ class Manager extends Component
                 'travel_documents' => [],
                 'visas' => []
             ],
-            'attributes' => $passenger->attributes,
+            'special_requirements' => $passenger->special_requirements,
             'status' => 'standby'
         ];
     }
@@ -334,6 +334,12 @@ class Manager extends Component
 
     public function acceptPassenger()
     {
+        $this->validate([
+            'acceptanceForm.documents.travel_documents' => 'required|array',
+            'acceptanceForm.special_requirements' => 'nullable|array',
+            'acceptanceForm.special_requirements.*' => 'nullable|boolean',
+        ]);
+
         if (!$this->acceptingPassenger) {
             $this->dispatch('alert', icon: 'error', message: 'No passenger selected');
             return;
@@ -347,7 +353,7 @@ class Manager extends Component
         $this->acceptingPassenger->update([
             'acceptance_status' => 'accepted',
             'documents' => $this->acceptanceForm['documents'],
-            'attributes' => $this->acceptanceForm['attributes']
+            'special_requirements' => $this->acceptanceForm['special_requirements']
         ]);
 
         $this->dispatch('alert', icon: 'success', message: 'Passenger Accepted');

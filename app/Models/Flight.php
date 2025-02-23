@@ -20,12 +20,16 @@ class Flight extends Model
         'arrival_airport',
         'scheduled_departure_time',
         'scheduled_arrival_time',
+        'actual_departure_time',
+        'actual_arrival_time',
         'status',
     ];
 
     protected $casts = [
         'scheduled_departure_time' => 'datetime',
         'scheduled_arrival_time' => 'datetime',
+        'actual_departure_time' => 'datetime',
+        'actual_arrival_time' => 'datetime',
     ];
 
     public function baggage()
