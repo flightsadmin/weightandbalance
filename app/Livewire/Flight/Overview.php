@@ -3,17 +3,21 @@
 namespace App\Livewire\Flight;
 
 use App\Models\Flight;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class Overview extends Component
 {
     public Flight $flight;
 
     public $showTimeModal = false;
+
     public $showRegistrationModal = false;
+
     public $timeType = '';
+
     public $selectedFlight = null;
+
     public $timeForm = [
         'datetime' => '',
     ];
@@ -64,21 +68,22 @@ class Overview extends Component
             'timeForm.datetime' => 'required|after:scheduled_departure_time',
         ]);
 
-        if (!$this->selectedFlight) {
+        if (! $this->selectedFlight) {
             $this->dispatch('alert', icon: 'danger', message: 'Flight not found');
+
             return;
         }
 
         if ($this->timeType === 'ATD') {
             $this->selectedFlight->update([
                 'actual_departure_time' => $this->timeForm['datetime'],
-                'status' => 'departed'
+                'status' => 'departed',
             ]);
             $message = 'Departure time updated successfully';
         } else {
             $this->selectedFlight->update([
                 'actual_arrival_time' => $this->timeForm['datetime'],
-                'status' => 'arrived'
+                'status' => 'arrived',
             ]);
             $message = 'Arrival time updated successfully';
         }

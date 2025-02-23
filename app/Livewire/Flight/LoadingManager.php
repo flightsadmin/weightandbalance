@@ -3,21 +3,24 @@
 namespace App\Livewire\Flight;
 
 use App\Models\Flight;
-use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class LoadingManager extends Component
 {
     public Flight $flight;
+
     public $loadplan;
+
     public $holds;
+
     public $containers;
 
     public function mount(Flight $flight)
     {
         $this->flight = $flight->load([
             'aircraft.type.holds.positions',
-            'containers' => fn($q) => $q->withPivot(['type', 'pieces', 'weight', 'status', 'position_id'])
+            'containers' => fn ($q) => $q->withPivot(['type', 'pieces', 'weight', 'status', 'position_id']),
         ]);
 
         $this->loadplan = $flight->loadplans()->latest()->first();
@@ -28,10 +31,10 @@ class LoadingManager extends Component
                 'id' => $hold->id,
                 'name' => $hold->name,
                 'max_weight' => $hold->max_weight,
-                'positions' => $hold->positions->map(fn($pos) => [
+                'positions' => $hold->positions->map(fn ($pos) => [
                     'id' => $pos->id,
-                    'designation' => $pos->code
-                ])->toArray()
+                    'designation' => $pos->code,
+                ])->toArray(),
             ];
         })->toArray();
 
@@ -44,7 +47,7 @@ class LoadingManager extends Component
                 'weight' => $container->pivot->weight,
                 'pieces' => $container->pivot->pieces,
                 'position' => $container->pivot->position_id,
-                'status' => $container->pivot->status
+                'status' => $container->pivot->status,
             ];
         })->toArray();
     }
@@ -58,18 +61,18 @@ class LoadingManager extends Component
                 $this->loadplan->update([
                     'loading' => [
                         'containers' => $containers,
-                        'holds' => $this->holds
+                        'holds' => $this->holds,
                     ],
-                    'last_modified_by' => auth()->id()
+                    'last_modified_by' => auth()->id(),
                 ]);
             } else {
                 // Create new loadplan if none exists
                 $this->loadplan = $this->flight->loadplans()->create([
                     'loading' => [
                         'containers' => $containers,
-                        'holds' => $this->holds
+                        'holds' => $this->holds,
                     ],
-                    'last_modified_by' => auth()->id()
+                    'last_modified_by' => auth()->id(),
                 ]);
             }
 
@@ -77,7 +80,7 @@ class LoadingManager extends Component
             foreach ($containers as $container) {
                 $this->flight->containers()->updateExistingPivot($container['id'], [
                     'position_id' => $container['position'] ? $container['position'][0] : null,
-                    'status' => $container['position'] ? 'loaded' : 'unloaded'
+                    'status' => $container['position'] ? 'loaded' : 'unloaded',
                 ]);
             }
 
@@ -86,7 +89,7 @@ class LoadingManager extends Component
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', message: 'Failed to save load plan');
-            \Log::error('Failed to save loadplan: ' . $e->getMessage());
+            \Log::error('Failed to save loadplan: '.$e->getMessage());
         }
     }
 
@@ -98,13 +101,13 @@ class LoadingManager extends Component
             foreach ($this->flight->containers as $container) {
                 $container->pivot->update([
                     'position_id' => null,
-                    'status' => 'unloaded'
+                    'status' => 'unloaded',
                 ]);
             }
 
             if ($this->loadplan) {
                 $this->loadplan->update([
-                    'loading' => null
+                    'loading' => null,
                 ]);
             }
 
@@ -114,7 +117,7 @@ class LoadingManager extends Component
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', message: 'Failed to reset load plan');
-            \Log::error('Failed to reset loadplan: ' . $e->getMessage());
+            \Log::error('Failed to reset loadplan: '.$e->getMessage());
         }
     }
 

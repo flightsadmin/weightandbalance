@@ -160,6 +160,7 @@ class Flight extends Model
         }
 
         $setting = $this->airline->settings()->where('key', $key)->first();
+
         return $setting ? $setting->typed_value : $default;
     }
 
@@ -178,6 +179,7 @@ class Flight extends Model
     public function getSettings(): array
     {
         $settings = $this->settings()->where('key', 'flight_settings')->first();
+
         return $settings ? $settings->typed_value : $this->getDefaultSettings();
     }
 

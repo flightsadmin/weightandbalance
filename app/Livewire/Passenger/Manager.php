@@ -41,7 +41,7 @@ class Manager extends Component
         'ticket_number' => '',
         'special_requirements' => [
             'infant' => false,
-            'infant_name' => null
+            'infant_name' => null,
         ],
     ];
 
@@ -58,10 +58,11 @@ class Manager extends Component
     ];
 
     public $acceptingPassenger = null;
+
     public $acceptanceForm = [
         'documents' => [
             'travel_documents' => [],
-            'visas' => []
+            'visas' => [],
         ],
         'special_requirements' => [
             'wchr' => false,
@@ -78,7 +79,7 @@ class Manager extends Component
 
     public function mount(Flight $flight)
     {
-        $this->flight = $flight->load(['passengers.seat', 'aircraft.type.cabinZones.seats',])
+        $this->flight = $flight->load(['passengers.seat', 'aircraft.type.cabinZones.seats'])
             ->loadCount([
                 'passengers',
                 'passengers as accepted_count' => function ($query) {
@@ -139,7 +140,7 @@ class Manager extends Component
                 'passengerForm.special_requirements.infant_name' => 'required_if:passengerForm.special_requirements.infant,true|max:255',
             ]
         );
-        if (!($this->passengerForm['special_requirements']['infant'] ?? false)) {
+        if (! ($this->passengerForm['special_requirements']['infant'] ?? false)) {
             $this->passengerForm['special_requirements']['infant'] = false;
             $this->passengerForm['special_requirements']['infant_name'] = null;
         }
@@ -176,7 +177,7 @@ class Manager extends Component
         for ($i = 0; $i < $this->pieces; $i++) {
             $this->editingPassenger->baggage()->create([
                 'flight_id' => $this->editingPassenger->flight->id,
-                'tag_number' => $this->editingPassenger->flight->airline->iata_code . str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
+                'tag_number' => $this->editingPassenger->flight->airline->iata_code.str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
                 'weight' => $this->weight / $this->pieces,
             ]);
         }
@@ -216,13 +217,13 @@ class Manager extends Component
 
     public function assignSeat()
     {
-        if (!$this->editingPassenger) {
+        if (! $this->editingPassenger) {
             $this->dispatch('alert', icon: 'error', message: 'No passenger selected.');
 
             return;
         }
 
-        if (!$this->selectedSeat) {
+        if (! $this->selectedSeat) {
             $this->dispatch('alert', icon: 'error', message: 'Please select a seat.');
 
             return;
@@ -230,13 +231,13 @@ class Manager extends Component
 
         $seat = Seat::findOrFail($this->selectedSeat);
 
-        if (!$seat->isAvailable($this->flight)) {
+        if (! $seat->isAvailable($this->flight)) {
             $this->dispatch('alert', icon: 'error', message: 'This seat is not available.');
 
             return;
         }
 
-        if (!$this->flight->seats()->where('seat_id', $seat->id)->exists()) {
+        if (! $this->flight->seats()->where('seat_id', $seat->id)->exists()) {
             $this->flight->seats()->attach($seat->id, [
                 'is_blocked' => false,
                 'created_at' => now(),
@@ -267,8 +268,9 @@ class Manager extends Component
     public function toggleSeatBlock($seatId)
     {
         $seat = Seat::find($seatId);
-        if (!$seat) {
+        if (! $seat) {
             $this->dispatch('alert', icon: 'error', message: 'Seat not found');
+
             return;
         }
 
@@ -279,7 +281,7 @@ class Manager extends Component
         }
 
         $flightSeat = $this->flight->seats()->wherePivot('seat_id', $seatId)->first();
-        if (!$flightSeat) {
+        if (! $flightSeat) {
             $this->flight->seats()->attach($seatId, [
                 'is_blocked' => true,
                 'blocked_reason' => 'OPS Reason',
@@ -288,7 +290,7 @@ class Manager extends Component
             ]);
             $isBlocked = true;
         } else {
-            $isBlocked = !$flightSeat->pivot->is_blocked;
+            $isBlocked = ! $flightSeat->pivot->is_blocked;
             $this->flight->seats()->updateExistingPivot($seatId, [
                 'is_blocked' => $isBlocked,
                 'blocked_reason' => $isBlocked ? 'OPS Reason' : null,
@@ -305,10 +307,10 @@ class Manager extends Component
         $this->acceptanceForm = [
             'documents' => $passenger->documents ?? [
                 'travel_documents' => [],
-                'visas' => []
+                'visas' => [],
             ],
             'special_requirements' => $passenger->special_requirements,
-            'status' => 'standby'
+            'status' => 'standby',
         ];
     }
 
@@ -321,7 +323,7 @@ class Manager extends Component
                 'issuing_country' => '',
                 'nationality' => '',
                 'issue_date' => '',
-                'expiry_date' => ''
+                'expiry_date' => '',
             ];
         } else {
             $this->dispatch('alert', icon: 'error', message: 'Travel document already exists');
@@ -343,20 +345,22 @@ class Manager extends Component
             'acceptanceForm.special_requirements' => 'nullable|array',
         ]);
 
-        if (!$this->acceptingPassenger) {
+        if (! $this->acceptingPassenger) {
             $this->dispatch('alert', icon: 'error', message: 'No passenger selected');
+
             return;
         }
 
         if (empty($this->acceptanceForm['documents']['travel_documents'])) {
             $this->dispatch('alert', icon: 'error', message: 'Travel document is required');
+
             return;
         }
 
         $this->acceptingPassenger->update([
             'acceptance_status' => 'accepted',
             'documents' => $this->acceptanceForm['documents'],
-            'special_requirements' => $this->acceptanceForm['special_requirements']
+            'special_requirements' => $this->acceptanceForm['special_requirements'],
         ]);
 
         $this->dispatch('alert', icon: 'success', message: 'Passenger Accepted');
@@ -372,7 +376,7 @@ class Manager extends Component
             ->withCount('baggage');
 
         if ($this->search) {
-            $query->where('name', 'like', '%' . $this->search . '%');
+            $query->where('name', 'like', '%'.$this->search.'%');
         }
 
         if ($this->type) {

@@ -8,6 +8,7 @@ use Livewire\Component;
 class Settings extends Component
 {
     public Flight $flight;
+
     public $settings;
 
     public $notocOptions = [
