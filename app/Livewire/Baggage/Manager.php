@@ -194,10 +194,8 @@ class Manager extends Component
             }
             // Case 2: New loading (no previous container)
             elseif (!$oldContainer) {
-                $newContainer->flights()->where('flight_id', $this->flight->id)
-                    ->increment('weight', $item->weight);
-                $newContainer->flights()->where('flight_id', $this->flight->id)
-                    ->increment('pieces', 1);
+                $newContainer->flights()->where('flight_id', $this->flight->id)->increment('weight', $item->weight);
+                $newContainer->flights()->where('flight_id', $this->flight->id)->increment('pieces', 1);
             }
         }
 

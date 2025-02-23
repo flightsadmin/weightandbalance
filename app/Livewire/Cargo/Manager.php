@@ -175,13 +175,13 @@ class Manager extends Component
             $oldContainer->flights()->where('flight_id', $this->flight->id)->decrement('weight', $cargo->weight);
             $oldContainer->flights()->where('flight_id', $this->flight->id)->decrement('pieces', $cargo->pieces);
             // Increment new container
-            $cargoContainer->increment('weight', $cargo->weight);
-            $cargoContainer->increment('pieces', $cargo->pieces);
+            $cargoContainer->flights()->where('flight_id', $this->flight->id)->increment('weight', $cargo->weight);
+            $cargoContainer->flights()->where('flight_id', $this->flight->id)->increment('pieces', $cargo->pieces);
         }
         // Case 2: Loading into a container (no previous container)
         elseif (!$oldContainer && $containerId) {
-            $cargoContainer->increment('weight', $cargo->weight);
-            $cargoContainer->increment('pieces', $cargo->pieces);
+            $cargoContainer->flights()->where('flight_id', $this->flight->id)->increment('weight', $cargo->weight);
+            $cargoContainer->flights()->where('flight_id', $this->flight->id)->increment('pieces', $cargo->pieces);
         }
         // Case 3: Offloading from a container (no new container)
         elseif ($oldContainer && !$containerId) {
