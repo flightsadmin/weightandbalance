@@ -27,7 +27,7 @@
             width: 100%;
             text-align: center;
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 5px;
         }
 
@@ -43,7 +43,7 @@
             border-radius: 8px;
             padding: 10px;
             background: #f8f9fa;
-            min-width: 260px;
+            min-width: 300px;
             flex-grow: 1;
             text-align: center;
         }
@@ -88,11 +88,6 @@
             color: #212529;
         }
 
-        .special-load {
-            background-color: #0d6efd;
-            color: white;
-        }
-
         .selected {
             border: 2px solid red !important;
         }
@@ -106,58 +101,43 @@
             background-color: #c3e6cb !important;
             cursor: grab;
         }
+
+        /* PMC spans vertically */
+        .pmc {
+            min-height: 140px;
+            grid-row: span 2;
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="container mt-3" x-data="cargoManager()">
+    <div class="container mt-3" x-data="cargoManager()" x-init="loadFromLocalStorage()">
         <div class="container-wrapper">
 
             <!-- Holding Area for Containers -->
             <div class="holding-area">
-                <template x-for="(container, index) in containers" :key="index">
-                    <div class="container" x-text="container.id" x-on:click="selectCargo($el, container.id)">
+                <template x-for="container in containers.filter(c => !c.position)">
+                    <div class="container" x-text="container.id" x-on:click="selectCargo(container)"
+                        :class="{'selected': selectedCargo && selectedCargo.id === container.id, 'pmc': container.type === 'PMC'}">
                     </div>
                 </template>
             </div>
 
             <div class="holds-wrapper">
-                <!-- Forward Hold -->
-                <div class="hold-container">
-                    <div class="hold-header">Forward Hold (3402 kg)</div>
-                    <div class="cargo-row">
-                        <template x-for="slot in positions.slice(0, 8)">
-                            <div class="cargo-slot" x-on:click="dropCargo($el)" x-text="slot"
-                                :class="{'drop-target': selectedCargo && !slotOccupied(slot)}">
-                            </div>
-                        </template>
+                <template x-for="hold in holds">
+                    <div class="hold-container">
+                        <div class="hold-header" x-text="hold.name"></div>
+                        <div class="cargo-row">
+                            <template x-for="slot in hold.positions">
+                                <div class="cargo-slot" x-on:click="dropCargo(slot)"
+                                    x-text="getCargoInSlot(slot) || slot"
+                                    :class="{'drop-target': selectedCargo && canDropHere(slot), 'occupied': slotOccupied(slot)}">
+                                </div>
+                            </template>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Aft Hold -->
-                <div class="hold-container">
-                    <div class="hold-header">Aft Hold (2426 kg)</div>
-                    <div class="cargo-row">
-                        <template x-for="slot in positions.slice(8, 16)">
-                            <div class="cargo-slot" x-on:click="dropCargo($el)" x-text="slot"
-                                :class="{'drop-target': selectedCargo && !slotOccupied(slot)}">
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Bulk Hold -->
-                <div class="hold-container">
-                    <div class="hold-header">Bulk Hold (1497 kg)</div>
-                    <div class="cargo-row">
-                        <template x-for="slot in positions.slice(16, 20)">
-                            <div class="cargo-slot" x-on:click="dropCargo($el)" x-text="slot"
-                                :class="{'drop-target': selectedCargo && !slotOccupied(slot)}">
-                            </div>
-                        </template>
-                    </div>
-                </div>
+                </template>
             </div>
         </div>
     </div>
@@ -166,61 +146,85 @@
         function cargoManager() {
             return {
                 selectedCargo: null,
-                selectedElement: null,
-                containers: Array.from({ length: 20 }, (_, i) => ({ id: `C${i + 1}` })),
-                positions: ["11R", "12R", "13R", "14R", "11L", "12L", "41R", "42R", "43R", "44R", "41L", "42L", "51R", "52R", "53R", "54R", "61R", "62R", "63R", "64R"],
+                containers: JSON.parse(localStorage.getItem('containers')) || [
+                    { id: 'PMC1', type: 'PMC', position: null },
+                    { id: 'PMC2', type: 'PMC', position: null },
+                    { id: 'PMC3', type: 'PMC', position: null },
+                    { id: 'AKE1', type: 'AKE', position: null },
+                    { id: 'AKE2', type: 'AKE', position: null },
+                    { id: 'AKE3', type: 'AKE', position: null },
+                    { id: 'AKE4', type: 'AKE', position: null },
+                    { id: 'AKE5', type: 'AKE', position: null },
+                    { id: 'AKE6', type: 'AKE', position: null }
+                ],
 
-                selectCargo(element, cargoId) {
-                    // Remove previous selection
-                    if (this.selectedElement) {
-                        this.selectedElement.classList.remove('selected');
-                    }
-                    document.querySelectorAll('.cargo-slot').forEach(slot => {
-                        slot.classList.remove('drop-target');
-                    });
+                holds: [
+                    { name: "Forward Hold (3402 kg)", positions: ["11L", "11R", "12L", "12R", "13L", "13R", "14L", "14R"] },
+                    { name: "Aft Hold (2426 kg)", positions: ["41L", "41R", "42L", "42R", "43L", "43R", "44L", "44R"] },
+                    { name: "Bulk Hold (1497 kg)", positions: ["51L", "51R", "52L", "52R", "61L", "61R", "62L", "62R"] }
+                ],
 
-                    this.selectedCargo = cargoId;
-                    this.selectedElement = element;
-                    element.classList.add('selected');
-
-                    // Highlight valid drop zones
-                    document.querySelectorAll('.cargo-slot:not(.occupied)').forEach(slot => {
-                        slot.classList.add('drop-target');
-                    });
+                selectCargo(container) {
+                    this.selectedCargo = container;
                 },
 
-                dropCargo(targetElement) {
-                    // Check if it's being dropped in the holding area
-                    if (targetElement.classList.contains('container')) {
-                        // Move container back to holding area
-                        this.moveToHoldingArea(targetElement);
-                    } else if (this.selectedCargo && !targetElement.classList.contains('occupied')) {
-                        // Drop in hold slot
-                        targetElement.innerHTML = `${this.selectedCargo} <br> <i class="bi bi-box-seam"></i>`;
-                        targetElement.classList.add('occupied');
-                        this.selectedElement.remove(); // Remove from holding area
-                        this.selectedCargo = null;
-                        this.selectedElement = null;
-                    }
-                },
+                dropCargo(slot) {
+                    if (!this.selectedCargo || !this.canDropHere(slot)) return;
 
-                moveToHoldingArea(targetElement) {
-                    // Move the container back to the holding area
-                    const containerElement = document.querySelector(`.container[data-id="${this.selectedCargo}"]`);
-                    this.selectedElement = null;
+                    let container = this.containers.find(c => c.id === this.selectedCargo.id);
+
+                    if (container.type === 'PMC') {
+                        // Assign PMC to two adjacent slots (vertical)
+                        let adjacentSlot = this.getVerticalAdjacentSlot(slot);
+                        if (!adjacentSlot) return;
+                        container.position = [slot, adjacentSlot];
+                    } else {
+                        // Assign AKE to a single slot
+                        container.position = [slot];
+                    }
+
                     this.selectedCargo = null;
+                    this.saveToLocalStorage();
+                },
 
-                    // Remove the selected element from the target slot
-                    targetElement.innerHTML = '';
+                canDropHere(slot) {
+                    if (!this.selectedCargo) return false;
 
-                    // Add the container back to the holding area (optional: create new elements or reuse existing)
-                    const holdingArea = document.querySelector('.holding-area');
-                    holdingArea.appendChild(containerElement);
-                    containerElement.classList.remove('selected');
+                    if (this.selectedCargo.type === 'PMC') {
+                        let adjacentSlot = this.getVerticalAdjacentSlot(slot);
+                        return adjacentSlot && !this.slotOccupied(slot) && !this.slotOccupied(adjacentSlot);
+                    }
+
+                    return !this.slotOccupied(slot);
+                },
+
+                getVerticalAdjacentSlot(slot) {
+                    let index = this.holds.flatMap(h => h.positions).indexOf(slot);
+                    let allSlots = this.holds.flatMap(h => h.positions);
+                    return allSlots[index + 4] || null; // Moves down by 4, assuming 4 columns per row
                 },
 
                 slotOccupied(slot) {
-                    return document.querySelector(`.cargo-slot[x-text="${slot}"]`).classList.contains('occupied');
+                    return this.containers.some(c => c.position && c.position.includes(slot));
+                },
+
+                getCargoInSlot(slot) {
+                    let container = this.containers.find(c => c.position && c.position.includes(slot));
+                    return container ? container.id : "";
+                },
+
+                moveToHoldingArea(containerId) {
+                    let container = this.containers.find(c => c.id === containerId);
+                    container.position = null;
+                    this.saveToLocalStorage();
+                },
+
+                saveToLocalStorage() {
+                    localStorage.setItem('containers', JSON.stringify(this.containers));
+                },
+
+                loadFromLocalStorage() {
+                    this.containers = JSON.parse(localStorage.getItem('containers')) || this.containers;
                 }
             };
         }

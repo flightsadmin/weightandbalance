@@ -70,6 +70,12 @@
             </a>
         </li>
         <li class="nav-item">
+            <a wire:click.prevent="setTab('loading')" href=""
+                class="nav-link {{ $activeTab === 'loading' ? 'active' : '' }}">
+                <i class="bi bi-speedometer2"></i> Loading
+            </a>
+        </li>
+        <li class="nav-item">
             <a wire:click.prevent="setTab('loadplan')" href=""
                 class="nav-link {{ $activeTab === 'loadplan' ? 'active' : '' }}">
                 <i class="bi bi-database-fill-add"></i> Loadplan
@@ -99,6 +105,8 @@
             <livewire:flight.boarding-control :flight="$flight" />
         @elseif ($activeTab === 'crew')
             <livewire:crew.manager :flight="$flight" />
+        @elseif ($activeTab === 'loading')
+            <livewire:flight.loading-manager :flight="$flight" />
         @elseif ($activeTab === 'loadplan')
             <livewire:flight.loadplan-manager :flight="$flight" />
         @elseif ($activeTab === 'loadsheet')
