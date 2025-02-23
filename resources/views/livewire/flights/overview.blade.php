@@ -88,7 +88,7 @@
                                                     <li>
                                                         <button class="dropdown-item"
                                                             wire:click="updateRegistration('{{ $registration->id }}')"
-                                                            wire:confirm="Are you sure you want to update the aircraft?">
+                                                            wire:confirm="Are you sure you want to update the aircraft? All containers will be moved to unplanned.">
                                                             {{ ucfirst($registration->registration_number) }}
                                                         </button>
                                                     </li>

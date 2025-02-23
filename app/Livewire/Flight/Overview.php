@@ -28,9 +28,17 @@ class Overview extends Component
         $this->flight->update(['status' => $status]);
     }
 
-    public function updateRegistration($reg)
+    public function updateRegistration($registrationId)
     {
-        $this->flight->update(['aircraft_id' => $reg]);
+        $loadplan = $this->flight->loadplans()->latest()->first();
+
+        if ($loadplan) {
+            $loadplan->update(['loading' => null]);
+        }
+
+        $this->flight->update(['aircraft_id' => $registrationId]);
+
+        $this->dispatch('alert', icon: 'success', message: 'Aircraft registration updated and all containers moved to unplanned.');
     }
 
     public function openTimeModal($flightId, $type)
