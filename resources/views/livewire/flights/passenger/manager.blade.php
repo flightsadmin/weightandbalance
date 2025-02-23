@@ -92,49 +92,19 @@
                                 </button>
                             </td>
                             <td>
-                                <div class="dropdown d-inline">
-                                    <button
-                                        class="btn btn-sm btn-{{ $passenger->acceptance_status === 'accepted' ? 'success' : ($passenger->acceptance_status === 'standby' ? 'warning' : 'danger') }} dropdown-toggle"
-                                        type="button" data-bs-toggle="dropdown">
-                                        {{ str_replace('_', ' ', ucwords($passenger->acceptance_status)) }}
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <button class="dropdown-item"
-                                                wire:click="updateAcceptanceStatus({{ $passenger->id }}, 'booked')">
-                                                <i class="bi bi-bookmark-check-fill text-secondary"></i> Booked
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button class="dropdown-item"
-                                                wire:click="updateAcceptanceStatus({{ $passenger->id }}, 'standby')">
-                                                <i class="bi bi-hourglass-split text-warning"></i> Standby
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button class="dropdown-item"
-                                                wire:click="updateAcceptanceStatus({{ $passenger->id }}, 'accepted')">
-                                                <i class="bi bi-check-circle text-success"></i> Accepted
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li>
-                                            <button class="dropdown-item"
-                                                wire:click="updateAcceptanceStatus({{ $passenger->id }}, 'offloaded')">
-                                                <i class="bi bi-x-circle text-danger"></i> Offloaded
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </div>
+                                <button class="btn btn-sm btn-{{ $passenger->acceptance_status === 'accepted' ? 'success' : 'warning' }}"
+                                    wire:click="startAcceptance({{ $passenger->id }})" data-bs-toggle="modal"
+                                    data-bs-target="#acceptanceModal">
+                                    <i class="bi bi-{{ $passenger->acceptance_status === 'accepted' ? 'check-lg' : 'person-check' }}"></i>
+                                    {{ ucfirst($passenger->acceptance_status) }}
+                                </button>
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-link" wire:click="edit({{ $passenger->id }})"
+                                <button class="btn btn-sm btn-link" wire:click="editPassenger({{ $passenger->id }})"
                                     data-bs-toggle="modal" data-bs-target="#passengerFormModal">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button class="btn btn-sm btn-link text-danger" wire:click="delete({{ $passenger->id }})"
+                                <button class="btn btn-sm btn-link text-danger" wire:click="deletePassenger({{ $passenger->id }})"
                                     wire:confirm="Are you sure you want to remove this passenger?">
                                     <i class="bi bi-trash"></i>
                                 </button>
@@ -166,106 +136,52 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Name</label>
-                                <input type="text" class="form-control form-control-sm" wire:model="form.name">
-                                @error('form.name')
+                                <input type="text" class="form-control form-control-sm" wire:model="passengerForm.name">
+                                @error('passengerForm.name')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Passenger Type</label>
-                                <select class="form-select form-select-sm" wire:model="form.type">
+                                <select class="form-select form-select-sm" wire:model="passengerForm.type">
                                     <option value="">Select Type</option>
                                     <option value="male">Adult Male</option>
                                     <option value="female">Adult Female</option>
                                     <option value="child">Child (2-11 yrs)</option>
                                     <option value="infant">Infant (0-2 yrs)</option>
                                 </select>
-                                @error('form.type')
+                                @error('passengerForm.type')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ticket Number</label>
-                                <input type="text" class="form-control form-control-sm" wire:model="form.ticket_number">
-                                @error('form.ticket_number')
+                                <input type="text" class="form-control form-control-sm" wire:model="passengerForm.ticket_number">
+                                @error('passengerForm.ticket_number')
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-6">
+                                <label class="form-label">PNR</label>
+                                <input type="text" class="form-control form-control-sm" wire:model="passengerForm.pnr">
+                                @error('passengerForm.pnr')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label">Special Requirements</label>
-                                <div class="row g-2">
-                                    <div class="col-md-3">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.wchr"
-                                                id="wchr">
-                                            <label class="form-check-label" for="wchr">WCHR</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.wchs"
-                                                id="wchs">
-                                            <label class="form-check-label" for="wchs">WCHS</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.wchc"
-                                                id="wchc">
-                                            <label class="form-check-label" for="wchc">WCHC</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.exst"
-                                                id="exst">
-                                            <label class="form-check-label" for="exst">EXST</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.stcr"
-                                                id="stcr">
-                                            <label class="form-check-label" for="stcr">STCR</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.deaf"
-                                                id="deaf">
-                                            <label class="form-check-label" for="deaf">Deaf</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.blind"
-                                                id="blind">
-                                            <label class="form-check-label" for="blind">Blind</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.dpna"
-                                                id="dpna">
-                                            <label class="form-check-label" for="dpna">DPNA</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" wire:model="form.attributes.meda"
-                                                id="meda">
-                                            <label class="form-check-label" for="meda">MEDA</label>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-check">
-                                                <input type="checkbox"
-                                                    class="form-check-input"
-                                                    wire:model.live="form.attributes.infant"
-                                                    id="infant">
-                                                <label class="form-check-label" for="infant">Infant</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @if ($form['attributes']['infant'])
-                                        <div class="col-md-12 mt-2">
-                                            <label class="form-label">Infant Name</label>
-                                            <input type="text"
-                                                class="form-control form-control-sm"
-                                                wire:model="form.attributes.infant_name"
-                                                placeholder="Enter infant name"
-                                                autofocus>
-                                        </div>
-                                    @endif
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" wire:model.live="passengerForm.attributes.infant">
+                                    <label class="form-check-label">Infant</label>
                                 </div>
                             </div>
+                            @if ($passengerForm['attributes']['infant'])
+                                <div class="col-md-6">
+                                    <label class="form-label">Infant Name</label>
+                                    <input type="text" class="form-control form-control-sm"
+                                        wire:model.live="passengerForm.attributes.infant_name">
+                                </div>
+                            @endif
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -483,6 +399,164 @@
         </div>
     </div>
 
+    <!-- Acceptance Modal -->
+    <div class="modal fade" id="acceptanceModal" tabindex="-1" wire:ignore.self>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Passenger Check-in</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    @if ($acceptingPassenger)
+                        <div class="passenger-info mb-2">
+                            <h6>Passenger Information</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <th>Name:</th>
+                                            <td>{{ $acceptingPassenger->name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>PNR:</th>
+                                            <td>{{ $acceptingPassenger->pnr }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Ticket:</th>
+                                            <td>{{ $acceptingPassenger->ticket_number }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <th>Type:</th>
+                                            <td>{{ ucfirst($acceptingPassenger->type) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Seat:</th>
+                                            <td>{{ $acceptingPassenger->flight_seat }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Baggage:</th>
+                                            <td>{{ $acceptingPassenger->baggage->count() }}
+                                                {{ $acceptingPassenger->baggage->count() > 1 ? 'bags' : 'bag' }}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="documents-section mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6>Travel Document</h6>
+                                @if (empty($acceptanceForm['documents']['travel_documents']))
+                                    <button type="button" class="btn btn-sm btn-secondary" wire:click="addTravelDocument">
+                                        <i class="bi bi-plus-lg"></i> Add Travel Document
+                                    </button>
+                                @else
+                                    <button type="button" class="btn btn-sm btn-danger" wire:click="removeTravelDocument">
+                                        <i class="bi bi-trash"></i> Remove Travel Document
+                                    </button>
+                                @endif
+                            </div>
+
+                            @forelse ($acceptanceForm['documents']['travel_documents'] as $index => $document)
+                                <div class="card mb-2">
+                                    <div class="card-body">
+                                        <div class="row g-2">
+                                            <div class="col-md-4">
+                                                <label class="form-label">Type</label>
+                                                <select class="form-select form-select-sm"
+                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.type">
+                                                    <option value="passport">Passport</option>
+                                                    <option value="national_id">National ID</option>
+                                                    <option value="residence_permit">Residence Permit</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Number</label>
+                                                <input type="text" class="form-control form-control-sm"
+                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.number">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Nationality</label>
+                                                <input type="text" class="form-control form-control-sm"
+                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.nationality">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Issue Date</label>
+                                                <input type="date" class="form-control form-control-sm"
+                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.issue_date">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Expiry Date</label>
+                                                <input type="date" class="form-control form-control-sm"
+                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.expiry_date">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Issuing Country</label>
+                                                <input type="text" class="form-control form-control-sm"
+                                                    wire:model="acceptanceForm.documents.travel_documents.{{ $index }}.issuing_country">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-muted">No travel documents added</div>
+                            @endforelse
+                        </div>
+
+                        <div class="special-requirements mb-2">
+                            <h6>Special Requirements</h6>
+                            <div class="row g-2">
+                                @foreach (['wchr', 'wchs', 'wchc', 'exst', 'stcr', 'deaf', 'blind', 'dpna', 'meda', 'infant'] as $requirement)
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                wire:model.live="acceptanceForm.attributes.{{ $requirement }}">
+                                            <label class="form-check-label">
+                                                <i
+                                                    class="bi bi-{{ match ($requirement) {
+                                                        'wchr', 'wchs', 'wchc' => 'person-wheelchair',
+                                                        'exst' => 'door-open',
+                                                        'stcr' => 'h-circle-fill',
+                                                        'deaf' => 'ear',
+                                                        'blind' => 'eye-fill',
+                                                        'dpna' => 'person-arms-up',
+                                                        'meda' => 'heart-pulse-fill',
+                                                        default => 'person-check',
+                                                    } }}"></i>
+                                                {{ strtoupper($requirement) }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        @if ($acceptingPassenger->attributes['infant'])
+                            <div class="infant-section mb-4">
+                                <h6>Infant Information</h6>
+                                <p><strong>Name:</strong> {{ $acceptingPassenger->attributes['infant_name'] }}</p>
+                            </div>
+                        @endif
+                    @endif
+                </div>
+                <div class="modal-footer d-flex justify-content-between align-items-center">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success" wire:click="acceptPassenger">
+                        <i class="bi bi-check-lg"></i> Accept Passenger
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
         .seat-container {
             display: flex;
@@ -551,15 +625,16 @@
     @script
         <script>
             $wire.on('passenger-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('passengerFormModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('passengerFormModal')).hide();
             });
             $wire.on('baggage-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('baggageModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('baggageModal')).hide();
             });
             $wire.on('seat-saved', () => {
                 bootstrap.Modal.getInstance(document.getElementById('seatModal')).hide();
+            });
+            $wire.on('passenger-accepted', () => {
+                bootstrap.Modal.getInstance(document.getElementById('acceptanceModal')).hide();
             });
         </script>
     @endscript

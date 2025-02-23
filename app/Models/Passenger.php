@@ -27,11 +27,12 @@ class Passenger extends Model
 
     protected $casts = [
         'attributes' => 'array',
+        'documents' => 'array'
     ];
 
     protected $attributes = [
-        'attributes' => '{"wchr": false, "wchs": false, "wchc": false, "exst": false, "stcr": false, "deaf": false, "blind": false, "dpna": false, "meda": false, "infant": false
-        }',
+        'attributes' => '{"wchr": false, "wchs": false, "wchc": false, "exst": false, "stcr": false, "deaf": false, "blind": false, "dpna": false, "meda": false, "infant": false}',
+        'documents' => '{"travel_documents": [], "visas": []}'
     ];
 
     public function flight(): BelongsTo

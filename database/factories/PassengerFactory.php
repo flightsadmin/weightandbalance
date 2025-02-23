@@ -35,15 +35,44 @@ class PassengerFactory extends Factory
             'infant_name' => null,
         ];
 
+        // Generate realistic travel documents
+        $documents = [
+            'travel_documents' => [
+                [
+                    'type' => fake()->randomElement(['passport', 'national_id', 'residence_permit']),
+                    'number' => strtoupper(fake()->bothify('??#####??')),
+                    'issuing_country' => fake()->countryCode(),
+                    'nationality' => fake()->countryCode(),
+                    'issue_date' => fake()->dateTimeBetween('-5 years', '-1 year')->format('Y-m-d'),
+                    'expiry_date' => fake()->dateTimeBetween('+1 year', '+10 years')->format('Y-m-d'),
+                ]
+            ],
+            'visas' => []
+        ];
+
+        // Add visa for some passengers
+        if (fake()->boolean(30)) {
+            $documents['visas'][] = [
+                'type' => fake()->randomElement(['tourist', 'business', 'transit']),
+                'number' => strtoupper(fake()->bothify('???####??')),
+                'issuing_country' => fake()->countryCode(),
+                'entries' => fake()->randomElement(['single', 'multiple']),
+                'issue_date' => fake()->dateTimeBetween('-1 year', 'now')->format('Y-m-d'),
+                'expiry_date' => fake()->dateTimeBetween('+1 month', '+1 year')->format('Y-m-d'),
+                'duration_of_stay' => fake()->numberBetween(1, 90)
+            ];
+        }
+
         return [
             'flight_id' => null,
             'name' => fake()->name(),
             'type' => $type,
-            'pnr' => strtoupper(fake()->bothify('??###?')),
+            'pnr' => strtoupper(fake()->bothify('??????')),
             'ticket_number' => fake()->numerify('###-##########'),
-            'acceptance_status' => fake()->randomElement(['pending', 'accepted', 'rejected']),
+            'acceptance_status' => 'pending',
             'boarding_status' => 'pending',
             'attributes' => $attributes,
+            'documents' => $documents
         ];
     }
 
@@ -82,7 +111,7 @@ class PassengerFactory extends Factory
                     ->first();
 
                 // If no adult found, create one
-                if (! $adult) {
+                if (!$adult) {
                     $adult = Passenger::factory()->state([
                         'flight_id' => $passenger->flight_id,
                         'type' => fake()->randomElement(['male', 'female']),
@@ -98,7 +127,7 @@ class PassengerFactory extends Factory
             // If this is an adult, randomly assign an infant
             elseif (in_array($passenger->type, ['male', 'female']) && fake()->boolean(20)) {
                 // Only create infant if adult doesn't already have one
-                if (! ($passenger->attributes['infant'] ?? false)) {
+                if (!($passenger->attributes['infant'] ?? false)) {
                     Passenger::factory()->infant()->create([
                         'flight_id' => $passenger->flight_id,
                     ]);

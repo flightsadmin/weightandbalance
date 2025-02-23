@@ -33,24 +33,16 @@ class Manager extends Component
     public $pieces = '';
 
     public $weight = '';
+    public $canAcceptPassenger = false;
 
-    public $form = [
+    public $passengerForm = [
         'name' => '',
-        'ticket_number' => '',
-        'reservation_number' => '',
         'type' => '',
+        'pnr' => '',
+        'ticket_number' => '',
         'attributes' => [
-            'wchr' => false,
-            'wchs' => false,
-            'wchc' => false,
-            'exst' => false,
-            'stcr' => false,
-            'deaf' => false,
-            'blind' => false,
-            'dpna' => false,
-            'meda' => false,
             'infant' => false,
-            'infant_name' => '',
+            'infant_name' => null
         ],
     ];
 
@@ -66,23 +58,40 @@ class Manager extends Component
         'seat_id' => null,
     ];
 
+    public $acceptingPassenger = null;
+    public $acceptanceForm = [
+        'documents' => [
+            'travel_documents' => [],
+            'visas' => []
+        ],
+        'attributes' => [
+            'wchr' => false,
+            'wchs' => false,
+            'wchc' => false,
+            'exst' => false,
+            'stcr' => false,
+            'deaf' => false,
+            'blind' => false,
+            'dpna' => false,
+            'meda' => false,
+        ],
+    ];
+
     public function mount(Flight $flight)
     {
-        $this->flight = $flight->load([
-            'passengers.seat',
-            'aircraft.type.cabinZones.seats',
-        ])->loadCount([
-            'passengers',
-            'passengers as accepted_count' => function ($query) {
-                $query->where('acceptance_status', 'accepted');
-            },
-            'passengers as standby_count' => function ($query) {
-                $query->where('acceptance_status', 'standby');
-            },
-            'passengers as offloaded_count' => function ($query) {
-                $query->where('acceptance_status', 'offloaded');
-            },
-        ]);
+        $this->flight = $flight->load(['passengers.seat', 'aircraft.type.cabinZones.seats',])
+            ->loadCount([
+                'passengers',
+                'passengers as accepted_count' => function ($query) {
+                    $query->where('acceptance_status', 'accepted');
+                },
+                'passengers as standby_count' => function ($query) {
+                    $query->where('acceptance_status', 'standby');
+                },
+                'passengers as offloaded_count' => function ($query) {
+                    $query->where('acceptance_status', 'offloaded');
+                },
+            ]);
     }
 
     public function loadSeats()
@@ -112,10 +121,10 @@ class Manager extends Component
         return collect();
     }
 
-    public function edit(Passenger $passenger)
+    public function editPassenger(Passenger $passenger)
     {
         $this->passenger = $passenger;
-        $this->form = $passenger->only(['name', 'ticket_number', 'reservation_number', 'type', 'attributes']);
+        $this->passengerForm = $passenger->only(['name', 'ticket_number', 'pnr', 'type', 'attributes']);
         $this->showForm = true;
     }
 
@@ -123,13 +132,12 @@ class Manager extends Component
     {
         $this->validate(
             [
-                'form.name' => 'required|string|max:255',
-                'form.ticket_number' => 'nullable|string|max:14',
-                'form.reservation_number' => 'nullable|string|max:6',
-                'form.type' => 'required|in:male,female,child,infant',
-                'form.attributes' => 'array',
-                'form.attributes.infant_name' => 'required_if:form.attributes.infant,true|string|max:50',
-                'seatForm.seat_id' => 'nullable|exists:seats,id',
+                'passengerForm.name' => 'required|string|max:255',
+                'passengerForm.pnr' => 'nullable|string|max:6',
+                'passengerForm.ticket_number' => 'nullable|string|max:14',
+                'passengerForm.type' => 'required|in:male,female,child,infant',
+                'passengerForm.attributes.infant' => 'required|boolean',
+                'passengerForm.attributes.infant_name' => 'required_if:passengerForm.attributes.infant,true|string|max:255',
             ]
         );
 
@@ -138,39 +146,23 @@ class Manager extends Component
                 'id' => $this->passenger->id,
             ],
             [
-                'name' => $this->form['name'],
-                'ticket_number' => $this->form['ticket_number'],
-                'reservation_number' => $this->form['reservation_number'],
-                'type' => $this->form['type'],
-                'acceptance_status' => 'pending',
-                'boarding_status' => 'unboarded',
-                'attributes' => $this->form['attributes'],
+                'name' => $this->passengerForm['name'],
+                'ticket_number' => $this->passengerForm['ticket_number'],
+                'pnr' => $this->passengerForm['pnr'],
+                'type' => $this->passengerForm['type'],
+                'attributes' => $this->passengerForm['attributes'],
             ]
         );
 
-        $this->reset('form', 'showForm');
+        $this->reset('passengerForm', 'showForm');
         $this->dispatch('alert', icon: 'success', message: 'Passenger added successfully.');
         $this->dispatch('passenger-saved');
     }
 
-    public function delete(Passenger $passenger)
+    public function deletePassenger(Passenger $passenger)
     {
         $passenger->delete();
         $this->dispatch('alert', icon: 'success', message: 'Passenger deleted successfully.');
-        $this->dispatch('passenger-saved');
-    }
-
-    public function updateAcceptanceStatus(Passenger $passenger, $status)
-    {
-        $passenger->update([
-            'acceptance_status' => $status,
-        ]);
-
-        $this->dispatch(
-            'alert',
-            icon: 'success',
-            message: ucfirst($status).' passenger successfully.'
-        );
         $this->dispatch('passenger-saved');
     }
 
@@ -180,7 +172,7 @@ class Manager extends Component
         for ($i = 0; $i < $this->pieces; $i++) {
             $this->editingPassenger->baggage()->create([
                 'flight_id' => $this->editingPassenger->flight->id,
-                'tag_number' => $this->editingPassenger->flight->airline->iata_code.str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
+                'tag_number' => $this->editingPassenger->flight->airline->iata_code . str_pad(Baggage::max('id') + 1, 6, '0', STR_PAD_LEFT),
                 'weight' => $this->weight / $this->pieces,
             ]);
         }
@@ -220,13 +212,13 @@ class Manager extends Component
 
     public function assignSeat()
     {
-        if (! $this->editingPassenger) {
+        if (!$this->editingPassenger) {
             $this->dispatch('alert', icon: 'error', message: 'No passenger selected.');
 
             return;
         }
 
-        if (! $this->selectedSeat) {
+        if (!$this->selectedSeat) {
             $this->dispatch('alert', icon: 'error', message: 'Please select a seat.');
 
             return;
@@ -234,13 +226,13 @@ class Manager extends Component
 
         $seat = Seat::findOrFail($this->selectedSeat);
 
-        if (! $seat->isAvailable($this->flight)) {
+        if (!$seat->isAvailable($this->flight)) {
             $this->dispatch('alert', icon: 'error', message: 'This seat is not available.');
 
             return;
         }
 
-        if (! $this->flight->seats()->where('seat_id', $seat->id)->exists()) {
+        if (!$this->flight->seats()->where('seat_id', $seat->id)->exists()) {
             $this->flight->seats()->attach($seat->id, [
                 'is_blocked' => false,
                 'created_at' => now(),
@@ -268,43 +260,11 @@ class Manager extends Component
         $this->dispatch('passenger-saved');
     }
 
-    public function blockSeat($seatId)
-    {
-        if (! $this->flight->seats()->where('seat_id', $seatId)->exists()) {
-            $this->flight->seats()->attach($seatId, [
-                'is_blocked' => true,
-                'blocked_reason' => 'Blocked by staff',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } else {
-            $this->flight->seats()->updateExistingPivot($seatId, [
-                'is_blocked' => true,
-                'blocked_reason' => 'Blocked by staff',
-            ]);
-        }
-
-        $this->dispatch('alert', icon: 'success', message: 'Seat blocked successfully.');
-        $this->dispatch('passenger-saved');
-    }
-
-    public function unblockSeat($seatId)
-    {
-        $this->flight->seats()->updateExistingPivot($seatId, [
-            'is_blocked' => false,
-            'blocked_reason' => null,
-        ]);
-
-        $this->dispatch('alert', icon: 'success', message: 'Seat unblocked successfully.');
-        $this->dispatch('passenger-saved');
-    }
-
     public function toggleSeatBlock($seatId)
     {
         $seat = Seat::find($seatId);
-        if (! $seat) {
+        if (!$seat) {
             $this->dispatch('alert', icon: 'error', message: 'Seat not found');
-
             return;
         }
 
@@ -315,23 +275,84 @@ class Manager extends Component
         }
 
         $flightSeat = $this->flight->seats()->wherePivot('seat_id', $seatId)->first();
-
-        if (! $flightSeat) {
-            $this->flight->seats()->attach($seatId, ['is_blocked' => true, 'blocked_reason' => 'Blocked by staff']);
+        if (!$flightSeat) {
+            $this->flight->seats()->attach($seatId, [
+                'is_blocked' => true,
+                'blocked_reason' => 'Blocked by staff',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             $isBlocked = true;
         } else {
-            $isBlocked = ! $flightSeat->pivot->is_blocked;
+            $isBlocked = !$flightSeat->pivot->is_blocked;
             $this->flight->seats()->updateExistingPivot($seatId, [
                 'is_blocked' => $isBlocked,
                 'blocked_reason' => $isBlocked ? 'Blocked by staff' : null,
             ]);
         }
 
-        $this->dispatch(
-            'alert',
-            icon: 'success',
-            message: $isBlocked ? 'Seat blocked successfully' : 'Seat unblocked successfully'
-        );
+        $this->dispatch('alert', icon: 'success', message: $isBlocked ? 'Seat blocked successfully' : 'Seat unblocked successfully');
+    }
+
+    public function startAcceptance(Passenger $passenger)
+    {
+        $this->acceptingPassenger = $passenger;
+
+        $this->acceptanceForm = [
+            'documents' => $passenger->documents ?? [
+                'travel_documents' => [],
+                'visas' => []
+            ],
+            'attributes' => $passenger->attributes,
+            'status' => 'standby'
+        ];
+    }
+
+    public function addTravelDocument()
+    {
+        if (empty($this->acceptanceForm['documents']['travel_documents'])) {
+            $this->acceptanceForm['documents']['travel_documents'][] = [
+                'type' => 'passport',
+                'number' => '',
+                'issuing_country' => '',
+                'nationality' => '',
+                'issue_date' => '',
+                'expiry_date' => ''
+            ];
+        } else {
+            $this->dispatch('alert', icon: 'error', message: 'Travel document already exists');
+        }
+    }
+
+    public function removeTravelDocument()
+    {
+        $this->acceptanceForm['documents']['travel_documents'] = [];
+        $this->acceptingPassenger->update([
+            'documents' => null,
+        ]);
+    }
+
+    public function acceptPassenger()
+    {
+        if (!$this->acceptingPassenger) {
+            $this->dispatch('alert', icon: 'error', message: 'No passenger selected');
+            return;
+        }
+
+        if (empty($this->acceptanceForm['documents']['travel_documents'])) {
+            $this->dispatch('alert', icon: 'error', message: 'Travel document is required');
+            return;
+        }
+
+        $this->acceptingPassenger->update([
+            'acceptance_status' => 'accepted',
+            'documents' => $this->acceptanceForm['documents'],
+            'attributes' => $this->acceptanceForm['attributes']
+        ]);
+
+        $this->dispatch('alert', icon: 'success', message: 'Passenger Accepted');
+        $this->dispatch('passenger-accepted');
+        $this->reset(['acceptingPassenger', 'acceptanceForm']);
     }
 
     #[On('passenger-saved')]
@@ -342,7 +363,7 @@ class Manager extends Component
             ->withCount('baggage');
 
         if ($this->search) {
-            $query->where('name', 'like', '%'.$this->search.'%');
+            $query->where('name', 'like', '%' . $this->search . '%');
         }
 
         if ($this->type) {
