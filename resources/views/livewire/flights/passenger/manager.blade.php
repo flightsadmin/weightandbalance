@@ -185,7 +185,7 @@
                                     <input type="text" class="form-control form-control-sm"
                                         wire:model.live="passengerForm.special_requirements.infant_name">
                                     @error('passengerForm.special_requirements.infant_name')
-                                        <div class="text-danger small">{{ $message }}</div>
+                                        <div class="text-danger small">{{ 'Please enter the name of the infant' }}</div>
                                     @enderror
                                 </div>
                             @endif
