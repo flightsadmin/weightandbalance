@@ -115,7 +115,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Index</label>
-                                    <input type="number" step="0.0001" class="form-control form-control-sm"
+                                    <input type="number" step="0.00001" class="form-control form-control-sm"
                                         wire:model="holdForm.index" required>
                                     @error('holdForm.index')
                                         <div class="text-danger small">{{ $message }}</div>
@@ -187,7 +187,7 @@
                                                             @enderror
                                                         </td>
                                                         <td>
-                                                            <input type="number" step="0.0001" class="form-control form-control-sm"
+                                                            <input type="number" step="0.00001" class="form-control form-control-sm"
                                                                 wire:model="holdForm.positions.{{ $index }}.index">
                                                             @error("holdForm.positions.{$index}.index")
                                                                 <div class="text-danger small">{{ $message }}</div>

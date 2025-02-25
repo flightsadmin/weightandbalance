@@ -25,7 +25,6 @@ class LoadingManager extends Component
 
         $this->loadplan = $flight->loadplans()->latest()->first();
 
-        // Format holds data for Alpine
         $this->holds = $this->flight->aircraft->type->holds->map(function ($hold) {
             return [
                 'id' => $hold->id,
@@ -38,7 +37,6 @@ class LoadingManager extends Component
             ];
         })->toArray();
 
-        // Format containers data for Alpine
         $this->containers = $this->flight->containers->map(function ($container) {
             return [
                 'id' => $container->id,

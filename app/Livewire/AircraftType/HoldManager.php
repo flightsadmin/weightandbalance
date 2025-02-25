@@ -19,7 +19,7 @@ class HoldManager extends Component
         'code' => 'FH',
         'position' => 1,
         'max_weight' => 2000,
-        'index' => 0.9001,
+        'index' => 0.00001,
         'is_active' => true,
         'positions' => [],
     ];
@@ -28,12 +28,12 @@ class HoldManager extends Component
         'holdForm.name' => 'required|string|max:255',
         'holdForm.code' => 'required|string|max:10',
         'holdForm.position' => 'required|integer|min:1',
+        'holdForm.index' => 'required|numeric',
         'holdForm.max_weight' => 'required|numeric|min:0',
-        'holdForm.index' => 'required|numeric|min:0',
         'holdForm.is_active' => 'boolean',
         'holdForm.positions.*.row' => 'required|integer|min:1',
         'holdForm.positions.*.side' => 'nullable|in:L,R',
-        'holdForm.positions.*.index' => 'required|numeric|min:0',
+        'holdForm.positions.*.index' => 'required|numeric',
         'holdForm.positions.*.max_weight' => 'required|numeric|min:0',
         'holdForm.positions.*.is_active' => 'boolean',
     ];
@@ -83,7 +83,7 @@ class HoldManager extends Component
                 'row' => $lastRow + 1,
                 'side' => null,
                 'max_weight' => 2000,
-                'index' => 0.9001,
+                'index' => 0.00001,
                 'is_active' => true,
             ];
         } else {
@@ -91,14 +91,14 @@ class HoldManager extends Component
                 'row' => $lastRow + 1,
                 'side' => 'L',
                 'max_weight' => 2000,
-                'index' => 0.9001,
+                'index' => 0.00001,
                 'is_active' => true,
             ];
             $this->holdForm['positions'][] = [
                 'row' => $lastRow + 1,
                 'side' => 'R',
                 'max_weight' => 2000,
-                'index' => 0.9001,
+                'index' => 0.00001,
                 'is_active' => true,
             ];
         }
@@ -123,6 +123,7 @@ class HoldManager extends Component
 
         $hold->positions()->delete();
         foreach ($this->holdForm['positions'] as $position) {
+            $position['code'] = $position['row'] . $position['side'];
             $hold->positions()->create($position);
         }
 

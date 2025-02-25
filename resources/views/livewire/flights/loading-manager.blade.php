@@ -309,7 +309,7 @@
             background: #f8f9fa;
             padding: 10px;
             width: 100%;
-            min-height: 100px;
+            min-height: 200px;
             align-items: start;
             text-align: center;
             display: grid;
@@ -358,10 +358,7 @@
             padding: 5px;
             background: #f8f9fa;
             flex-shrink: 0;
-            width: 360px;
-            min-width: 360px;
-            max-width: 360px;
-            margin: 0 10px;
+            margin: 0 1px;
             display: flex;
             flex-direction: column;
         }
@@ -469,8 +466,10 @@
 
         .unplanned-area .container {
             width: auto;
-            height: 70px;
-            font-size: 11px;
+            padding-top: 2px;
+            padding-bottom: 2px;
+            border-radius: 5px;
+            font-size: 10px;
         }
 
         .cargo-slot:hover,
