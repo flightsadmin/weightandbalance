@@ -20,7 +20,7 @@ class LoadingManager extends Component
     {
         $this->flight = $flight->load([
             'aircraft.type.holds.positions',
-            'containers' => fn ($q) => $q->withPivot(['type', 'pieces', 'weight', 'status', 'position_id']),
+            'containers' => fn($q) => $q->withPivot(['type', 'pieces', 'weight', 'status', 'position_id']),
         ]);
 
         $this->loadplan = $flight->loadplans()->latest()->first();
@@ -31,7 +31,7 @@ class LoadingManager extends Component
                 'id' => $hold->id,
                 'name' => $hold->name,
                 'max_weight' => $hold->max_weight,
-                'positions' => $hold->positions->map(fn ($pos) => [
+                'positions' => $hold->positions->map(fn($pos) => [
                     'id' => $pos->id,
                     'designation' => $pos->code,
                 ])->toArray(),
@@ -47,7 +47,10 @@ class LoadingManager extends Component
                 'weight' => $container->pivot->weight,
                 'pieces' => $container->pivot->pieces,
                 'position' => $container->pivot->position_id,
+                'position_code' => $container->pivot->position_id,
                 'status' => $container->pivot->status,
+                'destination' => $this->flight->arrival_airport,
+                'updated_at' => now()->toDateTimeString(),
             ];
         })->toArray();
     }
@@ -89,7 +92,7 @@ class LoadingManager extends Component
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', message: 'Failed to save load plan');
-            \Log::error('Failed to save loadplan: '.$e->getMessage());
+            \Log::error('Failed to save loadplan: ' . $e->getMessage());
         }
     }
 
@@ -117,7 +120,7 @@ class LoadingManager extends Component
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', message: 'Failed to reset load plan');
-            \Log::error('Failed to reset loadplan: '.$e->getMessage());
+            \Log::error('Failed to reset loadplan: ' . $e->getMessage());
         }
     }
 
