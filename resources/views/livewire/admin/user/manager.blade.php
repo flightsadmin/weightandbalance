@@ -40,13 +40,13 @@
                                     @endforeach
                                 </td>
                                 <td>
-                                    @if (auth()->user()->canEditUser($user))
+                                    @can('editUser')
                                         <button wire:click="toggleStatus({{ $user->id }})"
                                             @if ($user->hasRole('super-admin') && !auth()->user()->hasRole('super-admin')) disabled @endif
                                             class="btn btn-sm btn-{{ $user->active ? 'success' : 'danger' }}">
                                             {{ $user->active ? 'Active' : 'Inactive' }}
                                         </button>
-                                    @endif
+                                    @endcan
                                 </td>
                                 <td>
                                     @can('editUser')
