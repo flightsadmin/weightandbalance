@@ -5,6 +5,16 @@
         selectedContainer: null,
         localStorageKey: 'loadplan-' + @js($flight->id),
         showWeightSummary: false,
+        showAssignModal: false,
+        searchQuery: '',
+        searchResults: [],
+        newContainer: {
+            uld_code: '',
+            type: 'AKE',
+            weight: 0,
+            pieces: 0,
+            content_type: 'cargo',
+        },
     
         init() {
             this.loadFromStorage();
@@ -46,19 +56,13 @@
                     return;
                 }
     
-                if (this.selectedContainer.type === 'PMC') {
-                    const otherSide = this.getOtherSidePosition(position);
-                    if (!otherSide) {
-                        this.$dispatch('notify', {
-                            type: 'error',
-                            message: 'PMC requires two adjacent positions'
-                        });
-                        return;
-                    }
-                    this.selectedContainer.position = [position.id, otherSide.id];
-                } else {
-                    this.selectedContainer.position = [position.id];
-                }
+                const hold = this.holds.find(h => h.positions.some(p => p.id === position.id));
+    
+                // Update container position
+                this.selectedContainer.position = position.id;
+                this.selectedContainer.position_code = position.designation;
+                this.selectedContainer.hold_name = hold.name;
+                this.selectedContainer.updated_at = new Date().toISOString();
     
                 this.saveState();
                 this.selectedContainer = null;
@@ -79,6 +83,8 @@
             if (!container) return;
     
             container.position = null;
+            container.position_code = null;
+            container.hold_name = null;
             this.selectedContainer = null;
             this.saveState();
             this.calculateWeights();
@@ -104,18 +110,16 @@
         },
     
         isPositionOccupied(position) {
-            return this.containers.some(c => c.position?.includes(position.id));
+            return this.containers.some(c => c.position === position.id);
         },
     
         getContainerInPosition(position) {
-            return this.containers.find(c => c.position?.includes(position.id));
+            return this.containers.find(c => c.position === position.id);
         },
     
         getHoldWeight(hold) {
             return this.containers
-                .filter(c => c.position?.some(p =>
-                    hold.positions.some(pos => pos.id === p)
-                ))
+                .filter(c => hold.positions.some(pos => pos.id === c.position))
                 .reduce((sum, container) => sum + (container.weight || 0), 0);
         },
     
@@ -152,6 +156,68 @@
                 hold.currentWeight = this.getHoldWeight(hold);
                 hold.utilization = this.getHoldUtilization(hold);
             });
+        },
+    
+        async searchContainers() {
+            if (!this.searchQuery.trim()) {
+                this.searchResults = [];
+                return;
+            }
+            this.searchResults = await this.$wire.searchContainers(this.searchQuery);
+        },
+    
+        async attachContainer(container) {
+            await this.$wire.attachContainer(container.id);
+            this.searchResults = this.searchResults.filter(c => c.id !== container.id);
+            if (this.searchResults.length === 0) {
+                this.searchQuery = '';
+            }
+        },
+    
+        addContainer() {
+            if (!this.newContainer.uld_code) {
+                this.$dispatch('notify', {
+                    type: 'error',
+                    message: 'ULD code is required'
+                });
+                return;
+            }
+    
+            if (this.newContainer.weight <= 0) {
+                this.$dispatch('notify', {
+                    type: 'error',
+                    message: 'Weight must be greater than 0'
+                });
+                return;
+            }
+    
+            // Add new container to the list
+            const newContainerId = Date.now(); // Temporary ID for new container
+            this.containers.push({
+                id: newContainerId,
+                uld_code: this.newContainer.uld_code,
+                type: this.newContainer.type,
+                weight: parseFloat(this.newContainer.weight),
+                pieces: parseInt(this.newContainer.pieces),
+                position: null,
+                position_code: null,
+                status: 'unloaded',
+                destination: @js($flight->arrival_airport),
+                content_type: this.newContainer.content_type,
+                updated_at: new Date().toISOString(),
+            });
+    
+            // Reset form and close modal
+            this.newContainer = {
+                uld_code: '',
+                type: 'AKE',
+                weight: 0,
+                pieces: 0,
+                content_type: 'cargo',
+            };
+            this.showAssignModal = false;
+            this.saveState();
+            this.calculateWeights();
         }
     }">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -162,6 +228,9 @@
                 </span>
             </div>
             <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-success" @click="showAssignModal = true">
+                    <i class="bi bi-plus-circle"></i> Attach Container
+                </button>
                 <button class="btn btn-sm btn-outline-primary" @click="showWeightSummary = !showWeightSummary">
                     <i class="bi bi-clipboard-data"></i> Weight Summary
                 </button>
@@ -171,6 +240,67 @@
                 <button class="btn btn-sm btn-danger" @click="resetState(); $wire.resetLoadplan()">
                     <i class="bi bi-arrow-counterclockwise"></i> Reset
                 </button>
+            </div>
+        </div>
+
+        <!-- Container Assignment Modal -->
+        <div class="modal fade" :class="{ 'show': showAssignModal }" x-show="showAssignModal"
+            tabindex="-1" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Attach Container</h5>
+                        <button type="button" class="btn-close" @click="showAssignModal = false"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Search Container</label>
+                            <div class="input-group">
+                                <input type="text"
+                                    class="form-control"
+                                    x-model="searchQuery"
+                                    @input.debounce="searchContainers"
+                                    placeholder="Enter ULD number">
+                                <button class="btn btn-outline-secondary" type="button" @click="searchContainers">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="search-results mt-3" x-show="searchResults.length > 0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ULD Number</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="container in searchResults" :key="container.id">
+                                            <tr>
+                                                <td x-text="container.container_number"></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"
+                                                        @click="attachContainer(container)"
+                                                        :disabled="containers.some(c => c.id === container.id)">
+                                                        <i class="bi bi-plus-circle"></i>
+                                                        <span x-text="containers.some(c => c.id === container.id) ? 'Attached' : 'Attach'">
+                                                        </span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div x-show="searchQuery && !searchResults.length" class="text-center py-3">
+                            <p class="text-muted">No containers found</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -713,36 +843,15 @@
             transition: all 0.2s ease;
         }
 
-        .unplanned-area .container .container-info {
-            line-height: 1.2;
-        }
-
-        .unplanned-area .container .container-id {
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .unplanned-area .container .container-type,
-        .unplanned-area .container .container-weight {
-            font-size: 0.65rem;
-        }
-
         .unplanned-area .container:hover {
             transform: translateY(-2px);
+            background: #a4c0dd;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .unplanned-area .container.selected {
-            background-color: #e7f1ff;
+            background-color: #93bdf8;
             border-color: #0d6efd;
-        }
-
-        .pmc-container {
-            border-color: #fd7e14 !important;
-        }
-
-        .ake-container {
-            border-color: #0dcaf0 !important;
         }
 
         .baggage-container {

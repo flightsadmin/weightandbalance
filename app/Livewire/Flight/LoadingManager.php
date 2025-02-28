@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Flight;
 
+use App\Models\Container;
 use App\Models\Flight;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class LoadingManager extends Component
@@ -58,29 +60,57 @@ class LoadingManager extends Component
         try {
             DB::beginTransaction();
 
+            $formattedContainers = collect($containers)->mapWithKeys(function ($container) {
+                $hold = collect($this->holds)->first(function ($hold) use ($container) {
+                    return collect($hold['positions'])->pluck('id')->contains($container['position']);
+                });
+
+                return [
+                    $container['id'] => [
+                        'pieces' => $container['pieces'],
+                        'weight' => $container['weight'],
+                        'hold_name' => $hold ? $hold['name'] : null,
+                        'updated_at' => now()->toDateTimeString(),
+                        'destination' => $container['destination'],
+                        'position_id' => $container['position'],
+                        'content_type' => $container['type'],
+                        'position_code' => $container['position_code'],
+                        'container_number' => $container['uld_code'],
+                    ]
+                ];
+            })->toArray();
+
+            $loadingData = [
+                'containers' => $formattedContainers,
+                'holds' => collect($this->holds)->map(function ($hold) use ($containers) {
+                    $holdWeight = collect($containers)
+                        ->filter(function ($container) use ($hold) {
+                            return collect($hold['positions'])->pluck('id')->contains($container['position']);
+                        })
+                        ->sum('weight');
+
+                    return array_merge($hold, [
+                        'current_weight' => $holdWeight,
+                        'utilization' => ($holdWeight / $hold['max_weight']) * 100
+                    ]);
+                })->toArray(),
+            ];
+
             if ($this->loadplan) {
                 $this->loadplan->update([
-                    'loading' => [
-                        'containers' => $containers,
-                        'holds' => $this->holds,
-                    ],
+                    'loading' => $loadingData,
                     'last_modified_by' => auth()->id(),
                 ]);
             } else {
-                // Create new loadplan if none exists
                 $this->loadplan = $this->flight->loadplans()->create([
-                    'loading' => [
-                        'containers' => $containers,
-                        'holds' => $this->holds,
-                    ],
+                    'loading' => $loadingData,
                     'last_modified_by' => auth()->id(),
                 ]);
             }
 
-            // Update container positions
             foreach ($containers as $container) {
                 $this->flight->containers()->updateExistingPivot($container['id'], [
-                    'position_id' => $container['position'] ? $container['position'][0] : null,
+                    'position_id' => $container['position'],
                     'status' => $container['position'] ? 'loaded' : 'unloaded',
                 ]);
             }
@@ -119,6 +149,58 @@ class LoadingManager extends Component
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', message: 'Failed to reset load plan');
             \Log::error('Failed to reset loadplan: ' . $e->getMessage());
+        }
+    }
+
+    public function searchContainers($query)
+    {
+        if (empty($query)) {
+            return [];
+        }
+
+        return Container::where('container_number', 'like', "%{$query}%")
+            ->limit(5)
+            ->get()
+            ->map(function ($container) {
+                return [
+                    'id' => $container->id,
+                    'container_number' => $container->container_number,
+                ];
+            });
+    }
+
+    public function attachContainer($containerId, $type = 'cargo')
+    {
+        try {
+            DB::beginTransaction();
+
+            $container = Container::findOrFail($containerId);
+            $this->flight->containers()->attach($containerId, [
+                'type' => $type,
+                'weight' => $container->tare_weight,
+                'pieces' => 0,
+                'status' => 'unloaded',
+            ]);
+
+            $this->containers[] = [
+                'id' => $container->id,
+                'uld_code' => $container->container_number,
+                'type' => $type,
+                'weight' => $container->weight,
+                'pieces' => 0,
+                'position' => null,
+                'position_code' => null,
+                'status' => 'unloaded',
+                'destination' => $this->flight->arrival_airport,
+                'updated_at' => now()->toDateTimeString(),
+            ];
+
+            DB::commit();
+            $this->dispatch('alert', icon: 'success', message: 'Container attached successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('alert', icon: 'error', message: 'Failed to attach container');
+            \Log::error('Failed to attach container: ' . $e->getMessage());
         }
     }
 
