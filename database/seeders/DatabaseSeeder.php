@@ -12,6 +12,7 @@ use App\Models\Crew;
 use App\Models\Flight;
 use App\Models\Fuel;
 use App\Models\Passenger;
+use App\Models\Setting;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -19,6 +20,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         Airline::factory()->create()->each(function ($airline) {
+
             AircraftType::factory()->forAirline($airline)->create()->each(function ($aircraftType) use ($airline) {
                 Aircraft::factory(3)->create([
                     'airline_id' => $airline->id,
@@ -71,6 +73,7 @@ class DatabaseSeeder extends Seeder
             AircraftConfigSeeder::class,
             EnvelopeSeeder::class,
             CrewSeatingSeeder::class,
+            UldTypeSeeder::class,
         ]);
     }
 }

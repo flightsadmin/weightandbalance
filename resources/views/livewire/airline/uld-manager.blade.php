@@ -218,7 +218,7 @@
     <!-- ULD Units Modal -->
     <div class="modal fade" id="uldUnitsModal" tabindex="-1" aria-labelledby="uldUnitsModalLabel" aria-hidden="true"
         wire:ignore.self>
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="uldUnitsModalLabel">
@@ -232,7 +232,7 @@
                     @if ($selectedUldType)
                         <form wire:submit.prevent="createUldUnit" class="mb-4">
                             <div class="row g-3">
-                                <div class="col-md-8">
+                                <div class="col-md-6">
                                     <label class="form-label">Unit Number</label>
                                     <input type="text" class="form-control form-control-sm"
                                         wire:model="uldUnitForm.number" placeholder="Enter unit number (e.g. PMC-12345)">
@@ -240,7 +240,7 @@
                                         <div class="text-danger small">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label class="form-label">Serviceable</label>
                                     <div class="form-check form-switch">
                                         <input class="form-check-input form-check-input-sm" type="checkbox"
