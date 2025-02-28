@@ -231,154 +231,166 @@
                 </div>
 
                 <!-- Holds Layout -->
-                <div class="holds-wrapper-scroll">
-                    <div class="holds-wrapper">
-                        <template x-for="hold in holds" :key="hold.id">
-                            <div class="hold-container" :class="{ 'bulk': hold.name.includes('Bulk') }">
-                                <div class="hold-header">
-                                    <div class="d-flex justify-content-between align-items-center px-2">
-                                        <span x-text="hold.name"></span>
-                                        <div class="weight-badge" :class="{ 'text-danger': isHoldOverweight(hold) }">
-                                            <span x-text="getHoldWeight(hold)"></span>/<span x-text="hold.max_weight"></span>kg
+                <div class="card">
+                    <div class="card-body">
+                        <div class="holds-wrapper-scroll">
+                            <div class="holds-wrapper">
+                                <template x-for="hold in holds" :key="hold.id">
+                                    <div class="hold-container" :class="{ 'bulk': hold.name.includes('Bulk') }">
+                                        <div class="hold-header">
+                                            <div class="d-flex justify-content-between align-items-center px-2">
+                                                <span x-text="hold.name"></span>
+                                                <div class="weight-badge" :class="{ 'text-danger': isHoldOverweight(hold) }">
+                                                    <span x-text="getHoldWeight(hold)"></span>/<span x-text="hold.max_weight"></span>kg
+                                                </div>
+                                            </div>
+                                            <div class="progress mt-1" style="height: 4px;">
+                                                <div class="progress-bar"
+                                                    :class="{
+                                                        'bg-success': getHoldUtilization(hold) < 80,
+                                                        'bg-warning': getHoldUtilization(hold) >= 80 && getHoldUtilization(hold) < 95,
+                                                        'bg-danger': getHoldUtilization(hold) >= 95
+                                                    }"
+                                                    :style="'width: ' + getHoldUtilization(hold) + '%'">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="cargo-row" :class="{ 'bulk': hold.name.includes('Bulk') }">
+                                            <!-- Left Side Positions -->
+                                            <div class="position-column left" x-show="!hold.name.includes('Bulk')">
+                                                <template x-for="position in hold.positions.filter(p => p.designation.endsWith('L'))"
+                                                    :key="position.id">
+                                                    <div class="cargo-slot"
+                                                        :class="{
+                                                            'occupied': isPositionOccupied(position),
+                                                            'drop-target': selectedContainer && canDropHere(position),
+                                                            'selected': getContainerInPosition(position)?.id === selectedContainer?.id,
+                                                            'pmc': getContainerInPosition(position)?.type === 'PMC',
+                                                            'ake': getContainerInPosition(position)?.type === 'AKE',
+                                                            'cargo': getContainerInPosition(position)?.type === 'cargo',
+                                                            'baggage': getContainerInPosition(position)?.type === 'baggage'
+                                                        }"
+                                                        :data-side="position.designation"
+                                                        @click="handlePositionClick(position)"
+                                                        @dblclick="handleDoubleClick(position)">
+                                                        <template x-if="getContainerInPosition(position)">
+                                                            <div class="container-info">
+                                                                <span class="position-number" x-text="position.designation"></span>
+                                                                <div class="container-id"
+                                                                    x-text="getContainerInPosition(position).uld_code">
+                                                                </div>
+                                                                <div class="container-type"
+                                                                    x-text="getContainerInPosition(position).pieces > 0 ? 
+                                                                getContainerInPosition(position).type + ' (' + getContainerInPosition(position).pieces + 'pcs)' : 
+                                                                'Empty'">
+                                                                </div>
+                                                                <div class="container-weight">
+                                                                    <i class="bi"
+                                                                        :class="getContainerInPosition(position).type === 'baggage' ?
+                                                                            'bi-luggage' :
+                                                                            'bi-box-seam'"></i>
+                                                                    <span x-text="getContainerInPosition(position).weight + 'kg'"></span>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                        <template x-if="!getContainerInPosition(position)">
+                                                            <span class="position-code" x-text="position.designation"></span>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+
+                                            <!-- Right Side Positions -->
+                                            <div class="position-column right" x-show="!hold.name.includes('Bulk')">
+                                                <template x-for="position in hold.positions.filter(p => p.designation.endsWith('R'))"
+                                                    :key="position.id">
+                                                    <div class="cargo-slot"
+                                                        :class="{
+                                                            'occupied': isPositionOccupied(position),
+                                                            'drop-target': selectedContainer && canDropHere(position),
+                                                            'selected': getContainerInPosition(position)?.id === selectedContainer?.id,
+                                                            'pmc': getContainerInPosition(position)?.type === 'PMC',
+                                                            'ake': getContainerInPosition(position)?.type === 'AKE',
+                                                            'cargo': getContainerInPosition(position)?.type === 'cargo',
+                                                            'baggage': getContainerInPosition(position)?.type === 'baggage'
+                                                        }"
+                                                        :data-side="position.designation"
+                                                        @click="handlePositionClick(position)"
+                                                        @dblclick="handleDoubleClick(position)">
+                                                        <template x-if="getContainerInPosition(position)">
+                                                            <div class="container-info">
+                                                                <span class="position-number" x-text="position.designation"></span>
+                                                                <div class="container-id"
+                                                                    x-text="getContainerInPosition(position).uld_code">
+                                                                </div>
+                                                                <div class="container-type"
+                                                                    x-text="getContainerInPosition(position).pieces > 0 ? 
+                                                                getContainerInPosition(position).type + ' (' + getContainerInPosition(position).pieces + 'pcs)' : 
+                                                                'Empty'">
+                                                                </div>
+                                                                <div class="container-weight">
+                                                                    <i class="bi"
+                                                                        :class="getContainerInPosition(position).type === 'baggage' ?
+                                                                            'bi-luggage' :
+                                                                            'bi-box-seam'"></i>
+                                                                    <span x-text="getContainerInPosition(position).weight + 'kg'"></span>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                        <template x-if="!getContainerInPosition(position)">
+                                                            <span class="position-code" x-text="position.designation"></span>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+
+                                            <!-- Bulk Positions -->
+                                            <div class="position-column center" x-show="hold.name.includes('Bulk')">
+                                                <template x-for="position in hold.positions" :key="position.id">
+                                                    <div class="cargo-slot"
+                                                        :class="{
+                                                            'occupied': isPositionOccupied(position),
+                                                            'drop-target': selectedContainer && canDropHere(position),
+                                                            'selected': getContainerInPosition(position)?.id === selectedContainer?.id,
+                                                            'ake': getContainerInPosition(position)?.type === 'AKE',
+                                                            'cargo': getContainerInPosition(position)?.type === 'cargo',
+                                                            'baggage': getContainerInPosition(position)?.type === 'baggage'
+                                                        }"
+                                                        :data-side="position.designation"
+                                                        @click="handlePositionClick(position)"
+                                                        @dblclick="handleDoubleClick(position)">
+                                                        <template x-if="getContainerInPosition(position)">
+                                                            <div class="container-info">
+                                                                <span class="position-number" x-text="position.designation"></span>
+                                                                <div class="container-id"
+                                                                    x-text="getContainerInPosition(position).uld_code">
+                                                                </div>
+                                                                <div class="container-type"
+                                                                    x-text="getContainerInPosition(position).pieces > 0 ? 
+                                                                getContainerInPosition(position).type + ' (' + getContainerInPosition(position).pieces + 'pcs)' : 
+                                                                'Empty'">
+                                                                </div>
+                                                                <div class="container-weight">
+                                                                    <i class="bi"
+                                                                        :class="getContainerInPosition(position).type === 'baggage' ?
+                                                                            'bi-luggage' :
+                                                                            'bi-box-seam'"></i>
+                                                                    <span x-text="getContainerInPosition(position).weight + 'kg'"></span>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                        <template x-if="!getContainerInPosition(position)">
+                                                            <span class="position-code" x-text="position.designation"></span>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="progress mt-1" style="height: 4px;">
-                                        <div class="progress-bar"
-                                            :class="{
-                                                'bg-success': getHoldUtilization(hold) < 80,
-                                                'bg-warning': getHoldUtilization(hold) >= 80 && getHoldUtilization(hold) < 95,
-                                                'bg-danger': getHoldUtilization(hold) >= 95
-                                            }"
-                                            :style="'width: ' + getHoldUtilization(hold) + '%'">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="cargo-row" :class="{ 'bulk': hold.name.includes('Bulk') }">
-                                    <!-- Left Side Positions -->
-                                    <div class="position-column left" x-show="!hold.name.includes('Bulk')">
-                                        <template x-for="position in hold.positions.filter(p => p.designation.endsWith('L'))"
-                                            :key="position.id">
-                                            <div class="cargo-slot"
-                                                :class="{
-                                                    'occupied': isPositionOccupied(position),
-                                                    'drop-target': selectedContainer && canDropHere(position),
-                                                    'selected': getContainerInPosition(position)?.id === selectedContainer?.id,
-                                                    'pmc': getContainerInPosition(position)?.type === 'PMC',
-                                                    'ake': getContainerInPosition(position)?.type === 'AKE',
-                                                    'cargo': getContainerInPosition(position)?.type === 'cargo',
-                                                    'baggage': getContainerInPosition(position)?.type === 'baggage'
-                                                }"
-                                                :data-side="position.designation"
-                                                @click="handlePositionClick(position)"
-                                                @dblclick="handleDoubleClick(position)">
-                                                <template x-if="getContainerInPosition(position)">
-                                                    <div class="container-info">
-                                                        <span class="position-number" x-text="position.designation"></span>
-                                                        <div class="container-id" x-text="getContainerInPosition(position).uld_code"></div>
-                                                        <div class="container-type"
-                                                            x-text="getContainerInPosition(position).pieces > 0 ? 
-                                                                getContainerInPosition(position).type + ' (' + getContainerInPosition(position).pieces + 'pcs)' : 
-                                                                'Empty'">
-                                                        </div>
-                                                        <div class="container-weight">
-                                                            <i class="bi"
-                                                                :class="getContainerInPosition(position).type === 'baggage' ? 'bi-luggage' :
-                                                                    'bi-box-seam'"></i>
-                                                            <span x-text="getContainerInPosition(position).weight + 'kg'"></span>
-                                                        </div>
-                                                    </div>
-                                                </template>
-                                                <template x-if="!getContainerInPosition(position)">
-                                                    <span class="position-code" x-text="position.designation"></span>
-                                                </template>
-                                            </div>
-                                        </template>
-                                    </div>
-
-                                    <!-- Right Side Positions -->
-                                    <div class="position-column right" x-show="!hold.name.includes('Bulk')">
-                                        <template x-for="position in hold.positions.filter(p => p.designation.endsWith('R'))"
-                                            :key="position.id">
-                                            <div class="cargo-slot"
-                                                :class="{
-                                                    'occupied': isPositionOccupied(position),
-                                                    'drop-target': selectedContainer && canDropHere(position),
-                                                    'selected': getContainerInPosition(position)?.id === selectedContainer?.id,
-                                                    'pmc': getContainerInPosition(position)?.type === 'PMC',
-                                                    'ake': getContainerInPosition(position)?.type === 'AKE',
-                                                    'cargo': getContainerInPosition(position)?.type === 'cargo',
-                                                    'baggage': getContainerInPosition(position)?.type === 'baggage'
-                                                }"
-                                                :data-side="position.designation"
-                                                @click="handlePositionClick(position)"
-                                                @dblclick="handleDoubleClick(position)">
-                                                <template x-if="getContainerInPosition(position)">
-                                                    <div class="container-info">
-                                                        <span class="position-number" x-text="position.designation"></span>
-                                                        <div class="container-id" x-text="getContainerInPosition(position).uld_code"></div>
-                                                        <div class="container-type"
-                                                            x-text="getContainerInPosition(position).pieces > 0 ? 
-                                                                getContainerInPosition(position).type + ' (' + getContainerInPosition(position).pieces + 'pcs)' : 
-                                                                'Empty'">
-                                                        </div>
-                                                        <div class="container-weight">
-                                                            <i class="bi"
-                                                                :class="getContainerInPosition(position).type === 'baggage' ? 'bi-luggage' :
-                                                                    'bi-box-seam'"></i>
-                                                            <span x-text="getContainerInPosition(position).weight + 'kg'"></span>
-                                                        </div>
-                                                    </div>
-                                                </template>
-                                                <template x-if="!getContainerInPosition(position)">
-                                                    <span class="position-code" x-text="position.designation"></span>
-                                                </template>
-                                            </div>
-                                        </template>
-                                    </div>
-
-                                    <!-- Bulk Positions -->
-                                    <div class="position-column center" x-show="hold.name.includes('Bulk')">
-                                        <template x-for="position in hold.positions" :key="position.id">
-                                            <div class="cargo-slot"
-                                                :class="{
-                                                    'occupied': isPositionOccupied(position),
-                                                    'drop-target': selectedContainer && canDropHere(position),
-                                                    'selected': getContainerInPosition(position)?.id === selectedContainer?.id,
-                                                    'ake': getContainerInPosition(position)?.type === 'AKE',
-                                                    'cargo': getContainerInPosition(position)?.type === 'cargo',
-                                                    'baggage': getContainerInPosition(position)?.type === 'baggage'
-                                                }"
-                                                :data-side="position.designation"
-                                                @click="handlePositionClick(position)"
-                                                @dblclick="handleDoubleClick(position)">
-                                                <template x-if="getContainerInPosition(position)">
-                                                    <div class="container-info">
-                                                        <span class="position-number" x-text="position.designation"></span>
-                                                        <div class="container-id" x-text="getContainerInPosition(position).uld_code">
-                                                        </div>
-                                                        <div class="container-type"
-                                                            x-text="getContainerInPosition(position).pieces > 0 ? 
-                                                                getContainerInPosition(position).type + ' (' + getContainerInPosition(position).pieces + 'pcs)' : 
-                                                                'Empty'">
-                                                        </div>
-                                                        <div class="container-weight">
-                                                            <i class="bi"
-                                                                :class="getContainerInPosition(position).type === 'baggage' ? 'bi-luggage' :
-                                                                    'bi-box-seam'"></i>
-                                                            <span x-text="getContainerInPosition(position).weight + 'kg'"></span>
-                                                        </div>
-                                                    </div>
-                                                </template>
-                                                <template x-if="!getContainerInPosition(position)">
-                                                    <span class="position-code" x-text="position.designation"></span>
-                                                </template>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
+                                </template>
                             </div>
-                        </template>
+                        </div>
                     </div>
                 </div>
 
