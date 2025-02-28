@@ -2,6 +2,7 @@
     <div class="card" x-data="{
         holds: @js($holds),
         containers: @js($containers),
+        initialState: JSON.stringify(@js($containers)),
         selectedContainer: null,
         localStorageKey: 'loadplan-' + @js($flight->id),
         showWeightSummary: false,
@@ -20,6 +21,11 @@
             this.loadFromStorage();
             this.$wire.on('resetAlpineState', () => this.resetState());
             this.calculateWeights();
+        },
+    
+        hasChanges() {
+            const currentState = JSON.stringify(this.containers);
+            return currentState !== this.initialState;
         },
     
         loadFromStorage() {
@@ -143,12 +149,14 @@
             this.containers.forEach(c => c.position = null);
             this.selectedContainer = null;
             localStorage.removeItem(this.localStorageKey);
+            this.initialState = JSON.stringify(this.containers);
             this.calculateWeights();
         },
     
         async saveToServer() {
             await this.$wire.saveLoadplan(this.containers);
             localStorage.removeItem(this.localStorageKey);
+            this.initialState = JSON.stringify(this.containers);
             this.loadFromStorage();
             this.calculateWeights();
         },
@@ -255,11 +263,15 @@
                 <button class="btn btn-sm btn-outline-primary" @click="showWeightSummary = !showWeightSummary">
                     <i class="bi bi-clipboard-data"></i> Weight Summary
                 </button>
-                <button class="btn btn-sm btn-primary" @click="saveToServer">
-                    <i class="bi bi-save"></i> Save Load Plan
+                <button class="btn btn-sm btn-outline-success"
+                    @click="saveToServer"
+                    :disabled="!hasChanges()"
+                    :class="{ 'opacity-50': !hasChanges() }">
+                    <i class="bi bi-check-circle"></i> Finalize Load Plan
                 </button>
-                <button class="btn btn-sm btn-danger" @click="resetState(); $wire.resetLoadplan()">
-                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                <button class="btn btn-sm btn-outline-danger"
+                    @click="resetState(); $wire.resetLoadplan()">
+                    <i class="bi bi-arrow-counterclockwise"></i> Offload All
                 </button>
             </div>
         </div>
