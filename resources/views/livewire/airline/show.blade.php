@@ -27,6 +27,12 @@
                         <i class="bi bi-gear"></i> Settings
                     </button>
                 </li>
+                <li class="nav-item">
+                    <button class="nav-link {{ $activeTab === 'uld_types' ? 'active' : '' }}"
+                        wire:click="$set('activeTab', 'uld_types')">
+                        <i class="bi bi-box-seam"></i> ULD Types
+                    </button>
+                </li>
             </ul>
 
             @if ($activeTab === 'overview')
@@ -182,6 +188,23 @@
                                                                     class="badge bg-{{ $settings[$settingCategory][$key] ? 'success' : 'danger' }}">
                                                                     {{ $settings[$settingCategory][$key] ? 'Yes' : 'No' }}
                                                                 </span>
+                                                            @elseif ($config['type'] === 'json')
+                                                                @php
+                                                                    $value = $settings[$settingCategory][$key] ?? $config['default'];
+                                                                @endphp
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <div class="p-2 rounded"
+                                                                        style="background-color: {{ $value['color'] }}">
+                                                                        <i class="bi bi-{{ $value['icon'] }} text-white"></i>
+                                                                    </div>
+                                                                    <div>
+                                                                        <strong>{{ $value['name'] }}</strong><br>
+                                                                        <small class="text-muted">
+                                                                            Max: {{ $value['max_gross_weight'] }}kg
+                                                                            (Tare: {{ $value['tare_weight'] }}kg)
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
                                                             @else
                                                                 {{ $settings[$settingCategory][$key] }}
                                                             @endif
@@ -191,12 +214,10 @@
                                                     </td>
                                                     <td>{{ $config['type'] }}</td>
                                                     <td>{{ $config['description'] }}</td>
-                                                    <td>
+                                                    <td class="text-end">
                                                         <button class="btn btn-sm btn-primary"
-                                                            wire:click="editSetting('{{ $settingCategory }}', '{{ $key }}', {{ json_encode($config) }})"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#settingModal">
-                                                            <i class="bi bi-pencil"></i> Edit
+                                                            wire:click="editSetting('{{ $settingCategory }}', '{{ $key }}', {{ json_encode($config) }})">
+                                                            <i class="bi bi-pencil"></i>
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -210,13 +231,13 @@
                 </div>
 
                 <!-- Setting Modal -->
-                <div class="modal fade" id="settingModal" tabindex="-1" wire:ignore.self>
+                <div class="modal fade" id="settingModal" tabindex="-1" wire:model="showSettingModal" wire:ignore.self>
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <form wire:submit="saveSetting">
                                 <div class="modal-header">
                                     <h5 class="modal-title">Edit Setting</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <button type="button" class="btn-close" wire:click="closeModal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="mb-3">
@@ -225,6 +246,8 @@
                                             <div class="form-check form-switch">
                                                 <input class="form-check-input" type="checkbox" wire:model="form.value">
                                             </div>
+                                        @elseif ($form['type'] === 'json')
+                                            <textarea class="form-control form-control-sm" rows="10" wire:model="form.value"></textarea>
                                         @else
                                             <input
                                                 type="{{ $form['type'] === 'float' || $form['type'] === 'integer' ? 'number' : 'text' }}"
@@ -241,7 +264,7 @@
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <button type="button" class="btn btn-secondary" wire:click="closeModal">
                                         Cancel
                                     </button>
                                     <button type="submit" class="btn btn-primary">
@@ -252,15 +275,224 @@
                         </div>
                     </div>
                 </div>
+            @elseif ($activeTab === 'uld_types')
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title m-0">ULD Types</h5>
+                        <button class="btn btn-primary btn-sm" wire:click="createUldType" data-bs-toggle="modal"
+                            data-bs-target="#uldTypeModal">
+                            <i class="bi bi-plus-lg"></i> Add ULD Type
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                        <th>Weights</th>
+                                        <th>Positions</th>
+                                        <th>Allowed Holds</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($uldTypes as $key => $value)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="p-2 rounded" style="background-color: {{ $value['color'] }}">
+                                                        <i class="bi bi-{{ $value['icon'] }} text-white"></i>
+                                                    </div>
+                                                    <strong>{{ $value['code'] }}</strong>
+                                                </div>
+                                            </td>
+                                            <td>{{ $value['name'] }}</td>
+                                            <td>
+                                                <div class="small">
+                                                    <div>Max: {{ $value['max_gross_weight'] }}kg</div>
+                                                    <div class="text-muted">Tare: {{ $value['tare_weight'] }}kg</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="small">
+                                                    <div>Required: {{ $value['positions_required'] }}</div>
+                                                    <div class="text-muted">
+                                                        @if ($value['restrictions']['requires_adjacent_positions'])
+                                                            <span class="badge bg-info">Adjacent</span>
+                                                        @endif
+                                                        @if ($value['restrictions']['requires_vertical_positions'])
+                                                            <span class="badge bg-info">Vertical</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @foreach ($value['allowed_holds'] as $hold)
+                                                    <span class="badge bg-secondary">{{ $hold }}</span>
+                                                @endforeach
+                                            </td>
+                                            <td>
+                                                <div class="d-flex justify-content-end gap-1">
+                                                    <button class="btn btn-sm btn-primary"
+                                                        wire:click="editUldType('{{ $key }}')"
+                                                        data-bs-toggle="modal" data-bs-target="#uldTypeModal">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger"
+                                                        wire:click="deleteUldType('{{ $key }}')"
+                                                        wire:confirm="Are you sure you want to delete this ULD type?">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
-                @script
-                    <script>
-                        $wire.on('setting-saved', () => {
-                            bootstrap.Modal.getInstance(document.getElementById('settingModal')).hide();
-                        });
-                    </script>
-                @endscript
+                <!-- ULD Type Modal -->
+                <div class="modal fade" id="uldTypeModal" tabindex="-1" aria-labelledby="uldTypeModalLabel" aria-hidden="true"
+                    wire:ignore.self>
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <form wire:submit.prevent="saveUldType">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="uldTypeModalLabel">{{ $editingUldKey ? 'Edit' : 'Create' }} ULD Type</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Code</label>
+                                            <input type="text" class="form-control"
+                                                wire:model="uldForm.code"
+                                                {{ $editingUldKey ? 'readonly' : '' }}
+                                                maxlength="3">
+                                            @error('uldForm.code')
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Name</label>
+                                            <input type="text" class="form-control" wire:model="uldForm.name">
+                                            @error('uldForm.name')
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tare Weight (kg)</label>
+                                            <input type="number" class="form-control" wire:model="uldForm.tare_weight" step="0.1">
+                                            @error('uldForm.tare_weight')
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Max Gross Weight (kg)</label>
+                                            <input type="number" class="form-control" wire:model="uldForm.max_gross_weight"
+                                                step="0.1">
+                                            @error('uldForm.max_gross_weight')
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Required Positions</label>
+                                            <input type="number" class="form-control" wire:model="uldForm.positions_required"
+                                                min="1"
+                                                max="2">
+                                            @error('uldForm.positions_required')
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Color</label>
+                                            <input type="color" class="form-control form-control-color w-100"
+                                                wire:model="uldForm.color">
+                                            @error('uldForm.color')
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Icon</label>
+                                            <select class="form-select" wire:model="uldForm.icon">
+                                                <option value="box-seam">Box</option>
+                                                <option value="luggage">Luggage</option>
+                                                <option value="box-seam-fill">Box (Filled)</option>
+                                                <option value="container">Container</option>
+                                            </select>
+                                            @error('uldForm.icon')
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Allowed Holds</label>
+                                            <div class="d-flex gap-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" wire:model="uldForm.allowed_holds"
+                                                        value="FWD">
+                                                    <label class="form-check-label">FWD</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" wire:model="uldForm.allowed_holds"
+                                                        value="AFT">
+                                                    <label class="form-check-label">AFT</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" wire:model="uldForm.allowed_holds"
+                                                        value="BULK">
+                                                    <label class="form-check-label">BULK</label>
+                                                </div>
+                                            </div>
+                                            @error('uldForm.allowed_holds')
+                                                <div class="text-danger small">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">Restrictions</label>
+                                            <div class="d-flex gap-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        wire:model="uldForm.restrictions.requires_adjacent_positions">
+                                                    <label class="form-check-label">Requires Adjacent Positions</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        wire:model="uldForm.restrictions.requires_vertical_positions">
+                                                    <label class="form-check-label">Requires Vertical Positions</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        {{ $editingUldKey ? 'Save Changes' : 'Create ULD Type' }}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             @endif
         </div>
     </div>
 </div>
+
+@script
+    <script>
+        $wire.on('uld-saved', () => {
+            bootstrap.Modal.getInstance(document.getElementById('uldTypeModal')).hide();
+        });
+
+        $wire.on('setting-saved', () => {
+            bootstrap.Modal.getInstance(document.getElementById('settingModal')).hide();
+        });
+    </script>
+@endscript
