@@ -148,7 +148,9 @@
     
         async saveToServer() {
             await this.$wire.saveLoadplan(this.containers);
-            this.saveState();
+            localStorage.removeItem(this.localStorageKey);
+            this.loadFromStorage();
+            this.calculateWeights();
         },
     
         calculateWeights() {
@@ -167,10 +169,29 @@
         },
     
         async attachContainer(container) {
-            await this.$wire.attachContainer(container.id);
-            this.searchResults = this.searchResults.filter(c => c.id !== container.id);
-            if (this.searchResults.length === 0) {
-                this.searchQuery = '';
+            const response = await this.$wire.attachContainer(container.id);
+    
+            if (response.success) {
+                // Add the new container to the containers list
+                this.containers.push(response.container);
+    
+                // Mark the container as attached in search results
+                const resultContainer = this.searchResults.find(c => c.id === container.id);
+                if (resultContainer) {
+                    resultContainer.attached = true;
+                }
+    
+                // Show success message
+                this.$dispatch('notify', {
+                    type: 'success',
+                    message: response.message
+                });
+            } else {
+                // Show error message
+                this.$dispatch('notify', {
+                    type: 'error',
+                    message: response.message
+                });
             }
         },
     
@@ -255,12 +276,9 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Search Container</label>
-                            <div class="input-group">
-                                <input type="text"
-                                    class="form-control"
-                                    x-model="searchQuery"
-                                    @input.debounce="searchContainers"
-                                    placeholder="Enter ULD number">
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control form-control-sm"
+                                    x-model="searchQuery" @input.debounce="searchContainers" placeholder="Enter ULD number">
                                 <button class="btn btn-outline-secondary" type="button" @click="searchContainers">
                                     <i class="bi bi-search"></i>
                                 </button>
@@ -273,6 +291,7 @@
                                     <thead>
                                         <tr>
                                             <th>ULD Number</th>
+                                            <th>Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -281,12 +300,21 @@
                                             <tr>
                                                 <td x-text="container.container_number"></td>
                                                 <td>
-                                                    <button class="btn btn-sm btn-primary"
+                                                    <span x-show="containers.some(c => c.id === container.id)"
+                                                        class="badge bg-success">Attached</span>
+                                                    <span x-show="!containers.some(c => c.id === container.id)"
+                                                        class="badge bg-secondary">Available</span>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm"
+                                                        :class="containers.some(c => c.id === container.id) ? 'btn-success' : 'btn-primary'"
                                                         @click="attachContainer(container)"
                                                         :disabled="containers.some(c => c.id === container.id)">
-                                                        <i class="bi bi-plus-circle"></i>
-                                                        <span x-text="containers.some(c => c.id === container.id) ? 'Attached' : 'Attach'">
-                                                        </span>
+                                                        <i class="bi"
+                                                            :class="containers.some(c => c.id === container.id) ? 'bi-check-circle' :
+                                                                'bi-plus-circle'"></i>
+                                                        <span
+                                                            x-text="containers.some(c => c.id === container.id) ? 'Attached' : 'Attach'"></span>
                                                     </button>
                                                 </td>
                                             </tr>
@@ -527,7 +555,7 @@
                 <!-- Unplanned Items -->
                 <div class="unplanned-section mt-3">
                     <div class="row g-3">
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             <div class="card h-100">
                                 <div class="card-header py-2">
                                     <h6 class="card-title m-0">Available ULDs</h6>
@@ -563,46 +591,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card h-100">
-                                <div class="card-header py-2">
-                                    <h6 class="card-title m-0">Hold Summary</h6>
-                                </div>
-                                <div class="card-body p-2">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm table-hover mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Hold</th>
-                                                    <th class="text-end">Weight</th>
-                                                    <th class="text-end">%</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <template x-for="hold in holds" :key="hold.id">
-                                                    <tr>
-                                                        <td x-text="hold.name"></td>
-                                                        <td class="text-end">
-                                                            <span x-text="getHoldWeight(hold)"></span>/<span
-                                                                x-text="hold.max_weight"></span>
-                                                        </td>
-                                                        <td class="text-end">
-                                                            <span
-                                                                :class="{
-                                                                    'text-success': getHoldUtilization(hold) < 80,
-                                                                    'text-warning': getHoldUtilization(hold) >= 80 && getHoldUtilization(
-                                                                        hold) < 95,
-                                                                    'text-danger': getHoldUtilization(hold) >= 95
-                                                                }"
-                                                                x-text="Math.round(getHoldUtilization(hold)) + '%'"></span>
-                                                        </td>
-                                                    </tr>
-                                                </template>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-md-6">
+                            <livewire:container.manager :flight="$flight" /> {{--  --}}
                         </div>
                     </div>
                 </div>

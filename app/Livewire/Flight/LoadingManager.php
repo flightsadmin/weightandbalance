@@ -117,6 +117,7 @@ class LoadingManager extends Component
 
             DB::commit();
             $this->dispatch('alert', icon: 'success', message: 'Load plan saved successfully');
+            $this->dispatch('container_position_updated');
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', message: 'Failed to save load plan');
@@ -144,6 +145,7 @@ class LoadingManager extends Component
 
             DB::commit();
             $this->dispatch('resetAlpineState');
+            $this->dispatch('container_position_updated');
             $this->dispatch('alert', icon: 'success', message: 'Load plan reset successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -175,6 +177,15 @@ class LoadingManager extends Component
             DB::beginTransaction();
 
             $container = Container::findOrFail($containerId);
+
+            // Check if container is already attached
+            if ($this->flight->containers()->where('container_id', $containerId)->exists()) {
+                return [
+                    'success' => false,
+                    'message' => 'Container is already attached to this flight'
+                ];
+            }
+
             $this->flight->containers()->attach($containerId, [
                 'type' => $type,
                 'weight' => $container->tare_weight,
@@ -182,11 +193,11 @@ class LoadingManager extends Component
                 'status' => 'unloaded',
             ]);
 
-            $this->containers[] = [
+            $newContainer = [
                 'id' => $container->id,
                 'uld_code' => $container->container_number,
                 'type' => $type,
-                'weight' => $container->weight,
+                'weight' => $container->tare_weight,
                 'pieces' => 0,
                 'position' => null,
                 'position_code' => null,
@@ -196,11 +207,19 @@ class LoadingManager extends Component
             ];
 
             DB::commit();
-            $this->dispatch('alert', icon: 'success', message: 'Container attached successfully');
+
+            return [
+                'success' => true,
+                'message' => 'Container attached successfully',
+                'container' => $newContainer
+            ];
+
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->dispatch('alert', icon: 'error', message: 'Failed to attach container');
-            \Log::error('Failed to attach container: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Failed to attach container'
+            ];
         }
     }
 
