@@ -129,8 +129,7 @@
     @script
         <script>
             $wire.on('role-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('roleFormModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('roleFormModal')).hide();
             });
         </script>
     @endscript

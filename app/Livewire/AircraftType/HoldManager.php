@@ -123,7 +123,7 @@ class HoldManager extends Component
 
         $hold->positions()->delete();
         foreach ($this->holdForm['positions'] as $position) {
-            $position['code'] = $position['row'] . $position['side'];
+            $position['code'] = $position['row'].$position['side'];
             $hold->positions()->create($position);
         }
 

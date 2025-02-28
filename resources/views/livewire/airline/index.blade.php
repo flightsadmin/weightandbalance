@@ -190,8 +190,7 @@
     @script
         <script>
             $wire.on('airline-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('airlineFormModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('airlineFormModal')).hide();
             });
         </script>
     @endscript

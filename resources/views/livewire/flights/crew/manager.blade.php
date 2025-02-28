@@ -224,8 +224,7 @@
     @script
         <script>
             $wire.on('crew-modal-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('crewFormModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('crewFormModal')).hide();
             });
         </script>
     @endscript

@@ -247,8 +247,7 @@
 @script
     <script>
         $wire.on('cargo-saved', () => {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('cargoFormModal'));
-            modal.hide();
+            bootstrap.Modal.getInstance(document.getElementById('cargoFormModal')).hide();
         });
     </script>
 @endscript

@@ -90,8 +90,7 @@
     @script
         <script>
             $wire.on('permission-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('permissionFormModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('permissionFormModal')).hide();
             });
         </script>
     @endscript

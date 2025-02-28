@@ -198,8 +198,7 @@
 @script
     <script>
         $wire.on('envelope-saved', () => {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('envelopeModal'));
-            modal.hide();
+            bootstrap.Modal.getInstance(document.getElementById('envelopeModal')).hide();
         });
     </script>
 @endscript

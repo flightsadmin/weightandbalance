@@ -230,8 +230,7 @@
     @script
         <script>
             $wire.on('flight-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('flightFormModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('flightFormModal')).hide();
             });
         </script>
     @endscript

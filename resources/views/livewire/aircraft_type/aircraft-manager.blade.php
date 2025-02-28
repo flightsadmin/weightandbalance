@@ -29,7 +29,7 @@
                                 </span>
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-primary" 
+                                <button class="btn btn-sm btn-primary"
                                     wire:click="editAircraft({{ $plane->id }})"
                                     data-bs-toggle="modal" data-bs-target="#aircraftModal">
                                     <i class="bi bi-pencil"></i>
@@ -68,7 +68,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Registration Number</label>
-                                    <input type="text" class="form-control form-control-sm" 
+                                    <input type="text" class="form-control form-control-sm"
                                         wire:model="aircraftForm.registration_number" required>
                                     @error('aircraftForm.registration_number')
                                         <div class="text-danger small">{{ $message }}</div>
@@ -121,7 +121,7 @@
                         </div>
 
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-sm btn-secondary" 
+                            <button type="button" class="btn btn-sm btn-secondary"
                                 data-bs-dismiss="modal">Cancel</button>
                             <button type="submit" class="btn btn-sm btn-primary">
                                 Save Aircraft
@@ -135,10 +135,9 @@
 </div>
 
 @script
-<script>
-    $wire.on('aircraft-saved', () => {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('aircraftModal'));
-        modal.hide();
-    });
-</script>
-@endscript 
+    <script>
+        $wire.on('aircraft-saved', () => {
+            bootstrap.Modal.getInstance(document.getElementById('aircraftModal')).hide();
+        });
+    </script>
+@endscript

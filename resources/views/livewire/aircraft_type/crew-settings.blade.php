@@ -192,12 +192,10 @@
     @script
         <script>
             $wire.on('seating-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('seatingModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('seatingModal')).hide();
             });
             $wire.on('distributions-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('distributionModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('distributionModal')).hide();
             });
         </script>
     @endscript

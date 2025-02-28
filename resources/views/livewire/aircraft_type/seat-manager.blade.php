@@ -263,13 +263,11 @@
         @script
             <script>
                 $wire.on('seat-saved', () => {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('editSeatModal'));
-                    modal.hide();
+                    bootstrap.Modal.getInstance(document.getElementById('editSeatModal')).hide();
                 });
 
                 $wire.on('seats-created', () => {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('bulkCreateModal'));
-                    modal.hide();
+                    bootstrap.Modal.getInstance(document.getElementById('bulkCreateModal')).hide();
                 });
             </script>
         @endscript

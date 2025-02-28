@@ -267,8 +267,7 @@
     @script
         <script>
             $wire.on('aircraft-type-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('aircraftTypeFormModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('aircraftTypeFormModal')).hide();
             });
         </script>
     @endscript

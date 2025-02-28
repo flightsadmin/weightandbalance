@@ -256,8 +256,7 @@
                 @script
                     <script>
                         $wire.on('setting-saved', () => {
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('settingModal'));
-                            modal.hide();
+                            bootstrap.Modal.getInstance(document.getElementById('settingModal')).hide();
                         });
                     </script>
                 @endscript

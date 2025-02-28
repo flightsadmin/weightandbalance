@@ -125,8 +125,7 @@
     @script
         <script>
             $wire.on('containerSaved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('assignContainerModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('assignContainerModal')).hide();
             });
         </script>
     @endscript

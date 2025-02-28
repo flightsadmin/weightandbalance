@@ -102,8 +102,7 @@
 @script
     <script>
         $wire.on('zone-saved', () => {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('cabinZoneModal'));
-            modal.hide();
+            bootstrap.Modal.getInstance(document.getElementById('cabinZoneModal')).hide();
         });
     </script>
 @endscript

@@ -195,8 +195,7 @@
     @script
         <script>
             $wire.on('close-modal', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('fuelModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('fuelModal')).hide();
             });
         </script>
     @endscript

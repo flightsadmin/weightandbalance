@@ -231,8 +231,7 @@
     @script
         <script>
             $wire.on('baggage-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('baggageFormModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('baggageFormModal')).hide();
             });
         </script>
     @endscript

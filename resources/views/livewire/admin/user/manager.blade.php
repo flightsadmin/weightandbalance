@@ -181,8 +181,7 @@
     @script
         <script>
             $wire.on('user-saved', () => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('userFormModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('userFormModal')).hide();
             });
         </script>
     @endscript

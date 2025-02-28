@@ -105,8 +105,7 @@
 @script
     <script>
         $wire.on('pantry-saved', () => {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('pantryModal'));
-            modal.hide();
+            bootstrap.Modal.getInstance(document.getElementById('pantryModal')).hide();
         });
     </script>
 @endscript
