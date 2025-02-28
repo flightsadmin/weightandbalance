@@ -75,12 +75,12 @@
                 <i class="bi bi-speedometer2"></i> Loading
             </a>
         </li>
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a wire:click.prevent="setTab('loadplan')" href=""
                 class="nav-link {{ $activeTab === 'loadplan' ? 'active' : '' }}">
                 <i class="bi bi-database-fill-add"></i> Loadplan
             </a>
-        </li>
+        </li> --}}
         <li class="nav-item">
             <a wire:click.prevent="setTab('loadsheet')" href=""
                 class="nav-link {{ $activeTab === 'loadsheet' ? 'active' : '' }}">

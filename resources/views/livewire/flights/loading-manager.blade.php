@@ -257,6 +257,9 @@
                 </span>
             </div>
             <div class="d-flex gap-2">
+                {{-- <button class="btn btn-sm btn-outline-success" wire:click="previewLIRF">
+                    <i class="bi bi-eye"></i> Preview LIRF
+                </button> --}}
                 <button class="btn btn-sm btn-outline-success" @click="showAssignModal = true">
                     <i class="bi bi-plus-circle"></i> Attach Container
                 </button>

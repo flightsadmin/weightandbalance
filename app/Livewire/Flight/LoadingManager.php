@@ -18,6 +18,8 @@ class LoadingManager extends Component
 
     public $containers;
 
+    public $showLirfPreview = false;
+
     public function mount(Flight $flight)
     {
         $this->flight = $flight->load([
@@ -99,12 +101,22 @@ class LoadingManager extends Component
             if ($this->loadplan) {
                 $this->loadplan->update([
                     'loading' => $loadingData,
+                    'released_by' => auth()->id(),
+                    'released_at' => now(),
                     'last_modified_by' => auth()->id(),
+                    'last_modified_at' => now()->toDateTimeString(),
+                    'status' => 'released',
+                    'version' => $this->loadplan->version + 1,
                 ]);
             } else {
                 $this->loadplan = $this->flight->loadplans()->create([
                     'loading' => $loadingData,
+                    'released_by' => auth()->id(),
+                    'released_at' => now(),
                     'last_modified_by' => auth()->id(),
+                    'last_modified_at' => now()->toDateTimeString(),
+                    'status' => 'draft',
+                    'version' => 1,
                 ]);
             }
 
@@ -221,6 +233,64 @@ class LoadingManager extends Component
                 'message' => 'Failed to attach container'
             ];
         }
+    }
+
+    public function previewLIRF()
+    {
+        if ($this->loadplan->status !== 'released') {
+            $this->dispatch('alert', icon: 'error', message: 'Loadplan must be released before printing LIRF.');
+
+            return;
+        }
+        $loadInstructions = $this->flight->aircraft->type->holds()
+            ->with('positions')
+            ->get()
+            ->flatMap(function ($hold) {
+                return $hold->positions->map(function ($position) use ($hold) {
+                    $containerData = collect($this->containerPositions)
+                        ->first(function ($container) use ($position) {
+                            return $container['position_id'] === $position->id;
+                        });
+
+                    return [
+                        'hold' => $hold->name,
+                        'position' => $position->code,
+                        'container_number' => $containerData['container_number'] ?? 'NIL',
+                        'content_type' => $containerData['content_type'] ?? 'NIL',
+                        'weight' => $containerData['weight'] ?? 0,
+                        'pieces' => $containerData['pieces'] ?? null,
+                        'destination' => $containerData['destination'] ?? $this->flight->arrival_airport,
+                        'is_empty' => is_null($containerData),
+                    ];
+                });
+            })
+            ->sortBy([
+                ['hold', 'asc'],
+                ['position', 'asc'],
+            ])
+            ->values();
+
+        $this->loadingInstructions = $loadInstructions;
+
+        $holdSummary = $this->flight->aircraft->type->holds
+            ->map(function ($hold) {
+                $actualWeight = $hold->getCurrentWeight($this->containerPositions, $this->flight->containers);
+
+                return [
+                    'name' => $hold->name,
+                    'actual_weight' => $actualWeight,
+                    'max_weight' => $hold->max_weight,
+                    'available' => $hold->max_weight - $actualWeight,
+                ];
+            });
+
+        $this->showLirfPreview = true;
+        $this->dispatch('show-lirf-preview', [
+            'flight' => $this->flight,
+            'loadplan' => $this->loadplan,
+            'loadInstructions' => $loadInstructions,
+            'holdSummary' => $holdSummary,
+        ]);
     }
 
     public function render()
