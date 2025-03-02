@@ -247,6 +247,50 @@
             this.showAssignModal = false;
             this.saveState();
             this.calculateWeights();
+        },
+    
+        async detachContainer(container) {
+            if (!confirm('Are you sure you want to remove this container? All loaded baggage/cargo will be unloaded.')) {
+                return;
+            }
+    
+            const response = await this.$wire.detachContainer(container.id);
+    
+            if (response.success) {
+                // Remove container from the list
+                this.containers = this.containers.filter(c => c.id !== container.id);
+    
+                // Remove from search results if present
+                if (this.searchResults.length > 0) {
+                    const resultContainer = this.searchResults.find(c => c.id === container.id);
+                    if (resultContainer) {
+                        resultContainer.is_attached = false;
+                    }
+                }
+    
+                // Clear selection if this was the selected container
+                if (this.selectedContainer?.id === container.id) {
+                    this.selectedContainer = null;
+                }
+    
+                // Update local storage
+                this.saveState();
+    
+                // Recalculate weights
+                this.calculateWeights();
+    
+                // Show success message
+                this.$dispatch('notify', {
+                    type: 'success',
+                    message: response.message
+                });
+            } else {
+                // Show error message
+                this.$dispatch('notify', {
+                    type: 'error',
+                    message: response.message
+                });
+            }
         }
     }">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -300,7 +344,55 @@
                             </div>
                         </div>
 
+                        <!-- Show attached containers when no search -->
+                        <div class="attached-containers mt-3" x-show="!searchQuery">
+                            <h6 class="mb-2">Attached Containers</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ULD Number</th>
+                                            <th>Type</th>
+                                            <th>Weight</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="container in containers" :key="container.id">
+                                            <tr>
+                                                <td x-text="container.uld_code"></td>
+                                                <td>
+                                                    <span class="badge"
+                                                        :class="{
+                                                            'bg-primary': container.type === 'baggage',
+                                                            'bg-warning': container.type === 'cargo'
+                                                        }"
+                                                        x-text="container.type">
+                                                    </span>
+                                                </td>
+                                                <td x-text="container.weight + ' kg'"></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-danger"
+                                                        @click="detachContainer(container)"
+                                                        title="Remove container">
+                                                        <i class="bi bi-trash"></i> Remove
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                        <tr x-show="!containers.length">
+                                            <td colspan="4" class="text-center text-muted">
+                                                No containers attached
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Search Results -->
                         <div class="search-results mt-3" x-show="searchResults.length > 0">
+                            <h6 class="mb-2">Search Results</h6>
                             <div class="table-responsive">
                                 <table class="table table-sm table-hover">
                                     <thead>
@@ -321,16 +413,18 @@
                                                         class="badge bg-secondary">Available</span>
                                                 </td>
                                                 <td>
-                                                    <button class="btn btn-sm"
-                                                        :class="containers.some(c => c.id === container.id) ? 'btn-success' : 'btn-primary'"
-                                                        @click="attachContainer(container)"
-                                                        :disabled="containers.some(c => c.id === container.id)">
-                                                        <i class="bi"
-                                                            :class="containers.some(c => c.id === container.id) ? 'bi-check-circle' :
-                                                                'bi-plus-circle'"></i>
-                                                        <span
-                                                            x-text="containers.some(c => c.id === container.id) ? 'Attached' : 'Attach'"></span>
-                                                    </button>
+                                                    <template x-if="containers.some(c => c.id === container.id)">
+                                                        <button class="btn btn-sm btn-outline-danger"
+                                                            @click="detachContainer(containers.find(c => c.id === container.id))">
+                                                            <i class="bi bi-trash"></i> Remove
+                                                        </button>
+                                                    </template>
+                                                    <template x-if="!containers.some(c => c.id === container.id)">
+                                                        <button class="btn btn-sm btn-primary"
+                                                            @click="attachContainer(container)">
+                                                            <i class="bi bi-plus-circle"></i> Attach
+                                                        </button>
+                                                    </template>
                                                 </td>
                                             </tr>
                                         </template>
@@ -607,7 +701,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <livewire:container.manager :flight="$flight" /> {{--  --}}
+                            <livewire:container.manager :flight="$flight" />
                         </div>
                     </div>
                 </div>

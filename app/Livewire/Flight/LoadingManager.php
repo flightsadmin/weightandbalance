@@ -173,12 +173,14 @@ class LoadingManager extends Component
         }
 
         return Container::where('container_number', 'like', "%{$query}%")
-            ->limit(5)
+            ->limit(10)
             ->get()
             ->map(function ($container) {
+                $isAttached = $this->flight->containers->contains('id', $container->id);
                 return [
                     'id' => $container->id,
                     'container_number' => $container->container_number,
+                    'is_attached' => $isAttached,
                 ];
             });
     }
@@ -219,6 +221,7 @@ class LoadingManager extends Component
             ];
 
             DB::commit();
+            $this->dispatch('container_position_updated');
 
             return [
                 'success' => true,
@@ -231,6 +234,61 @@ class LoadingManager extends Component
             return [
                 'success' => false,
                 'message' => 'Failed to attach container'
+            ];
+        }
+    }
+
+    public function detachContainer($containerId)
+    {
+        try {
+            DB::beginTransaction();
+
+            $container = Container::findOrFail($containerId);
+
+            // First, empty the container by resetting its pivot data
+            $this->flight->containers()->updateExistingPivot($containerId, [
+                'weight' => $container->tare_weight,
+                'pieces' => 0,
+                'position_id' => null,
+                'status' => 'unloaded'
+            ]);
+
+            $this->containers = collect($this->containers)
+                ->filter(function ($container) use ($containerId) {
+                    return $container['id'] !== $containerId;
+                })->toArray();
+
+                $this->flight->containers()->detach($containerId);
+
+            if ($this->loadplan) {
+                $this->loadplan->update([
+                    'loading' => collect($this->loadplan->loading ?? [])
+                        ->filter(function ($item, $key) use ($containerId) {
+                            return $key != $containerId;
+                        })
+                        ->toArray(),
+                    'last_modified_by' => auth()->id(),
+                    'last_modified_at' => now(),
+                ]);
+            }
+
+            DB::commit();
+
+            $this->dispatch('container_position_updated');
+            $this->dispatch('alert', icon: 'success', message: 'Container detached successfully');
+
+            return [
+                'success' => true,
+                'message' => 'Container detached and contents unloaded successfully'
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to detach container: ' . $e->getMessage());
+
+            return [
+                'success' => false,
+                'message' => 'Failed to detach container'
             ];
         }
     }
