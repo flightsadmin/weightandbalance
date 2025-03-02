@@ -301,9 +301,10 @@
                 </span>
             </div>
             <div class="d-flex gap-2">
-                {{-- <button class="btn btn-sm btn-outline-success" wire:click="previewLIRF">
+                <button class="btn btn-sm btn-outline-success" wire:click="previewLIRF"
+                    data-bs-toggle="modal" data-bs-target="#lirfPreviewModal">
                     <i class="bi bi-eye"></i> Preview LIRF
-                </button> --}}
+                </button>
                 <button class="btn btn-sm btn-outline-success" @click="showAssignModal = true">
                     <i class="bi bi-plus-circle"></i> Attach Container
                 </button>
@@ -701,13 +702,90 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <livewire:container.manager :flight="$flight" />
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="card-title m-0">Loadplan</h6>
+                                </div>
+                                <div class="card-body p-2">
+                                    @if ($loadplan)
+                                        <div>Version: {{ $loadplan->version ?? 'N/A' }}</div>
+                                        <div>Status: {{ str($loadplan->status ?? 'N/A')->title() }}</div>
+                                        <div>Last Modified:
+                                            {{ $loadplan->last_modified_at?->format('d/m/Y H:i') ?? 'N/A' }}
+                                        </div>
+                                        <div>Last Modified By: {{ $loadplan->last_modified_by->name ?? 'N/A' }}</div>
+                                        <div>Created At: {{ $loadplan->created_at?->format('d/m/Y H:i') ?? 'N/A' }}</div>
+                                    @else
+                                        <div>No loadplan found</div>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- LIRF Preview Modal -->
+    <div class="modal modal-fullscreen fade" id="lirfPreviewModal" tabindex="-1" wire:ignore.self>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h5 class="modal-title">Loading Instruction Report Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-2" id="lirfPrintArea">
+                    @if ($showLirfPreview)
+                        @include('livewire.flights.loading-instruction')
+                    @endif
+                </div>
+                <div class="modal-footer py-2 d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="generatePDF()">
+                        <i class="bi bi-printer"></i> Print LIRF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        async function generatePDF() {
+            const {
+                jsPDF
+            } = window.jspdf;
+            const doc = new jsPDF();
+            const element = document.getElementById("lirfPrintArea");
+
+            const canvas = await html2canvas(element, {
+                scale: 2
+            });
+            const imgData = canvas.toDataURL("image/png");
+
+            const imgWidth = 190;
+            const pageHeight = 297;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+
+            let position = 10;
+            doc.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                doc.addPage();
+                doc.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            doc.save("Loading Instruction Report - {{ $flight->flight_number }}.pdf");
+        }
+    </script>
 
     <style>
         .container-wrapper {

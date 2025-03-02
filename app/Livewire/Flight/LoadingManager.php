@@ -258,7 +258,7 @@ class LoadingManager extends Component
                     return $container['id'] !== $containerId;
                 })->toArray();
 
-                $this->flight->containers()->detach($containerId);
+            $this->flight->containers()->detach($containerId);
 
             if ($this->loadplan) {
                 $this->loadplan->update([
@@ -295,19 +295,20 @@ class LoadingManager extends Component
 
     public function previewLIRF()
     {
-        if ($this->loadplan->status !== 'released') {
+        if (isset($this->loadplan) && $this->loadplan->status !== 'released') {
             $this->dispatch('alert', icon: 'error', message: 'Loadplan must be released before printing LIRF.');
 
             return;
         }
+
         $loadInstructions = $this->flight->aircraft->type->holds()
             ->with('positions')
             ->get()
             ->flatMap(function ($hold) {
                 return $hold->positions->map(function ($position) use ($hold) {
-                    $containerData = collect($this->containerPositions)
+                    $containerData = collect($this->containers)
                         ->first(function ($container) use ($position) {
-                            return $container['position_id'] === $position->id;
+                            return $container['position'] === $position->id;
                         });
 
                     return [
@@ -325,29 +326,13 @@ class LoadingManager extends Component
             ->sortBy([
                 ['hold', 'asc'],
                 ['position', 'asc'],
-            ])
-            ->values();
+            ])->values()->toArray();
 
-        $this->loadingInstructions = $loadInstructions;
 
-        $holdSummary = $this->flight->aircraft->type->holds
-            ->map(function ($hold) {
-                $actualWeight = $hold->getCurrentWeight($this->containerPositions, $this->flight->containers);
-
-                return [
-                    'name' => $hold->name,
-                    'actual_weight' => $actualWeight,
-                    'max_weight' => $hold->max_weight,
-                    'available' => $hold->max_weight - $actualWeight,
-                ];
-            });
-
-        $this->showLirfPreview = true;
         $this->dispatch('show-lirf-preview', [
             'flight' => $this->flight,
             'loadplan' => $this->loadplan,
             'loadInstructions' => $loadInstructions,
-            'holdSummary' => $holdSummary,
         ]);
     }
 
