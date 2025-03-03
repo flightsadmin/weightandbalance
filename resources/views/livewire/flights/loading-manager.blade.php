@@ -301,7 +301,7 @@
                 </span>
             </div>
             <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-success" wire:click="previewLIRF">
+                <button class="btn btn-sm btn-outline-primary" wire:click="previewLIRF">
                     <i class="bi bi-eye"></i> Preview LIRF
                 </button>
                 <button class="btn btn-sm btn-outline-success" @click="showAssignModal = true">
@@ -311,13 +311,10 @@
                     <i class="bi bi-clipboard-data"></i> Weight Summary
                 </button>
                 <button class="btn btn-sm btn-outline-success"
-                    @click="saveToServer"
-                    :disabled="!hasChanges()"
-                    :class="{ 'opacity-50': !hasChanges() }">
+                    @click="saveToServer" :disabled="!hasChanges()" :class="{ 'opacity-50': !hasChanges() }">
                     <i class="bi bi-check-circle"></i> Finalize Load Plan
                 </button>
-                <button class="btn btn-sm btn-outline-danger"
-                    @click="resetState(); $wire.resetLoadplan()">
+                <button class="btn btn-sm btn-outline-danger" @click="resetState(); $wire.resetLoadplan()">
                     <i class="bi bi-arrow-counterclockwise"></i> Offload All
                 </button>
             </div>
