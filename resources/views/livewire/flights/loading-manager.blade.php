@@ -301,8 +301,7 @@
                 </span>
             </div>
             <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-success" wire:click="previewLIRF"
-                    data-bs-toggle="modal" data-bs-target="#lirfPreviewModal">
+                <button class="btn btn-sm btn-outline-success" wire:click="previewLIRF">
                     <i class="bi bi-eye"></i> Preview LIRF
                 </button>
                 <button class="btn btn-sm btn-outline-success" @click="showAssignModal = true">
@@ -731,18 +730,18 @@
     <div class="modal modal-fullscreen fade" id="lirfPreviewModal" tabindex="-1" wire:ignore.self>
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header py-2">
+                <div class="modal-header">
                     <h5 class="modal-title">Loading Instruction Report Preview</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-2" id="lirfPrintArea">
+                <div class="modal-body" id="lirfPrintArea">
                     @if ($showLirfPreview)
                         @include('livewire.flights.loading-instruction')
                     @endif
                 </div>
-                <div class="modal-footer py-2 d-flex justify-content-between">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="generatePDF()">
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="generatePDF()">
                         <i class="bi bi-printer"></i> Print LIRF
                     </button>
                 </div>
@@ -785,6 +784,11 @@
 
             doc.save("Loading Instruction Report - {{ $flight->flight_number }}.pdf");
         }
+
+        document.addEventListener('show-lirf-preview', function() {
+            var modal = new bootstrap.Modal(document.getElementById('lirfPreviewModal'));
+            modal.show();
+        });
     </script>
 
     <style>

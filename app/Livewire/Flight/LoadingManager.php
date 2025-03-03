@@ -20,6 +20,8 @@ class LoadingManager extends Component
 
     public $showLirfPreview = false;
 
+    public $loadInstructions = [];
+
     public function mount(Flight $flight)
     {
         $this->flight = $flight->load([
@@ -297,11 +299,10 @@ class LoadingManager extends Component
     {
         if (isset($this->loadplan) && $this->loadplan->status !== 'released') {
             $this->dispatch('alert', icon: 'error', message: 'Loadplan must be released before printing LIRF.');
-
             return;
         }
 
-        $loadInstructions = $this->flight->aircraft->type->holds()
+        $this->loadInstructions = collect($this->flight->aircraft->type->holds()
             ->with('positions')
             ->get()
             ->flatMap(function ($hold) {
@@ -314,26 +315,22 @@ class LoadingManager extends Component
                     return [
                         'hold' => $hold->name,
                         'position' => $position->code,
-                        'container_number' => $containerData['container_number'] ?? 'NIL',
-                        'content_type' => $containerData['content_type'] ?? 'NIL',
+                        'container_number' => $containerData['uld_code'] ?? 'NIL',
+                        'content_type' => $containerData['type'] ?? 'NIL',
                         'weight' => $containerData['weight'] ?? 0,
                         'pieces' => $containerData['pieces'] ?? null,
                         'destination' => $containerData['destination'] ?? $this->flight->arrival_airport,
                         'is_empty' => is_null($containerData),
                     ];
                 });
-            })
+            }))
             ->sortBy([
                 ['hold', 'asc'],
                 ['position', 'asc'],
             ])->values()->toArray();
 
-
-        $this->dispatch('show-lirf-preview', [
-            'flight' => $this->flight,
-            'loadplan' => $this->loadplan,
-            'loadInstructions' => $loadInstructions,
-        ]);
+        $this->showLirfPreview = true;
+        $this->dispatch('show-lirf-preview');
     }
 
     public function render()

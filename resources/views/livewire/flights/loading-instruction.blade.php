@@ -52,7 +52,6 @@
         </tbody>
     </table>
 
-    <!-- Rest of your document structure -->
     <dl class="row my-2"
         style="font-family: monospace; font-size: small; border-bottom: 1px dotted rgb(48, 46, 46); max-width: calc(100% - 30px); margin: 0 auto;">
         <dd class="col-6">LOADING INSTRUCTION</dd>
@@ -69,12 +68,12 @@
         </dl>
 
         <dl class="row mb-0" style="font-family: monospace; font-size: small;">
-            @foreach ($loadingInstructions->where('hold', $holdCode == 'FH' ? 'Forward Hold' : ($holdCode == 'AH' ? 'Aft Hold' : 'Bulk Hold'))->sortBy('position')->chunk(2) as $pair)
+            @foreach (collect($loadInstructions)->where('hold', $holdCode == 'FH' ? 'Forward Hold' : ($holdCode == 'AH' ? 'Aft Hold' : 'Bulk Hold'))->sortBy('position')->chunk(2) as $pair)
                 @foreach ($pair as $container)
                     <div class="col-6">
                         <dt>:{{ $container['position'] }} {{ $container['container_number'] }}</dt>
                         <dd>:ONLOAD
-                            {{ $container['is_empty'] ? '' : $container['destination'] . ' ' . ($container['content_type'] === 'baggage' ? 'BAG' : 'CGO') . '/' . $container['weight'] }}<br>
+                            {{ $container['is_empty'] ? '' : $container['destination'] . ' ' . strtoupper($container['content_type'][0]) . '/' . $container['weight'] }}<br>
                             :REPORT
                         </dd>
                     </div>
