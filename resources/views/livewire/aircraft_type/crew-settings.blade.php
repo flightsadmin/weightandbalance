@@ -28,12 +28,8 @@
                     <tbody>
                         @foreach ($settings['seating'] as $position => $config)
                             <tr>
-                                <td>
-                                    @if ($config['is_deck_crew'])
-                                        <span class="badge bg-info">{{ $config['location'] }}</span>
-                                    @else
-                                        <span class="badge bg-secondary">{{ $config['location'] }}</span>
-                                    @endif
+                                <td class="bg-{{ $config['is_deck_crew'] ? 'success' : 'primary-subtle' }}">
+                                    {{ $config['location'] }}
                                 </td>
                                 <td>{{ number_format($config['index_per_kg'], 5) }}</td>
                                 <td>{{ number_format($config['arm_length'], 2) }}</td>
@@ -181,8 +177,12 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-sm btn-primary">Save Distributions</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="bi bi-save"></i> Save Distributions
+                        </button>
                     </div>
                 </form>
             </div>

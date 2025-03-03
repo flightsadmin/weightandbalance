@@ -78,13 +78,7 @@ class CrewSeatingSeeder extends Seeder
                     'aft_door_rh' => 1,
                     'aft_door_lh' => 1,
                     'aft_door' => 1,
-                ],
-                6 => [
-                    'fwd_door' => 2,
-                    'aft_door_rh' => 1,
-                    'aft_door_lh' => 1,
-                    'aft_door' => 2,
-                ],
+                ]
             ],
         ];
         foreach ($aircraftTypes as $type) {
