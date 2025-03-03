@@ -12,7 +12,6 @@ use App\Models\Crew;
 use App\Models\Flight;
 use App\Models\Fuel;
 use App\Models\Passenger;
-use App\Models\Setting;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder

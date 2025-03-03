@@ -302,11 +302,8 @@
                 </span>
             </div>
             <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-primary" wire:click="previewLIRF">
-                    <i class="bi bi-eye"></i> Preview LIRF
-                </button>
                 <button class="btn btn-sm btn-outline-success" @click="showAssignModal = true">
-                    <i class="bi bi-plus-circle"></i> Attach Container
+                    <i class="bi bi-plus-circle"></i> Manage Containers
                 </button>
                 <button class="btn btn-sm btn-outline-primary" @click="showWeightSummary = !showWeightSummary">
                     <i class="bi bi-clipboard-data"></i> Weight Summary
@@ -314,6 +311,9 @@
                 <button class="btn btn-sm btn-outline-success"
                     @click="saveToServer" :disabled="!hasChanges()" :class="{ 'opacity-50': !hasChanges() }">
                     <i class="bi bi-check-circle"></i> Finalize Load Plan
+                </button>
+                <button class="btn btn-sm btn-outline-primary" wire:click="previewLIRF">
+                    <i class="bi bi-eye"></i> Preview LIRF
                 </button>
                 <button class="btn btn-sm btn-outline-danger" @click="resetState(); $wire.resetLoadplan()">
                     <i class="bi bi-arrow-counterclockwise"></i> Offload All
@@ -327,15 +327,15 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Attach Container</h5>
+                        <h5 class="modal-title">Manage Containers</h5>
                         <button type="button" class="btn-close" @click="showAssignModal = false"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Search Container</label>
                             <div class="input-group input-group-sm">
-                                <input type="text" class="form-control form-control-sm"
-                                    x-model="searchQuery" @input.debounce="searchContainers" placeholder="Enter ULD number">
+                                <input type="text" class="form-control form-control-sm" x-model="searchQuery"
+                                    @input.debounce="searchContainers" placeholder="Enter ULD number">
                                 <button class="btn btn-outline-secondary" type="button" @click="searchContainers">
                                     <i class="bi bi-search"></i>
                                 </button>
@@ -548,8 +548,6 @@
                                                             'occupied': isPositionOccupied(position),
                                                             'drop-target': selectedContainer && canDropHere(position),
                                                             'selected': getContainerInPosition(position)?.id === selectedContainer?.id,
-                                                            'pmc': getContainerInPosition(position)?.type === 'PMC',
-                                                            'ake': getContainerInPosition(position)?.type === 'AKE',
                                                             'cargo': getContainerInPosition(position)?.type === 'cargo',
                                                             'baggage': getContainerInPosition(position)?.type === 'baggage'
                                                         }"
@@ -592,8 +590,6 @@
                                                             'occupied': isPositionOccupied(position),
                                                             'drop-target': selectedContainer && canDropHere(position),
                                                             'selected': getContainerInPosition(position)?.id === selectedContainer?.id,
-                                                            'pmc': getContainerInPosition(position)?.type === 'PMC',
-                                                            'ake': getContainerInPosition(position)?.type === 'AKE',
                                                             'cargo': getContainerInPosition(position)?.type === 'cargo',
                                                             'baggage': getContainerInPosition(position)?.type === 'baggage'
                                                         }"
@@ -635,7 +631,6 @@
                                                             'occupied': isPositionOccupied(position),
                                                             'drop-target': selectedContainer && canDropHere(position),
                                                             'selected': getContainerInPosition(position)?.id === selectedContainer?.id,
-                                                            'ake': getContainerInPosition(position)?.type === 'AKE',
                                                             'cargo': getContainerInPosition(position)?.type === 'cargo',
                                                             'baggage': getContainerInPosition(position)?.type === 'baggage'
                                                         }"
@@ -690,8 +685,6 @@
                                             <div class="container"
                                                 :class="{
                                                     'selected': selectedContainer?.id === container.id,
-                                                    'pmc-container': container.type === 'PMC',
-                                                    'ake-container': container.type === 'AKE',
                                                     'baggage-container': container.type === 'baggage',
                                                     'cargo-container': container.type === 'cargo'
                                                 }"
@@ -966,10 +959,6 @@
             position: relative;
             transition: all 0.2s ease;
             cursor: pointer;
-        }
-
-        .cargo-slot.pmc {
-            width: 174px;
         }
 
         .cargo-slot.occupied {

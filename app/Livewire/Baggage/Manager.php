@@ -117,31 +117,25 @@ class Manager extends Component
         // Case 1: Moving from one container to another
         if ($oldContainer && $containerId) {
             // Decrement old container
-            $oldContainer->flights()->where('flight_id', $this->flight->id)
-                ->decrement('weight', $weight);
+            $oldContainer->flights()->where('flight_id', $this->flight->id)->decrement('weight', $weight);
+            $oldContainer->flights()->where('flight_id', $this->flight->id)->decrement('pieces', 1);
 
             // Increment new container
-            Container::find($containerId)->flights()
-                ->where('flight_id', $this->flight->id)
-                ->increment('weight', $weight);
+            Container::find($containerId)->flights()->where('flight_id', $this->flight->id)->increment('weight', $weight);
+            Container::find($containerId)->flights()->where('flight_id', $this->flight->id)->increment('pieces', 1);
         }
         // Case 2: Loading into a container (no previous container)
         elseif (! $oldContainer && $containerId) {
-            Container::find($containerId)->flights()
-                ->where('flight_id', $this->flight->id)
-                ->increment('weight', $weight);
+            Container::find($containerId)->flights()->where('flight_id', $this->flight->id)->increment('weight', $weight);
+            Container::find($containerId)->flights()->where('flight_id', $this->flight->id)->increment('pieces', 1);
         }
         // Case 3: Offloading from a container (no new container)
         elseif ($oldContainer && ! $containerId) {
-            $oldContainer->flights()->where('flight_id', $this->flight->id)
-                ->decrement('weight', $weight);
+            $oldContainer->flights()->where('flight_id', $this->flight->id)->decrement('weight', $weight);
+            $oldContainer->flights()->where('flight_id', $this->flight->id)->decrement('pieces', 1);
         }
 
-        $this->dispatch(
-            'alert',
-            icon: 'success',
-            message: 'Baggage container updated successfully.'
-        );
+        $this->dispatch('alert', icon: 'success', message: 'Baggage container updated successfully.');
     }
 
     public function updatedSelectAll($value)
@@ -163,11 +157,11 @@ class Manager extends Component
 
     public function loadSelectedToContainer()
     {
-        if (empty($this->selected) || ! $this->bulkContainer) {
+        if (empty($this->selected)) {
             return;
         }
 
-        $newContainer = Container::find($this->bulkContainer);
+        $newContainer = $this->bulkContainer ? Container::find($this->bulkContainer) : null;
         $baggage = Baggage::whereIn('id', $this->selected)->get();
 
         foreach ($baggage as $item) {
@@ -181,11 +175,11 @@ class Manager extends Component
             // Update container_id
             $item->update([
                 'container_id' => $this->bulkContainer,
-                'status' => 'loaded',
+                'status' => $this->bulkContainer ? 'loaded' : 'checked',
             ]);
 
             // Case 1: Moving from one container to another
-            if ($oldContainer) {
+            if ($oldContainer && $newContainer) {
                 $oldContainer->flights()->where('flight_id', $this->flight->id)->decrement('weight', $item->weight);
                 $oldContainer->flights()->where('flight_id', $this->flight->id)->decrement('pieces', 1);
 
@@ -193,16 +187,21 @@ class Manager extends Component
                 $newContainer->flights()->where('flight_id', $this->flight->id)->increment('pieces', 1);
             }
             // Case 2: New loading (no previous container)
-            elseif (! $oldContainer) {
+            elseif (! $oldContainer && $newContainer) {
                 $newContainer->flights()->where('flight_id', $this->flight->id)->increment('weight', $item->weight);
                 $newContainer->flights()->where('flight_id', $this->flight->id)->increment('pieces', 1);
+            }
+            // Case 3: Unloading from container (no new container)
+            elseif ($oldContainer && ! $newContainer) {
+                $oldContainer->flights()->where('flight_id', $this->flight->id)->decrement('weight', $item->weight);
+                $oldContainer->flights()->where('flight_id', $this->flight->id)->decrement('pieces', 1);
             }
         }
 
         $this->dispatch(
             'alert',
             icon: 'success',
-            message: count($this->selected).' baggage items loaded to container.'
+            message: count($this->selected).' baggage items '.($this->bulkContainer ? 'loaded to container' : 'unloaded from container').'.'
         );
 
         $this->selected = [];

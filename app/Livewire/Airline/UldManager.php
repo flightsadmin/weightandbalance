@@ -3,15 +3,19 @@
 namespace App\Livewire\Airline;
 
 use App\Models\Airline;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class UldManager extends Component
 {
     public Airline $airline;
+
     public $editingUldKey = null;
+
     public $showUldUnitsModal = false;
+
     public $selectedUldType = null;
+
     public $editingUldUnitKey = null;
 
     public $uldForm = [
@@ -25,13 +29,13 @@ class UldManager extends Component
         'allowed_holds' => ['FWD', 'AFT'],
         'restrictions' => [
             'requires_adjacent_positions' => false,
-            'requires_vertical_positions' => false
-        ]
+            'requires_vertical_positions' => false,
+        ],
     ];
 
     public $uldUnitForm = [
         'number' => '',
-        'serviceable' => true
+        'serviceable' => true,
     ];
 
     protected $defaultUldTypes = [
@@ -46,9 +50,9 @@ class UldManager extends Component
             'allowed_holds' => ['FWD', 'AFT'],
             'restrictions' => [
                 'requires_adjacent_positions' => true,
-                'requires_vertical_positions' => true
+                'requires_vertical_positions' => true,
             ],
-            'units' => []
+            'units' => [],
         ],
         'ake' => [
             'code' => 'AKE',
@@ -61,10 +65,10 @@ class UldManager extends Component
             'allowed_holds' => ['FWD', 'AFT', 'BULK'],
             'restrictions' => [
                 'requires_adjacent_positions' => false,
-                'requires_vertical_positions' => false
+                'requires_vertical_positions' => false,
             ],
-            'units' => []
-        ]
+            'units' => [],
+        ],
     ];
 
     public function mount(Airline $airline)
@@ -76,7 +80,7 @@ class UldManager extends Component
     {
         $uldSettings = $this->airline->settings()->where('key', 'uld_types')->first();
 
-        if (!$uldSettings) {
+        if (! $uldSettings) {
             return $this->initializeDefaultUldTypes();
         }
 
@@ -89,7 +93,7 @@ class UldManager extends Component
 
         $this->airline->settings()->create([
             'key' => 'uld_types',
-            'value' => json_encode($defaultUlds)
+            'value' => json_encode($defaultUlds),
         ]);
 
         return $defaultUlds;
@@ -106,8 +110,9 @@ class UldManager extends Component
         $this->editingUldKey = $key;
         $uldTypes = $this->getUldTypes();
 
-        if (!isset($uldTypes[$key])) {
+        if (! isset($uldTypes[$key])) {
             $this->dispatch('alert', icon: 'error', message: 'ULD type not found.');
+
             return;
         }
 
@@ -133,8 +138,9 @@ class UldManager extends Component
         $uldTypes = $this->getUldTypes();
         $key = $this->editingUldKey ?? strtolower($this->uldForm['code']);
 
-        if (!$this->editingUldKey && isset($uldTypes[$key])) {
+        if (! $this->editingUldKey && isset($uldTypes[$key])) {
             $this->addError('uldForm.code', 'This ULD code already exists.');
+
             return;
         }
 
@@ -152,9 +158,9 @@ class UldManager extends Component
             'allowed_holds' => $this->uldForm['allowed_holds'],
             'restrictions' => [
                 'requires_adjacent_positions' => (bool) $this->uldForm['restrictions']['requires_adjacent_positions'],
-                'requires_vertical_positions' => (bool) $this->uldForm['restrictions']['requires_vertical_positions']
+                'requires_vertical_positions' => (bool) $this->uldForm['restrictions']['requires_vertical_positions'],
             ],
-            'units' => $existingUnits
+            'units' => $existingUnits,
         ];
 
         $this->airline->settings()->updateOrCreate(
@@ -164,15 +170,16 @@ class UldManager extends Component
 
         $this->dispatch('uld-saved');
         $this->resetUldForm();
-        $this->dispatch('alert', icon: 'success', message: 'ULD type ' . ($this->editingUldKey ? 'updated' : 'created') . ' successfully.');
+        $this->dispatch('alert', icon: 'success', message: 'ULD type '.($this->editingUldKey ? 'updated' : 'created').' successfully.');
     }
 
     public function deleteUldType($key)
     {
         $uldTypes = $this->getUldTypes();
 
-        if (!isset($uldTypes[$key])) {
+        if (! isset($uldTypes[$key])) {
             $this->dispatch('alert', icon: 'error', message: 'ULD type not found.');
+
             return;
         }
 
@@ -199,8 +206,8 @@ class UldManager extends Component
             'allowed_holds' => ['FWD', 'AFT'],
             'restrictions' => [
                 'requires_adjacent_positions' => false,
-                'requires_vertical_positions' => false
-            ]
+                'requires_vertical_positions' => false,
+            ],
         ];
     }
 
@@ -220,8 +227,9 @@ class UldManager extends Component
 
         $uldTypes = $this->getUldTypes();
 
-        if (!isset($uldTypes[$this->selectedUldType])) {
+        if (! isset($uldTypes[$this->selectedUldType])) {
             $this->dispatch('alert', icon: 'error', message: 'ULD type not found.');
+
             return;
         }
 
@@ -229,8 +237,9 @@ class UldManager extends Component
         $units = $uldTypes[$this->selectedUldType]['units'] ?? [];
         $existingUnit = collect($units)->firstWhere('number', $this->uldUnitForm['number']);
 
-        if ($existingUnit && !$this->editingUldUnitKey) {
+        if ($existingUnit && ! $this->editingUldUnitKey) {
             $this->addError('uldUnitForm.number', 'This unit number already exists.');
+
             return;
         }
 
@@ -240,16 +249,17 @@ class UldManager extends Component
                 if ($unit['number'] === $this->editingUldUnitKey) {
                     return [
                         'number' => $this->uldUnitForm['number'],
-                        'serviceable' => (bool) $this->uldUnitForm['serviceable']
+                        'serviceable' => (bool) $this->uldUnitForm['serviceable'],
                     ];
                 }
+
                 return $unit;
             })->toArray();
         } else {
             // Add new unit
             $units[] = [
                 'number' => $this->uldUnitForm['number'],
-                'serviceable' => (bool) $this->uldUnitForm['serviceable']
+                'serviceable' => (bool) $this->uldUnitForm['serviceable'],
             ];
         }
 
@@ -261,7 +271,7 @@ class UldManager extends Component
         );
 
         $this->resetUldUnitForm();
-        $this->dispatch('alert', icon: 'success', message: 'ULD unit ' . ($this->editingUldUnitKey ? 'updated' : 'created') . ' successfully.');
+        $this->dispatch('alert', icon: 'success', message: 'ULD unit '.($this->editingUldUnitKey ? 'updated' : 'created').' successfully.');
     }
 
     public function editUldUnit($unitNumber)
@@ -270,15 +280,16 @@ class UldManager extends Component
         $units = $uldTypes[$this->selectedUldType]['units'] ?? [];
         $unit = collect($units)->firstWhere('number', $unitNumber);
 
-        if (!$unit) {
+        if (! $unit) {
             $this->dispatch('alert', icon: 'error', message: 'ULD unit not found.');
+
             return;
         }
 
         $this->editingUldUnitKey = $unitNumber;
         $this->uldUnitForm = [
             'number' => $unit['number'],
-            'serviceable' => $unit['serviceable']
+            'serviceable' => $unit['serviceable'],
         ];
     }
 
@@ -306,7 +317,7 @@ class UldManager extends Component
         $this->editingUldUnitKey = null;
         $this->uldUnitForm = [
             'number' => '',
-            'serviceable' => true
+            'serviceable' => true,
         ];
     }
 

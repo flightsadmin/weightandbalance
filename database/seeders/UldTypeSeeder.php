@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Airline;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class UldTypeSeeder extends Seeder
 {
@@ -20,8 +19,8 @@ class UldTypeSeeder extends Seeder
             'allowed_holds' => ['FWD', 'AFT'],
             'restrictions' => [
                 'requires_adjacent_positions' => true,
-                'requires_vertical_positions' => true
-            ]
+                'requires_vertical_positions' => true,
+            ],
         ],
         'ake' => [
             'code' => 'AKE',
@@ -34,8 +33,8 @@ class UldTypeSeeder extends Seeder
             'allowed_holds' => ['FWD', 'AFT', 'BULK'],
             'restrictions' => [
                 'requires_adjacent_positions' => false,
-                'requires_vertical_positions' => false
-            ]
+                'requires_vertical_positions' => false,
+            ],
         ],
         'akh' => [
             'code' => 'AKH',
@@ -48,9 +47,9 @@ class UldTypeSeeder extends Seeder
             'allowed_holds' => ['FWD', 'AFT', 'BULK'],
             'restrictions' => [
                 'requires_adjacent_positions' => false,
-                'requires_vertical_positions' => false
-            ]
-        ]
+                'requires_vertical_positions' => false,
+            ],
+        ],
     ];
 
     public function run(): void
@@ -61,6 +60,7 @@ class UldTypeSeeder extends Seeder
             $selectedTypes = collect($this->uldTypes)
                 ->map(function ($type) use ($airline) {
                     $type['units'] = $this->generateUnits($type['code'], rand(3, 40), $airline);
+
                     return $type;
                 })->toArray();
 
@@ -78,13 +78,13 @@ class UldTypeSeeder extends Seeder
 
         for ($i = 0; $i < $count; $i++) {
             do {
-                $number = $code . rand(10000, 99999) . strtoupper($airline->iata_code);
+                $number = $code.rand(10000, 99999).strtoupper($airline->iata_code);
             } while (in_array($number, $usedNumbers));
 
             $usedNumbers[] = $number;
             $units[] = [
                 'number' => $number,
-                'serviceable' => rand(1, 100) <= 80 // 80% chance of being serviceable
+                'serviceable' => rand(1, 100) <= 80, // 80% chance of being serviceable
             ];
         }
 

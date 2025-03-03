@@ -61,10 +61,10 @@
     @foreach (['FH' => 'FWD', 'AH' => 'AFT', 'BH' => 'BULK'] as $holdCode => $position)
         <dl class="row mb-0" style="font-family: monospace; font-size: small;">
             <dt class="col-6">
-                CPT {{ $flight->aircraft->type->holds->where('code', $holdCode)->first()->code }} {{ $position }} MAX
+                CPT {{ $position }} MAX
                 {{ $flight->aircraft->type->holds->where('code', $holdCode)->first()->max_weight }}
             </dt>
-            <dt class="col-6">* CPT {{ $flight->aircraft->type->holds->where('code', $holdCode)->first()->code }} TOTAL:</dt>
+            <dt class="col-6">* CPT {{ $position }} TOTAL:</dt>
         </dl>
 
         <dl class="row mb-0" style="font-family: monospace; font-size: small;">

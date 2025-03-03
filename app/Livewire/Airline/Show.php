@@ -5,7 +5,6 @@ namespace App\Livewire\Airline;
 use App\Models\Airline;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use Livewire\Attributes\On;
 
 class Show extends Component
 {
@@ -18,6 +17,7 @@ class Show extends Component
     public $settingCategory = 'general';
 
     public $editingSetting = null;
+
     public $showSettingModal = false;
 
     // Form fields
@@ -67,7 +67,7 @@ class Show extends Component
         $this->airline = $airline->load([
             'settings',
             'aircraft.type',
-            'flights' => fn($q) => $q->latest('scheduled_departure_time')->take(5),
+            'flights' => fn ($q) => $q->latest('scheduled_departure_time')->take(5),
         ]);
     }
 
@@ -148,7 +148,7 @@ class Show extends Component
 
     public function toggleStatus()
     {
-        $this->airline->active = !$this->airline->active;
+        $this->airline->active = ! $this->airline->active;
         $this->airline->save();
         $this->dispatch('alert', icon: 'success', message: 'Airline status updated successfully.');
     }

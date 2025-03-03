@@ -5,7 +5,6 @@ namespace App\Livewire\Flight;
 use App\Models\Container;
 use App\Models\Flight;
 use Illuminate\Support\Facades\DB;
-use Livewire\Attributes\On;
 use Livewire\Component;
 
 class LoadingManager extends Component
@@ -26,7 +25,7 @@ class LoadingManager extends Component
     {
         $this->flight = $flight->load([
             'aircraft.type.holds.positions',
-            'containers' => fn($q) => $q->withPivot(['type', 'pieces', 'weight', 'status', 'position_id']),
+            'containers' => fn ($q) => $q->withPivot(['type', 'pieces', 'weight', 'status', 'position_id']),
         ]);
 
         $this->loadplan = $flight->loadplans()->latest()->first();
@@ -36,7 +35,7 @@ class LoadingManager extends Component
                 'id' => $hold->id,
                 'name' => $hold->name,
                 'max_weight' => $hold->max_weight,
-                'positions' => $hold->positions->map(fn($pos) => [
+                'positions' => $hold->positions->map(fn ($pos) => [
                     'id' => $pos->id,
                     'designation' => $pos->code,
                 ])->toArray(),
@@ -80,7 +79,7 @@ class LoadingManager extends Component
                         'content_type' => $container['type'],
                         'position_code' => $container['position_code'],
                         'container_number' => $container['uld_code'],
-                    ]
+                    ],
                 ];
             })->toArray();
 
@@ -95,7 +94,7 @@ class LoadingManager extends Component
 
                     return array_merge($hold, [
                         'current_weight' => $holdWeight,
-                        'utilization' => ($holdWeight / $hold['max_weight']) * 100
+                        'utilization' => ($holdWeight / $hold['max_weight']) * 100,
                     ]);
                 })->toArray(),
             ];
@@ -135,7 +134,7 @@ class LoadingManager extends Component
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', message: 'Failed to save load plan');
-            \Log::error('Failed to save loadplan: ' . $e->getMessage());
+            \Log::error('Failed to save loadplan: '.$e->getMessage());
         }
     }
 
@@ -164,7 +163,7 @@ class LoadingManager extends Component
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', message: 'Failed to reset load plan');
-            \Log::error('Failed to reset loadplan: ' . $e->getMessage());
+            \Log::error('Failed to reset loadplan: '.$e->getMessage());
         }
     }
 
@@ -179,6 +178,7 @@ class LoadingManager extends Component
             ->get()
             ->map(function ($container) {
                 $isAttached = $this->flight->containers->contains('id', $container->id);
+
                 return [
                     'id' => $container->id,
                     'container_number' => $container->container_number,
@@ -197,7 +197,7 @@ class LoadingManager extends Component
             if ($this->flight->containers()->where('container_id', $containerId)->exists()) {
                 return [
                     'success' => false,
-                    'message' => 'Container is already attached to this flight'
+                    'message' => 'Container is already attached to this flight',
                 ];
             }
 
@@ -227,14 +227,15 @@ class LoadingManager extends Component
             return [
                 'success' => true,
                 'message' => 'Container attached successfully',
-                'container' => $newContainer
+                'container' => $newContainer,
             ];
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return [
                 'success' => false,
-                'message' => 'Failed to attach container'
+                'message' => 'Failed to attach container',
             ];
         }
     }
@@ -251,7 +252,7 @@ class LoadingManager extends Component
                 'weight' => $container->tare_weight,
                 'pieces' => 0,
                 'position_id' => null,
-                'status' => 'unloaded'
+                'status' => 'unloaded',
             ]);
 
             $this->containers = collect($this->containers)
@@ -280,16 +281,16 @@ class LoadingManager extends Component
 
             return [
                 'success' => true,
-                'message' => 'Container detached and contents unloaded successfully'
+                'message' => 'Container detached and contents unloaded successfully',
             ];
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Failed to detach container: ' . $e->getMessage());
+            \Log::error('Failed to detach container: '.$e->getMessage());
 
             return [
                 'success' => false,
-                'message' => 'Failed to detach container'
+                'message' => 'Failed to detach container',
             ];
         }
     }
@@ -298,6 +299,7 @@ class LoadingManager extends Component
     {
         if (isset($this->loadplan) && $this->loadplan->status !== 'released') {
             $this->dispatch('alert', icon: 'error', message: 'Loadplan must be released before printing LIRF.');
+
             return;
         }
 
