@@ -12,7 +12,6 @@
         selectedType: 'baggage',
         newContainer: {
             uld_code: '',
-            type: 'AKE',
             weight: 0,
             pieces: 0,
             content_type: 'cargo',
@@ -105,14 +104,6 @@
     
         canDropHere(position) {
             if (!this.selectedContainer) return false;
-    
-            if (this.selectedContainer.type === 'PMC') {
-                const adjacentPosition = this.getVerticalAdjacentPosition(position);
-                return adjacentPosition &&
-                    !this.isPositionOccupied(position) &&
-                    !this.isPositionOccupied(adjacentPosition);
-            }
-    
             return !this.isPositionOccupied(position);
         },
     
@@ -240,7 +231,7 @@
             // Reset form and close modal
             this.newContainer = {
                 uld_code: '',
-                type: 'AKE',
+                type: 'baggage',
                 weight: 0,
                 pieces: 0,
                 content_type: 'cargo',
