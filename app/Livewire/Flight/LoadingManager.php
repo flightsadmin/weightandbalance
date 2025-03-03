@@ -25,7 +25,7 @@ class LoadingManager extends Component
     {
         $this->flight = $flight->load([
             'aircraft.type.holds.positions',
-            'containers' => fn ($q) => $q->withPivot(['type', 'pieces', 'weight', 'status', 'position_id']),
+            'containers' => fn($q) => $q->withPivot(['type', 'pieces', 'weight', 'status', 'position_id']),
         ]);
 
         $this->loadplan = $flight->loadplans()->latest()->first();
@@ -35,7 +35,7 @@ class LoadingManager extends Component
                 'id' => $hold->id,
                 'name' => $hold->name,
                 'max_weight' => $hold->max_weight,
-                'positions' => $hold->positions->map(fn ($pos) => [
+                'positions' => $hold->positions->map(fn($pos) => [
                     'id' => $pos->id,
                     'designation' => $pos->code,
                 ])->toArray(),
@@ -99,27 +99,20 @@ class LoadingManager extends Component
                 })->toArray(),
             ];
 
-            if ($this->loadplan) {
-                $this->loadplan->update([
+            $this->loadplan = $this->flight->loadplans()->updateOrCreate(
+                [
+                    'flight_id' => $this->flight->id,
+                ],
+                [
                     'loading' => $loadingData,
                     'released_by' => auth()->id(),
                     'released_at' => now(),
                     'last_modified_by' => auth()->id(),
                     'last_modified_at' => now()->toDateTimeString(),
                     'status' => 'released',
-                    'version' => $this->loadplan->version + 1,
-                ]);
-            } else {
-                $this->loadplan = $this->flight->loadplans()->create([
-                    'loading' => $loadingData,
-                    'released_by' => auth()->id(),
-                    'released_at' => now(),
-                    'last_modified_by' => auth()->id(),
-                    'last_modified_at' => now()->toDateTimeString(),
-                    'status' => 'draft',
-                    'version' => 1,
-                ]);
-            }
+                    'version' => $this->loadplan ? $this->loadplan->version + 1 : 1,
+                ]
+            );
 
             foreach ($containers as $container) {
                 $this->flight->containers()->updateExistingPivot($container['id'], [
@@ -134,7 +127,7 @@ class LoadingManager extends Component
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', message: 'Failed to save load plan');
-            \Log::error('Failed to save loadplan: '.$e->getMessage());
+            \Log::error('Failed to save loadplan: ' . $e->getMessage());
         }
     }
 
@@ -150,20 +143,26 @@ class LoadingManager extends Component
                 ]);
             }
 
-            if ($this->loadplan) {
-                $this->loadplan->update([
+            $this->loadplan = $this->flight->loadplans()->updateOrCreate(
+                [
+                    'flight_id' => $this->flight->id,
+                ],
+                [
                     'loading' => null,
-                ]);
-            }
+                    'last_modified_by' => auth()->id(),
+                    'last_modified_at' => now()->toDateTimeString(),
+                    'status' => 'draft',
+                ]
+            );
 
             DB::commit();
             $this->dispatch('resetAlpineState');
             $this->dispatch('container_position_updated');
-            $this->dispatch('alert', icon: 'success', message: 'Load plan reset successfully');
+            $this->dispatch('alert', icon: 'success', message: 'All containers unloaded and load plan reset successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', message: 'Failed to reset load plan');
-            \Log::error('Failed to reset loadplan: '.$e->getMessage());
+            \Log::error('Failed to reset loadplan: ' . $e->getMessage());
         }
     }
 
@@ -173,9 +172,7 @@ class LoadingManager extends Component
             return [];
         }
 
-        return Container::where('container_number', 'like', "%{$query}%")
-            ->limit(10)
-            ->get()
+        return Container::where('container_number', 'like', "%{$query}%")->limit(10)->get()
             ->map(function ($container) {
                 $isAttached = $this->flight->containers->contains('id', $container->id);
 
@@ -247,7 +244,6 @@ class LoadingManager extends Component
 
             $container = Container::findOrFail($containerId);
 
-            // First, empty the container by resetting its pivot data
             $this->flight->containers()->updateExistingPivot($containerId, [
                 'weight' => $container->tare_weight,
                 'pieces' => 0,
@@ -286,7 +282,7 @@ class LoadingManager extends Component
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Failed to detach container: '.$e->getMessage());
+            \Log::error('Failed to detach container: ' . $e->getMessage());
 
             return [
                 'success' => false,
