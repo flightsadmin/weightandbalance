@@ -9,6 +9,7 @@
         showAssignModal: false,
         searchQuery: '',
         searchResults: [],
+        selectedType: 'baggage',
         newContainer: {
             uld_code: '',
             type: 'AKE',
@@ -176,8 +177,8 @@
             this.searchResults = await this.$wire.searchContainers(this.searchQuery);
         },
     
-        async attachContainer(container) {
-            const response = await this.$wire.attachContainer(container.id);
+        async attachContainer(container, type) {
+            const response = await this.$wire.attachContainer(container.id, type);
     
             if (response.success) {
                 // Add the new container to the containers list
@@ -341,6 +342,23 @@
                             </div>
                         </div>
 
+                        <!-- Container Type Selection -->
+                        <div class="mb-3 d-flex justify-content-between" x-show="searchResults.length > 0">
+                            <label class="form-label d-block">Container Type</label>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <input type="radio" class="btn-check" name="containerType" id="typeBaggage" value="baggage"
+                                    x-model="selectedType">
+                                <label class="btn btn-outline-primary" for="typeBaggage">
+                                    <i class="bi bi-luggage"></i> Baggage
+                                </label>
+                                <input type="radio" class="btn-check" name="containerType" id="typeCargo" value="cargo"
+                                    x-model="selectedType">
+                                <label class="btn btn-outline-warning" for="typeCargo">
+                                    <i class="bi bi-box-seam"></i> Cargo
+                                </label>
+                            </div>
+                        </div>
+
                         <!-- Show attached containers when no search -->
                         <div class="attached-containers mt-3" x-show="!searchQuery">
                             <h6 class="mb-2">Attached Containers</h6>
@@ -418,7 +436,7 @@
                                                     </template>
                                                     <template x-if="!containers.some(c => c.id === container.id)">
                                                         <button class="btn btn-sm btn-primary"
-                                                            @click="attachContainer(container)">
+                                                            @click="attachContainer(container, selectedType)">
                                                             <i class="bi bi-plus-circle"></i> Attach
                                                         </button>
                                                     </template>

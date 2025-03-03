@@ -187,14 +187,13 @@ class LoadingManager extends Component
             });
     }
 
-    public function attachContainer($containerId, $type = 'cargo')
+    public function attachContainer($containerId, $type = 'baggage')
     {
         try {
             DB::beginTransaction();
 
             $container = Container::findOrFail($containerId);
 
-            // Check if container is already attached
             if ($this->flight->containers()->where('container_id', $containerId)->exists()) {
                 return [
                     'success' => false,
