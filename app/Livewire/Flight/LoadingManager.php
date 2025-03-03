@@ -294,7 +294,7 @@ class LoadingManager extends Component
     public function previewLIRF()
     {
         if (isset($this->loadplan) && $this->loadplan->status !== 'released') {
-            $this->dispatch('alert', icon: 'error', message: 'Loadplan must be released before printing LIRF.');
+            $this->dispatch('alert', icon: 'error', message: 'Loadplan not released yet.');
 
             return;
         }

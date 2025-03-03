@@ -695,6 +695,9 @@
                                                 </div>
                                             </div>
                                         </template>
+                                        <template x-if="unplannedContainers.length === 0">
+                                            <div class="text-center text-muted">No unplanned containers</div>
+                                        </template>
                                     </div>
                                 </div>
                             </div>
@@ -748,8 +751,6 @@
         </div>
     </div>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
@@ -961,6 +962,16 @@
             background-color: #e7f1ff;
         }
 
+        .cargo-slot.occupied.cargo {
+            background-color: #abb2f0;
+            border-color: #0c22ee;
+        }
+
+        .cargo-slot.occupied.baggage {
+            background-color: #ffd7b5;
+            border-color: #0c22ee;
+        }
+
         .cargo-slot.drop-target {
             border: 2px dashed #198754;
             background-color: #d1e7dd;
@@ -1002,10 +1013,10 @@
 
         .unplanned-area {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 6px;
-            padding: 6px;
-            min-height: 80px;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 5px;
+            padding: 5px;
+            min-height: 70px;
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 4px;
@@ -1014,7 +1025,7 @@
         .unplanned-area .container {
             border: 1px solid #0d6efd;
             border-radius: 3px;
-            padding: 4px;
+            padding: 2px;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -1031,11 +1042,13 @@
         }
 
         .baggage-container {
+            background-color: #ffd7b5;
             border-color: #198754 !important;
         }
 
         .cargo-container {
-            border-color: #6c757d !important;
+            background-color: #abb2f0;
+            border-color: #0c22ee !important;
         }
 
         .modal.show {
