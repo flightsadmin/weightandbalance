@@ -981,7 +981,7 @@
             width: 100%;
             text-align: center;
             line-height: 1;
-            padding: 0 2px;
+            padding: 2px;
             padding-top: 12px;
             position: relative;
         }
