@@ -601,7 +601,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
+            gap: 2px;
         }
 
         .seat-grid {
@@ -627,15 +627,19 @@
         .seat-cell {
             display: table-cell;
             cursor: pointer;
-            padding: 4px;
+            padding: 2px;
             border-radius: 3px;
             border: 1px solid #dee2e6;
             transition: all 0.2s;
             text-align: center;
-            min-width: 35px;
-            height: 35px;
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            min-height: 30px;
             vertical-align: middle;
-            font-size: 0.80rem;
+            font-size: 10px;
+            border-radius: 4px;
+            font-weight: 100;
         }
 
         .seat-cell:hover:not(.occupied):not(.blocked) {
